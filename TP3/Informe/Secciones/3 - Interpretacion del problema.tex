@@ -1,0 +1,8 @@
+\section{Interpretación del problema}
+El programa debe recibir un entero como argumento por línea de comandos, debe crear un vector de esa cantidad de elementos de tipo \textit{double} con la función \texttt{malloc()} para reservar la memoria, debe preparar los \textit{signal handlers} necesarios y quedar en espera de las señales.\\
+
+Si la señal es \texttt{SIGUSR1}, el handler debe hacer un fork y el hijo resultante debe imprimir el contenido del vector separado con comas, su PID, y el PID de su padre.\\
+
+Si la señal es \texttt{SIGUSR2}, se debe crear un \textit{thread} o hilo que multiplique a los elementos por si mismos e imprima los valores separados por espacio, y al finalizar devuelva la suma de los elementos. No puede haber más de 10 hilos en total.\\
+
+Además, el proceso padre tiene que imprimir el estado en el cual terminaron los hijos, verificar que no quede ninguno en estado \textit{zombie}, y avisar si se llega al máximo de hilos. Si se recibe la señal \texttt{SIGTERM}, se espera a que termine todos los hijos e hilos y se termina el programa.

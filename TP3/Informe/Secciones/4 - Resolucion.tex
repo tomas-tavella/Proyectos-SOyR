@@ -1,0 +1,120 @@
+\section{Resolución}
+
+Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolución del problema planteado:
+\begin{itemize}
+    \item Para el manejo de procesos se utilizaron:
+    \begin{itemize}
+        \item \texttt{<sys/types.h>}
+        \item \texttt{<sys/wait.h>}
+    \end{itemize}
+    \item \texttt{<signal.h>} para el manejo de señales.
+    \item \texttt{<pthread.h>} para el manejo de \textit{threads} o hilos.\\
+\end{itemize}
+
+En el \texttt{main()} del programa, se utiliza la función \texttt{malloc()} (definida en las bibliotecas estándar) para reservar el espacio de memoria para el vector de N elementos.\\
+
+Para el manejo de señales, se utiliza la función \texttt{signal()} (parte de \texttt{<signal.h>}), que se encarga de instalar \textit{signal handlers} para las distintas señales que el programa va a recibir. Esta función toma dos parámetros: el número o nombre de la señal a manejar; y la función que se va a encargar del manejo de la señal.\\ 
+
+Para el manejo de procesos padres e hijos, fueron de utilidad las siguientes funciones (parte de las bibliotecas \texttt{<unistd.h>} y \texttt{<sys/wait.h>}):
+
+\begin{itemize}
+    \item \textbf{\texttt{fork()}}: Genera una copia de la imagen del proceso padre y se la asigna al proceso hijo, al cual se le asignan nuevos identificadores. Para distinguir al padre del hijo, esta función devuelve 0 al ser llamada en el hijo y el PID del hijo al ser llamada en el padre. 
+    \item \texttt{getpid()}: Devuelve el PID del proceso que hace la llamada al sistema.
+    \item \texttt{getppid()}: Devuelve el PID del proceso padre del proceso que hace la llamada al sistema.
+    \item \texttt{waitpid()}: Suspende la ejecución del proceso que llama a la función hasta que el hijo con el PID especificado termine.
+    \item \texttt{wait()}: Suspende la ejecución del proceso que llama a la función hasta que algún proceso hijo termine.\\
+\end{itemize}
+
+En tanto al manejo de los \textit{threads}, se utilizaron las siguientes funciones:
+
+\begin{itemize}
+    \item \texttt{pthread\_create()}: Crea un nuevo \textit{thread}, le asigna la función que este va a ejecutar y le pasa los argumentos.
+    \item \texttt{pthread\_exit()}: Finaliza el \textit{thread} en el que se llama, y devuelve un valor que se le especifica a la función que creó el \textit{thread}.
+    \item \texttt{pthread\_join()}: Detiene el thread en ejecución hasta que otro hilo termina, y recupera el valor que este devolvió.\\
+\end{itemize}
+
+Para compilar el código a un archivo binario ejecutable, se debe utilizar el comando \texttt{gcc} (\textit{GNU C Compiler}) en la terminal, agregando el argumento \texttt{-pthread} para permitir la utilización de \textit{threads}:
+
+\begin{center}
+    \texttt{\$ gcc entregable2.c -o vector\_procesos\_hilos -pthread}
+\end{center}
+
+Donde \texttt{vector\_procesos\_hilos} es el archivo compilado ejecutable. Para correrlo, se debe llamar al archivo seguido del número de elementos que se quiera el vector:
+
+\begin{center}
+    \texttt{\$ ./vector\_procesos\_hilos <N>}
+\end{center}
+
+Si no se pasa la cantidad de argumentos requerida, el programa sugiere un ejemplo con la sintaxis correcta.\\
+
+Para el envío de señales al programa, se debe utilizar el comando \texttt{kill}. Una forma más amigable con el usuario para no tener que recordar el número de la señal ni el PID del proceso es utilizar los siguientes argumentos:
+
+\begin{center}
+    \texttt{\$ kill -s <nombre\_señal>\ \$(pidof vector\_procesos\_hilos)}
+\end{center}
+
+Donde \texttt{nombre\_señal} se corresponde con \texttt{SIGUSR1}, \texttt{SIGUSR2} o \texttt{SIGTERM}, y el comando \texttt{pidof} devuelve el PID del programa en ejecución sin necesidad de buscarlo manualmente.\\
+
+\subsection{Pseudocódigo}
+
+A continuación se muestra un pseudocódigo correspondiente con el código en C.\\
+
+\begin{lstlisting}[language=C]
+INICIO
+    Declaracion y asignacion de variables y funciones
+    if(Cantidad de argumentos es menor a 2){
+        Imprime error en pantalla;
+        salir;
+    }
+
+    Se convierte la cantidad de elementos de cadena de caracteres a entero;
+    if(Cantidad cantidad de elementos es mayor a 20){
+        Imprime error en pantalla;
+        salir;
+    }
+
+    Imprime en pantalla el PID del proceso;
+    Reserva el espacio para el vector de elementos de tipo double y los genera;
+    Se asignan las signals a sus respectivos handlers
+    Se imprime en pantalla que se esta a la espera de las signals y se queda esperando;
+FIN
+
+trapUSR1(){
+    if(La cantidad de hijos es menor al maximo){
+        if(Se crea un proceso y el proceso actual es un hijo){
+            Se muestran los elementos del vector separados por comas junto con la identificacion del proceso padre;
+        }
+        else{
+            Se incrementa el contador de hijos;
+        }
+    else{
+        Imprime que se llego al maximo de hijos;
+    }
+}
+
+trapUSR2(){
+    Se inicializan variables;
+    if(La cantidad de hilos es menor al maximo){
+        Se crea un hilo nuevo, llamando a thread_function;
+        Se recupera el valor de suma que devuelve thread_function;
+        Se imprime la suma en pantalla;
+    }
+    else{
+        Imprime que se llego al maximo de hilos;
+    }
+}
+
+trapTERM(){
+    Se espera a que terminen todos los hijos e hilos;
+    Se liberan los recursos de los hijos una vez que terminan;
+}
+
+thread_function(){
+    Se multiplican e imprimen los elementos del vector por si mismos, separados por espacios;
+    Se realiza la suma de todos los elementos;
+    Se devuelve la suma;
+}
+
+
+\end{lstlisting}
+\lstinputlisting[]{}
