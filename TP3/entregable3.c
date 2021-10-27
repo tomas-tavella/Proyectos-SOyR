@@ -5,6 +5,7 @@
 #include <sys/shm.h>
 #include <sys/sem.h>
 #include <sys/ipc.h>
+#include <sys/msg.h>
 
 // Crear la union necesaria para semctl (Linux-specific)
 // Union es como struct, pero solo uno de los elementos puede tomar una valor a la vez
