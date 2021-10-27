@@ -1,4 +1,4 @@
-# Ignoro archivos que VSCode genera al compilar
+# Ignoro archivos que VSCode genera al compilar de LaTeX a pdf
 
 *.aux
 *.bbl
