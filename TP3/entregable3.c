@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/shm.h>
-#include <sys.sem.h>
+#include <sys/sem.h>
 #include <sys/ipc.h>
 
 // Crear la union necesaria para semctl (Linux-specific)
