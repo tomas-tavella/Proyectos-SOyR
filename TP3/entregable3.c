@@ -19,6 +19,12 @@ FILE *fpdat;
 // Cantidad para el tamano de la memoria compartida
 #define CANTIDAD 100
 
+// Defino los distintos semaforos
+
+#define SEM_SYNC 0
+#define SEM_READ 1
+#define SEM_WRITE 2
+
 // Definir las operaciones para los semaforos
 #define BLOQUEAR(OP) ((OP).sem_op = -1)             // OP es una estructura
 #define DESBLOQUEAR(OP) ((OP).sem_op = +1)
