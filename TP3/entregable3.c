@@ -30,9 +30,10 @@ union semun {
     struct seminfo *__buf;
 };
 
+// Estructura de datos a escribir en el buffer
 struct datos{
     unsigned short id;
-    float tiempo;               //Este no se que ponerle
+    suseconds_t tiempo;               // susesconds_t esta incluido en <sys/types.h> y devuelve el tiempo en micro segundos
     char dato[30];
 }buffer;
 
@@ -41,6 +42,7 @@ int main(int argc, char *argv[]){
     key_t clave;
     int IDmem, IDSem;
     struct datos *memoria_comp = NULL;
+    union semun argumento;
 
     // Obtener la clave, verificando si la pudo conseguir
     clave = ftok(PATH,NUMERO);
@@ -56,19 +58,27 @@ int main(int argc, char *argv[]){
 		exit(2);
 	}
 
-    // Llamar al sistema para obtener los semaforos
-    IDSem = semget(clave, 3, 0666 | IPC_CREAT);
-    if (IDSem == -1){
-        printf("No se puede crear el semáforo\n");
-        exit(0);
-    }
-
     // Adosar el proceso al espacio de memoria mediante un puntero
     memoria_comp = (struct datos *) shmget(clave, NULL, NULL)
     if (memoria_comp == NULL){
 		printf("No se pudo asociar el puntero a la memoria compartida\n");
 		exit(3);
 	}
+
+    // Creación de semaforos
+    IDSem = semget(clave, 3, 0666 | IPC_CREAT);
+    if (IDSem == -1){
+        printf("No se puede crear el semáforo\n");
+        exit(4);
+    }
+
+    //Inicialización de semaforos
+    argumento.val = 1; //Semaforo en verde
+    semctl (IDSem, 0, SETVAL, argumento);
+    argumento.val = 0; //Semaforo en rojo
+    semctl (IDSem, 1, SETVAL, argumento);
+    argumento.val = 0; //Semaforo en rojo
+    semctl (IDSem, 2, SETVAL, argumento);
 
     fclose(fpdat);
     return 0;
