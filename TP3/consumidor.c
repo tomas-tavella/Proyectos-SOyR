@@ -7,10 +7,9 @@
 #include <sys/sem.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
-#include <sys/time.h>                   // Para obtener el tiempo de UNIX
 
 // Definir puntero al archivo a utilizar
-FILE *fpdat;
+FILE *fpcsv;
 
 // Definir los parametros de ftok
 #define NUMERO 30      
@@ -43,7 +42,6 @@ struct datos{
     suseconds_t tiempo;               // susesconds_t esta incluido en <sys/types.h> y devuelve el tiempo en micro segundos
     char dato[30];
 }buffer;
-
 
 int main(int argc, char *argv[]){
     key_t clave;
@@ -85,57 +83,5 @@ int main(int argc, char *argv[]){
     // Inicialización de semaforos
     op.sem_flg = 0;                 // Nunca usamos flags para los semaforos
 
-    argumento.val = 1; //Semaforo de sincronizacion inicializado en verde
-    semctl (IDsem, SEM_SYNC, SETVAL, argumento);
-    argumento.val = 0; //Semaforo de lectura inicializado en rojo
-    semctl (IDsem, SEM_READ, SETVAL, argumento);
-    argumento.val = 1; //Semaforo de escritura inicializado en verde
-    semctl (IDsem, SEM_WRITE, SETVAL, argumento);
-
-    // Verificar que el archivo exista
-    fpdat = fopen("datos.dat","rb");
-    if (fpdat == 0) {
-        printf("No se puede abrir el archivo.\n");
-        return 0;
-    }
-
-    gettimeofday(&tiempo, NULL);                // Obtengo el tiempo de UNIX inicial, al momento que se escribe el primer dato
-    tiempo_init = tiempo.tv_usec;
-    
-    // Se lee el archivo binario
-    fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
-    int memcomp_cnt=0, id=0;
-    while(!feof(fpdat)){
-        strcpy(memoria_comp[memcomp_cnt].dato , buffer.dato);         // Copia de datos al buffer
-
-        memoria_comp[memcomp_cnt].id = id;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
-        
-        gettimeofday(&tiempo, NULL);
-        memoria_comp[memcomp_cnt].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
-
-        fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
-        memcomp_cnt++;
-        id++;
-
-        if (memcomp_cnt == CANTIDAD/2){
-            op.sem_num = SEM_WRITE;
-            BLOQUEAR(op);
-            semop(IDsem, &op, 3);
-
-        }
-        if (memcomp_cnt == CANTIDAD){
-            memcomp_cnt=0;
-            
-            op.sem_num = SEM_READ;
-            BLOQUEAR(op);
-            semop(IDsem, &op, 3);
-        }
-    }
-    fclose(fpdat);
-
-    // Se libera la memoria compartida
-    shmdt ((const void *) memoria_comp);
-
-	shmctl (IDmem, IPC_RMID, (struct shmid_ds *)NULL);
     return 0;
 }
