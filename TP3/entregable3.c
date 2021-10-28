@@ -6,6 +6,7 @@
 #include <sys/sem.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <sys/time.h>                   // Para obtener el tiempo de UNIX
 
 // Definir puntero al archivo a utilizar
 FILE *fpdat;
@@ -43,6 +44,11 @@ int main(int argc, char *argv[]){
     int IDmem, IDSem;
     struct datos *memoria_comp = NULL;
     union semun argumento;
+    struct timeval tiempo;
+    suseconds_t tiempo_init;
+
+    gettimeofday(&tiempo, NULL);                // Obtengo el tiempo de UNIX inicial, al momento que se escribe el primer dato
+    tiempo_init = tiempo.tv_usec;
 
     // Obtener la clave, verificando si la pudo conseguir
     clave = ftok(PATH,NUMERO);
@@ -59,7 +65,6 @@ int main(int argc, char *argv[]){
 	}
 
     // Adosar el proceso al espacio de memoria mediante un puntero
-    //memoria_comp = (struct datos *) shmget(clave, (void *) NULL, NULL);
     memoria_comp = (struct datos *) shmat(IDmem, (const void *)0,0);
     if (memoria_comp == NULL){
 		printf("No se pudo asociar el puntero a la memoria compartida\n");
@@ -73,7 +78,7 @@ int main(int argc, char *argv[]){
         exit(4);
     }
 
-    //Inicialización de semaforos
+    // Inicialización de semaforos
     argumento.val = 1; //Semaforo en verde
     semctl (IDSem, 0, SETVAL, argumento);
     argumento.val = 0; //Semaforo en rojo
@@ -81,6 +86,25 @@ int main(int argc, char *argv[]){
     argumento.val = 0; //Semaforo en rojo
     semctl (IDSem, 2, SETVAL, argumento);
 
+    // Verificar que el archivo exista
+    fpdat = fopen("Datos.dat","rb");
+    if (fpdat == 0) {
+        printf("No se puede abrir el archivo.\n");
+        return 0;
+    }
+    
+    // Se lee el archivo binario
+    fread(&(buffer->dato),sizeof(encabezado),1,fpdat);
+    while(!feof(fpdat)){
+    
+        fread(&(buffer->dato),sizeof(encabezado),1,fpdat);
+    
+    }
     fclose(fpdat);
+
+    // Se libera la memoria compartida
+    shmdt ((const void *) memoria_comp);
+
+	shmctl (IDMem, IPC_RMID, (struct shmid_ds *)NULL);
     return 0;
 }
