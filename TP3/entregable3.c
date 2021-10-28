@@ -37,7 +37,7 @@ struct datos{
 int main(int argc, char *argv[]){
     key_t clave;
     int IDmem;
-    
+    struct datos *memoria_comp = NULL;
 
     // Obtener la clave, verificando si la pudo conseguir
     clave = ftok(PATH,NUMERO);
@@ -53,6 +53,11 @@ int main(int argc, char *argv[]){
 		exit (2);
 	}
 
-
+    // Adosar el proceso al espacio de memoria mediante un puntero
+    memoria_comp = (struct datos *) shmget(clave, NULL, NULL)
+    if (memoria_comp == NULL){
+		printf("No se pudo asociar el puntero a la memoria compartida\n");
+		exit (3);
+	}
     return 0;
 }
