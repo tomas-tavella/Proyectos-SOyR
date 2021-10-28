@@ -1,5 +1,12 @@
 \section{Interpretación del problema}
-El programa debe recibir un entero como argumento por línea de comandos, debe crear un vector de esa cantidad de elementos de tipo \textit{double} con la función \texttt{malloc()} para reservar la memoria, debe preparar los \textit{signal handlers} necesarios y quedar en espera de las señales.\\
+Para este programa, se debe crear un espacio de memoria compartida utilizando las funciones de la biblioteca \texttt{<sys/shm.h>}, en el que existirá un \textit{buffer ping-pong}: un \textit{buffer} que se divide en dos mitades, y mientras el productor escribe en una de las mitades, el consumidor lee de la otra mitad que ya fue escrita. Al terminar la escritura y lectura, se "intercambian" las mitades y se repite el proceso.
+
+El programa debe leer datos del archivo \texttt{datos.dat} y almacenarlos en forma de estructuras con los siguientes datos:\\
+
+\begin{itemize}
+    \item Una variable de tipo \texttt{int} que almacena un identificador menor a 50000.
+    \item 
+\end{itemize}
 
 Si la señal es \texttt{SIGUSR1}, el handler debe hacer un fork y el hijo resultante debe imprimir el contenido del vector separado con comas, su PID, y el PID de su padre.\\
 
