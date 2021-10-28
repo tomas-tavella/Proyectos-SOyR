@@ -1,23 +1,14 @@
 \section{Enunciado}
-Se desea escribir un programa que genere un vector de N elementos con los valores de 1 a N almacenados como double. El valor de N se pasará en la línea de comando en el momento de iniciar el programa.\\
+Se desea implementar un \textit{buffer ping-pong} para que un proceso genere datos y otro los consuma. La implementación debe utilizar memoria compartida para los datos producidos y leídos.\\
 
-Si el programa recibe la señal \texttt{SIGUSR1} deberá crear un proceso hijo, que imprimirá los valores almacenados en el vector separados por comas y los imprimirá en pantalla, junto con la identificación del proceso y del proceso padre.\\
+El proceso productor debe leer datos desde el archivo \texttt{datos.dat} y almacenarlos en un \textit{buffer ping-pong} de estructuras, cuyos campos son:\\
 
-Si el programa recibe la señal \texttt{SIGUSR2} deberá crear un hilo, este hilo deberá modificar cada elemento
-del vector, multiplicándolo por si mismo, imprimir en pantalla los valores obtenidos separados por espacios y devolver el valor de la suma de los elementos del vector cuando termine.\\
-
-El programa deberá llevar la cuenta de la cantidad de hijos e hilos generados, imprimir los resultados
-devueltos por cada hilo, verificar que N no sea mayor que 20 y mostrar el estado con el que termina
-cada hijo (PID y Estado). Una vez que se generen 10 hilos, no deberá generar más hilos cuando reciba
-la señal \texttt{SIGUSR2} e imprimirá un cartel avisando que la cantidad máxima de hilos ha sido alcanzada.\\
-
-Si el programa recibe la señal \texttt{SIGTERM}, esperará que se completen los hilos e hijos pendientes si los
-hubiera y terminará.\\
-
-Tener en cuenta las siguientes indicaciones:
 \begin{itemize}
-    \item Cuidar que no queden procesos en estado \textit{zombie}.
-    \item No utilizar variables globales dentro de los hilos.
-    \item El espacio de memoria para el vector con los N elementos debe reservarse dinámicamente
-mediante la función \texttt{malloc()}.
+    \item Un identificador entero menor que 50000.
+    \item Una etiqueta de tiempo con precisión de microsegundos.
+    \item El dato leído desde el archivo \texttt{datos.dat}.\\
 \end{itemize}
+
+El proceso consumidor debe leer desde el \textit{buffer ping-pong} e imprimir los valores leídos en pantalla a medida que estén disponibles. También debe almacenarlos en un archivo llamado \texttt{datos.csv}, a razón de una estructura por línea, con los valores separados por comas.\\
+
+Deben implementarse dos variantes del problema, una que administre el \textit{buffer ping-pong} usando semáforos y variables compartidas, y otro que utilice colas de mensajes. En ambos casos decida y justifique que se va a hacer cuando el productor llene ambos \textit{buffers} y el consumidor no consumió los datos.
