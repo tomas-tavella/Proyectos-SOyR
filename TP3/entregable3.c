@@ -9,7 +9,7 @@
 
 // Definir los parametros de ftok
 #define NUMERO 30               // Grupo 30 tuki :basa:
-#define ARCHIVO "/dev/null"
+#define PATH "/dev/null"
 
 // Cantidad para el tamano de la memoria compartida
 #define CANTIDAD 100
@@ -31,25 +31,28 @@ struct datos{
     unsigned short id;
     float tiempo; //Este no se que ponerle
     char dato[30];
-}
+}buffer;
 
 
 int main(int argc, char *argv[]){
     key_t clave;
     int IDmem;
+    
 
     // Obtener la clave, verificando si la pudo conseguir
-    clave = ftok(ARCHIVO,NUMERO);
+    clave = ftok(PATH,NUMERO);
     if (Clave == (key_t) -1){
-		printf("No consegui  clave para memoria compartida\n");
+		printf("No se pudo obtener una clave\n");
 		exit(1);
 	}
 
     // Llamar al sistema para obtener la memoria compartida
-    IDmem = shmget(clave, CANTIDAD*sizeof(datos), 0666 | IPC_CREAT);
+    IDmem = shmget(clave, CANTIDAD*sizeof(buffer), 0666 | IPC_CREAT);
     if(IDmem == -1){
-		printf("No consegui ID para memoria compartida\n");
+		printf("No se pudo obtener un ID de memoria compartida\n");
 		exit (2);
 	}
+
+
     return 0;
 }
