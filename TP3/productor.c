@@ -82,12 +82,12 @@ int main(int argc, char *argv[]){
     }
 
     // Inicialización de semaforos
-    argumento.val = 1; //Semaforo en verde
-    semctl (IDSem, 0, SETVAL, argumento);
-    argumento.val = 0; //Semaforo en rojo
-    semctl (IDSem, 1, SETVAL, argumento);
-    argumento.val = 0; //Semaforo en rojo
-    semctl (IDSem, 2, SETVAL, argumento);
+    argumento.val = 1; //Semaforo de sincronizacion inicializado en verde
+    semctl (IDSem, SEM_SYNC, SETVAL, argumento);
+    argumento.val = 0; //Semaforo de lectura inicializado en rojo
+    semctl (IDSem, SEM_READ, SETVAL, argumento);
+    argumento.val = 1; //Semaforo de escritura inicializado en verde
+    semctl (IDSem, SEM_WRITE, SETVAL, argumento);
 
     // Verificar que el archivo exista
     fpdat = fopen("Datos.dat","rb");
@@ -101,17 +101,19 @@ int main(int argc, char *argv[]){
     
     // Se lee el archivo binario
     fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
-    int j=0;
+    int memcomp_cnt=0, id=0;
     while(!feof(fpdat)){
-        strcpy(memoria_comp[j].dato , buffer.dato);         // Copia de datos al buffer
+        strcpy(memoria_comp[memcomp_cnt].dato , buffer.dato);         // Copia de datos al buffer
 
-        memoria_comp[j].id = j;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
+        memoria_comp[memcomp_cnt].id = id;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
         
         gettimeofday(&tiempo, NULL);
-        memoria_comp[j].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
-        
+        memoria_comp[memcomp_cnt].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+
         fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
-        j++;
+        memcomp_cnt++;
+        id++;
+
     }
     fclose(fpdat);
 
