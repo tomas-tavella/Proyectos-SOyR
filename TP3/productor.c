@@ -47,10 +47,11 @@ struct datos{
 
 int main(int argc, char *argv[]){
     key_t clave;
-    int IDmem, IDSem;
+    int IDmem, IDsem;
     struct datos *memoria_comp = NULL;
     union semun argumento;
     struct timeval tiempo;
+    struct sembuf op;
     suseconds_t tiempo_init;
 
     // Obtener la clave, verificando si la pudo conseguir
@@ -75,19 +76,21 @@ int main(int argc, char *argv[]){
 	}
 
     // Creación de semaforos
-    IDSem = semget(clave, 3, 0666 | IPC_CREAT);
-    if (IDSem == -1){
+    IDsem = semget(clave, 3, 0666 | IPC_CREAT);
+    if (IDsem == -1){
         printf("No se puede crear el semáforo\n");
         exit(4);
     }
 
     // Inicialización de semaforos
+    op.sem_flg = 0;                 // Nunca usamos flags para los semaforos
+
     argumento.val = 1; //Semaforo de sincronizacion inicializado en verde
-    semctl (IDSem, SEM_SYNC, SETVAL, argumento);
+    semctl (IDsem, SEM_SYNC, SETVAL, argumento);
     argumento.val = 0; //Semaforo de lectura inicializado en rojo
-    semctl (IDSem, SEM_READ, SETVAL, argumento);
+    semctl (IDsem, SEM_READ, SETVAL, argumento);
     argumento.val = 1; //Semaforo de escritura inicializado en verde
-    semctl (IDSem, SEM_WRITE, SETVAL, argumento);
+    semctl (IDsem, SEM_WRITE, SETVAL, argumento);
 
     // Verificar que el archivo exista
     fpdat = fopen("Datos.dat","rb");
@@ -114,6 +117,17 @@ int main(int argc, char *argv[]){
         memcomp_cnt++;
         id++;
 
+        if (memcomp_cnt == CANTIDAD){
+            memcomp_cnt=0;
+        }
+        if (memcomp_cnt == CANTIDAD/2){
+            op.sem_num = SEM_WRITE;
+            BLOQUEAR(op);
+            semop(IDsem, &op, 3);
+        }
+        else{
+            
+        }
     }
     fclose(fpdat);
 
