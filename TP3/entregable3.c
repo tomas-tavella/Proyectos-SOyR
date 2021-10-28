@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/shm.h>
 #include <sys/sem.h>
@@ -33,7 +34,7 @@ union semun {
 
 // Estructura de datos a escribir en el buffer
 struct datos{
-    unsigned short id;
+    int id;
     suseconds_t tiempo;               // susesconds_t esta incluido en <sys/types.h> y devuelve el tiempo en micro segundos
     char dato[30];
 }buffer;
@@ -47,9 +48,6 @@ int main(int argc, char *argv[]){
     struct timeval tiempo;
     suseconds_t tiempo_init;
 
-    gettimeofday(&tiempo, NULL);                // Obtengo el tiempo de UNIX inicial, al momento que se escribe el primer dato
-    tiempo_init = tiempo.tv_usec;
-
     // Obtener la clave, verificando si la pudo conseguir
     clave = ftok(PATH,NUMERO);
     if (clave == (key_t) -1){
@@ -58,7 +56,7 @@ int main(int argc, char *argv[]){
 	}
 
     // Llamar al sistema para obtener la memoria compartida
-    IDmem = shmget(clave, CANTIDAD*sizeof(buffer), 0666 | IPC_CREAT);
+    IDmem = shmget(clave, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
     if(IDmem == -1){
 		printf("No se pudo obtener un ID de memoria compartida\n");
 		exit(2);
@@ -92,19 +90,29 @@ int main(int argc, char *argv[]){
         printf("No se puede abrir el archivo.\n");
         return 0;
     }
+
+    gettimeofday(&tiempo, NULL);                // Obtengo el tiempo de UNIX inicial, al momento que se escribe el primer dato
+    tiempo_init = tiempo.tv_usec;
     
     // Se lee el archivo binario
-    fread(&(buffer->dato),sizeof(encabezado),1,fpdat);
+    fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
+    int j=0;
     while(!feof(fpdat)){
-    
-        fread(&(buffer->dato),sizeof(encabezado),1,fpdat);
-    
+        strcpy(memoria_comp[j].dato , buffer.dato);
+
+        memoria_comp[j].id = j;
+        
+        gettimeofday(&tiempo, NULL);
+        memoria_comp[j].tiempo = tiempo_init - tiempo.tv_usec;
+        
+        fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
+        j++;
     }
     fclose(fpdat);
 
     // Se libera la memoria compartida
     shmdt ((const void *) memoria_comp);
 
-	shmctl (IDMem, IPC_RMID, (struct shmid_ds *)NULL);
+	shmctl (IDmem, IPC_RMID, (struct shmid_ds *)NULL);
     return 0;
 }
