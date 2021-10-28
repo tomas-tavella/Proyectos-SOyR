@@ -20,7 +20,6 @@ FILE *fpdat;
 #define CANTIDAD 100
 
 // Defino los distintos semaforos
-
 #define SEM_SYNC 0
 #define SEM_READ 1
 #define SEM_WRITE 2
@@ -109,7 +108,7 @@ int main(int argc, char *argv[]){
         memoria_comp[j].id = j;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
         
         gettimeofday(&tiempo, NULL);
-        memoria_comp[j].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto ek tiempo inicial al tiempo actual para obtener el timestamp
+        memoria_comp[j].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
         
         fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
         j++;
