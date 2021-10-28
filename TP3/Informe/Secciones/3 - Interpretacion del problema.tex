@@ -14,6 +14,6 @@ Mientras tanto, el proceso consumidor debe leer estas estructuras en la otra mit
 Para administrar el \textit{buffer} de manera que no surjan condiciones de carrera y tanto el productor como el consumidor puedan trabajar en secciones críticas sin interrupciones, se van a crear dos programas que utilizan métodos distintos para este fin:\\
 
 \begin{itemize}
-    \item \textbf{Semáforos y variables compartidas:} se utilizan los semáforos con las llamadas a sistema contenidas en la biblioteca \texttt{<sys/sem.h>} y variables compartidas.
+    \item \textbf{Semáforos y variables compartidas:} se utilizan los semáforos con las llamadas a sistema contenidas en la biblioteca \texttt{<sys/sem.h>} y variables compartidas mediante \texttt{<sys/ipc.h>}.
     \item \textbf{Colas de mensajes:} se utilizan las colas de mensajes mediante las llamadas a sistema de la biblioteca \texttt{<sys/msg.h>}.\\
 \end{itemize}
