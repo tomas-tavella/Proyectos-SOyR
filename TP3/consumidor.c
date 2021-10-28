@@ -7,6 +7,7 @@
 #include <sys/sem.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <sys/time.h>
 
 // Definir puntero al archivo a utilizar
 FILE *fpcsv;
@@ -48,9 +49,7 @@ int main(int argc, char *argv[]){
     int IDmem, IDsem;
     struct datos *memoria_comp = NULL;
     union semun argumento;
-    struct timeval tiempo;
     struct sembuf op;
-    suseconds_t tiempo_init;
 
     // Obtener la clave, verificando si la pudo conseguir
     clave = ftok(PATH,NUMERO);
@@ -82,6 +81,13 @@ int main(int argc, char *argv[]){
 
     // Inicialización de semaforos
     op.sem_flg = 0;                 // Nunca usamos flags para los semaforos
+
+    // Verificar que el archivo exista
+    fpcsv = fopen("datos.csv","w");
+    if (fpcsv == 0) {
+        printf("No se puede crear el archivo.\n");
+        return 0;
+    }
 
     return 0;
 }
