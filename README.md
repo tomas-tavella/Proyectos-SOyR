@@ -1,2 +1,2 @@
 # Proyectos-SOyR
-Repositorio de GitHub para los entregables de SOyR del Grupo 30 + Tave
+Repositorio de las actividades entregables de los distintos trabajos practicos de la materia Sistemas Operativos y Redes (E02234) del Grupo 4.
