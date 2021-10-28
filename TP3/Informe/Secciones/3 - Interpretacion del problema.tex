@@ -1,15 +1,21 @@
 \section{Interpretación del problema}
-Para este programa, se debe crear un espacio de memoria compartida utilizando las funciones de la biblioteca \texttt{<sys/shm.h>}, en el que existirá un \textit{buffer ping-pong}: un \textit{buffer} que se divide en dos mitades, y mientras el productor escribe en una de las mitades, el consumidor lee de la otra mitad que ya fue escrita. Al terminar la escritura y lectura, se "intercambian" las mitades y se repite el proceso.
+Para este programa, se debe crear un espacio de memoria compartida utilizando las funciones de la biblioteca \texttt{<sys/shm.h>}, en el que existirá un \textit{buffer ping-pong}: un \textit{buffer} que se divide en dos mitades, y mientras el proceso productor escribe en una de las mitades, el proceso consumidor lee de la otra mitad que ya fue escrita. Al terminar la escritura y lectura, se "intercambian" las mitades y se repite el procedimiento.\\
 
-El programa debe leer datos del archivo \texttt{datos.dat} y almacenarlos en forma de estructuras con los siguientes datos:\\
+El proceso productor debe leer datos del archivo \texttt{datos.dat} y almacenarlos en forma de estructuras con los siguientes datos:\\
 
 \begin{itemize}
     \item Una variable de tipo \texttt{int} que almacena un identificador menor a 50000.
-    \item 
+    \item Una etiqueta con el tiempo en el que fue escrito el dato, con precisión de micro segundos.
+    \item El dato que se leyó del archivo.\\
 \end{itemize}
 
-Si la señal es \texttt{SIGUSR1}, el handler debe hacer un fork y el hijo resultante debe imprimir el contenido del vector separado con comas, su PID, y el PID de su padre.\\
+Mientras tanto, el proceso consumidor debe leer estas estructuras en la otra mitad del \textit{buffer} a medida que estén disponibles, para imprimirlas en pantalla y pasarlas a formato \texttt{.csv} (mediante las conversiones apropiadas) para luego escribirlas en un nuevo archivo \texttt{datos.csv}.\\
 
-Si la señal es \texttt{SIGUSR2}, se debe crear un \textit{thread} o hilo que multiplique a los elementos por si mismos e imprima los valores separados por espacio, y al finalizar devuelva la suma de los elementos. No puede haber más de 10 hilos en total.\\
+Para administrar el \textit{buffer} de manera que no surjan condiciones de carrera y tanto el productor como el consumidor puedan trabajar en secciones críticas sin interrupciones, se van a crear dos programas que utilizan métodos distintos para este fin:\\
 
-Además, el proceso padre tiene que imprimir el estado en el cual terminaron los hijos, verificar que no quede ninguno en estado \textit{zombie}, y avisar si se llega al máximo de hilos. Si se recibe la señal \texttt{SIGTERM}, se espera a que termine todos los hijos e hilos y se termina el programa.
+\begin{itemize}
+    \item \textbf{Semáforos y variables compartidas:} se utilizan los semáforos con las llamadas a sistema contenidas en la biblioteca \texttt{<sys/sem.h>} y variables compartidas.
+    \item \textbf{Colas de mensajes:} se utilizan las colas de mensajes mediante las llamadas a sistema de la biblioteca \texttt{<sys/msg.h>}.\\
+\end{itemize}
+
+\textbf{Falta lo que se va a hacer cuando el productor llena ambas mitades y el consumidor no leyo.}\\
