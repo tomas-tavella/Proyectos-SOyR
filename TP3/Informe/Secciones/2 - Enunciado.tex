@@ -9,6 +9,6 @@ El proceso productor debe leer datos desde el archivo \texttt{datos.dat} y almac
     \item El dato leído desde el archivo \texttt{datos.dat}.\\
 \end{itemize}
 
-El proceso consumidor debe leer desde el \textit{buffer ping-pong} e imprimir los valores leídos en pantalla a medida que estén disponibles. También debe almacenarlos en un archivo llamado \texttt{datos.csv}, a razón de una estructura por línea, con los valores separados por comas.\\
+El proceso consumidor debe leer desde el \textit{buffer ping-pong} e imprimir los valores leídos en pantalla a medida que estén disponibles. También debe almacenarlos en un archivo llamado \texttt{datos.csv}, a razón de una estructura por línea, con los valores separados por comas (CSV).\\
 
 Deben implementarse dos variantes del problema, una que administre el \textit{buffer ping-pong} usando semáforos y variables compartidas, y otro que utilice colas de mensajes. En ambos casos decida y justifique que se va a hacer cuando el productor llene ambos \textit{buffers} y el consumidor no consumió los datos.
