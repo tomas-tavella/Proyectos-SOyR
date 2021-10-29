@@ -94,5 +94,10 @@ int main(int argc, char *argv[]){
     BLOQUEAR(op);
     semop(IDsem, &op, 3);
 
+    memcomp_cnt = 0;
+    while (memcomp_cnt < CANTIDAD/2){
+        fprintf(fpcsv,"%d,%d,%s\n",memoria_comp[memcomp_cnt].id,memoria_comp[memcomp_cnt].tiempo,memoria_comp[memcomp_cnt].dato);
+        memcomp_cnt++;
+    }
     return 0;
 }
