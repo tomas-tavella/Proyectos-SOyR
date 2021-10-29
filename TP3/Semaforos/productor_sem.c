@@ -42,7 +42,7 @@ union semun {
 struct datos{
     int id;
     suseconds_t tiempo;               // susesconds_t esta incluido en <sys/types.h> y devuelve el tiempo en micro segundos
-    char dato[30];
+    float dato;
 }buffer;
 
 
@@ -59,44 +59,44 @@ int main(int argc, char *argv[]){
     // Obtener la clave, verificando si la pudo conseguir
     clave1 = ftok(PATH,NUMERO1);
     if (clave1 == (key_t) -1){
-		printf("No se pudo obtener la clave 1\n");
+		printf("No se pudo obtener la primera clave\n");
 		exit(1);
 	}
     clave2 = ftok(PATH,NUMERO2);
     if (clave2 == (key_t) -1){
-		printf("No se pudo obtener la clave 2\n");
-		exit(1);
+		printf("No se pudo obtener la segunda clave\n");
+		exit(2);
 	}
 
     // Llamar al sistema para obtener la memoria compartida
     IDmem1 = shmget(clave1, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
     if(IDmem1 == -1){
 		printf("No se pudo obtener un ID de la primera memoria compartida\n");
-		exit(2);
+		exit(3);
 	}
     IDmem2 = shmget(clave2, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
     if(IDmem2 == -1){
 		printf("No se pudo obtener un ID de la segunda memoria compartida\n");
-		exit(3);
+		exit(4);
 	}
 
     // Adosar el proceso al espacio de memoria mediante un puntero
     memoria_comp1 = (struct datos *) shmat(IDmem1, (const void *)0,0);
     if (memoria_comp1 == NULL){
 		printf("No se pudo asociar el puntero a la primera memoria compartida\n");
-		exit(4);
+		exit(5);
 	}
     memoria_comp2 = (struct datos *) shmat(IDmem2, (const void *)0,0);
     if (memoria_comp2 == NULL){
 		printf("No se pudo asociar el puntero a la primera memoria compartida\n");
-		exit(5);
+		exit(6);
 	}
 
     // Creación de semaforos
     IDsem = semget(clave, 3, 0666 | IPC_CREAT);
     if (IDsem == -1){
         printf("No se puede crear el semáforo\n");
-        exit(6);
+        exit(7);
     }
 
     // Inicialización de semaforos
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]){
     int memcomp_cnt=0;
     memoria_comp[0].id=-1;
     while(!feof(fpdat)){
-            strcpy(memoria_comp1[memcomp_cnt].dato , buffer.dato);         // Copia de datos al buffer
+            memoria_comp1[memcomp_cnt].dato = buffer.dato;                  // Copia de datos al buffer
 
             memoria_comp1[memcomp_cnt].id += 1;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
         

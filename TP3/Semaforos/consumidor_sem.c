@@ -13,11 +13,12 @@
 FILE *fpcsv;
 
 // Definir los parametros de ftok
-#define NUMERO 30      
+#define NUMERO1 30 
+#define NUMERO2 31   
 #define PATH "/dev/null"
 
 // Cantidad para el tamano de la memoria compartida
-#define CANTIDAD 100
+#define CANTIDAD 50
 
 // Defino los distintos semaforos
 #define SEM_SYNC 0
@@ -41,36 +42,53 @@ union semun {
 struct datos{
     int id;
     suseconds_t tiempo;               // susesconds_t esta incluido en <sys/types.h> y devuelve el tiempo en micro segundos
-    char dato[30];
+    float dato;
 }buffer;
 
 int main(int argc, char *argv[]){
-    key_t clave;
-    int IDmem, IDsem;
-    struct datos *memoria_comp = NULL;
+    key_t clave1, clave2;
+    int IDmem1, IDmem2, IDsem;
+    struct datos *memoria_comp1 = NULL;
+    struct datos *memoria_comp2 = NULL;
     union semun argumento;
     struct sembuf op;
 
     // Obtener la clave, verificando si la pudo conseguir
-    clave = ftok(PATH,NUMERO);
-    if (clave == (key_t) -1){
-		printf("No se pudo obtener una clave\n");
+    clave1 = ftok(PATH,NUMERO1);
+    if (clave1 == (key_t) -1){
+		printf("No se pudo obtener la primera clave\n");
 		exit(1);
 	}
-
-    // Llamar al sistema para obtener la memoria compartida
-    IDmem = shmget(clave, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
-    if(IDmem == -1){
-		printf("No se pudo obtener un ID de memoria compartida\n");
+    clave2 = ftok(PATH,NUMERO2);
+    if (clave2 == (key_t) -1){
+		printf("No se pudo obtener la segunda clave\n");
 		exit(2);
 	}
 
-    // Adosar el proceso al espacio de memoria mediante un puntero
-    memoria_comp = (struct datos *) shmat(IDmem, (const void *)0,0);
-    if (memoria_comp == NULL){
-		printf("No se pudo asociar el puntero a la memoria compartida\n");
+    // Llamar al sistema para obtener la memoria compartida
+    IDmem1 = shmget(clave1, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
+    if(IDmem1 == -1){
+		printf("No se pudo obtener un ID de la primera memoria compartida\n");
 		exit(3);
 	}
+    IDmem2 = shmget(clave2, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
+    if(IDmem2 == -1){
+		printf("No se pudo obtener un ID de la segunda memoria compartida\n");
+		exit(4);
+	}
+
+    // Adosar el proceso al espacio de memoria mediante un puntero
+    memoria_comp1 = (struct datos *) shmat(IDmem1, (const void *)0,0);
+    if (memoria_comp1 == NULL){
+		printf("No se pudo asociar el puntero a la primera memoria compartida\n");
+		exit(5);
+	}
+    memoria_comp2 = (struct datos *) shmat(IDmem2, (const void *)0,0);
+    if (memoria_comp2 == NULL){
+		printf("No se pudo asociar el puntero a la primera memoria compartida\n");
+		exit(6);
+	}
+
 
     // Creación de semaforos
     IDsem = semget(clave, 3, 0666 | IPC_CREAT);
@@ -96,7 +114,7 @@ int main(int argc, char *argv[]){
 
     memcomp_cnt = 0;
     while (memcomp_cnt < CANTIDAD/2){
-        fprintf(fpcsv,"%d,%d,%s\n",memoria_comp[memcomp_cnt].id,memoria_comp[memcomp_cnt].tiempo,memoria_comp[memcomp_cnt].dato);
+        fprintf(fpcsv,"%d,%d,%f\n",memoria_comp1[memcomp_cnt].id,memoria_comp1[memcomp_cnt].tiempo,memoria_comp1[memcomp_cnt].dato);
         memcomp_cnt++;
     }
     // Desbloqueo el semaforo de sincronizacion
