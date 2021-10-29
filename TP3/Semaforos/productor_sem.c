@@ -108,7 +108,8 @@ int main(int argc, char *argv[]){
     memoria_comp[0].id=-1;
     while(!feof(fpdat)){
 
-        op.sem_num = SEM_READ;                          // Bloquear el semaforo de lectura
+        // Bloquear el semaforo de sincronizacion
+        op.sem_num = SEM_SYNC;
         BLOQUEAR(op);
         semop(IDsem, &op, 3);
         while (memcomp_cnt < CANTIDAD/2){
@@ -122,10 +123,15 @@ int main(int argc, char *argv[]){
             fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
             memcomp_cnt++;
         }
-        op.sem_num = SEM_READ;                          // Desbloquear el semaforo de lectura
+        // Desbloquear el semaforo de sincronizacion
+        op.sem_num = SEM_SYNC;
         DESBLOQUEAR(op);
         semop(IDsem, &op, 3);
-        
+
+        // Bloquear el semaforo de sincronizacion
+        op.sem_num = SEM_SYNC;
+        BLOQUEAR(op);
+        semop(IDsem, &op, 3);
         while (memcomp_cnt < CANTIDAD){
             strcpy(memoria_comp[memcomp_cnt].dato , buffer.dato);           // Copia de datos al buffer
 
@@ -137,7 +143,11 @@ int main(int argc, char *argv[]){
             fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
             memcomp_cnt++;
         }
-       memcomp_cnt = 0;                                                    // Una vez que se llega a la ultima posicion de memoria, lo vuelvo al principio
+        memcomp_cnt = 0;                                                    // Una vez que se llega a la ultima posicion de memoria, lo vuelvo al principio
+        // Desbloquear el semaforo de sincronizacion
+        op.sem_num = SEM_SYNC;
+        DESBLOQUEAR(op);
+        semop(IDsem, &op, 3);
     }
     fclose(fpdat);
 

@@ -89,8 +89,8 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    // Espero a que el productor desbloquee el semaforo para poder leer
-    op.sem_num = SEM_READ;
+    // Espero a que el productor desbloquee el semaforo de sincronizacion para poder leer
+    op.sem_num = SEM_SYNC;
     BLOQUEAR(op);
     semop(IDsem, &op, 3);
 
@@ -99,5 +99,10 @@ int main(int argc, char *argv[]){
         fprintf(fpcsv,"%d,%d,%s\n",memoria_comp[memcomp_cnt].id,memoria_comp[memcomp_cnt].tiempo,memoria_comp[memcomp_cnt].dato);
         memcomp_cnt++;
     }
+    // Desbloqueo el semaforo de sincronizacion
+    op.sem_num = SEM_SYNC;
+    DESBLOQUEAR(op);
+    semop(IDsem, &op, 3);
+
     return 0;
 }
