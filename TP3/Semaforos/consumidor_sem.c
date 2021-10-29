@@ -112,15 +112,27 @@ int main(int argc, char *argv[]){
     BLOQUEAR(op);
     semop(IDsem, &op, 3);
 
-    memcomp_cnt = 0;
-    while (memcomp_cnt < CANTIDAD/2){
-        fprintf(fpcsv,"%d,%d,%f\n",memoria_comp1[memcomp_cnt].id,memoria_comp1[memcomp_cnt].tiempo,memoria_comp1[memcomp_cnt].dato);
+    int memcomp_cnt = 0;
+    int auxBuffer=0; //Variable auxiliar para ver de que buffer leer
+    while (memcomp_cnt < 2*CANTIDAD){
+        if(auxBuffer==0){
+            fprintf(fpcsv,"%d,%d,%f\n",memoria_comp1[memcomp_cnt].id,memoria_comp1[memcomp_cnt].tiempo,memoria_comp1[memcomp_cnt].dato);
+        }
+        else{
+            fprintf(fpcsv,"%d,%d,%f\n",memoria_comp2[memcomp_cnt].id,memoria_comp2[memcomp_cnt].tiempo,memoria_comp2[memcomp_cnt].dato);
+        }
         memcomp_cnt++;
+        if(memcomp_cnt==CANTIDAD){
+                memcomp_cnt=0;
+                auxBuffer!=auxBuffer;
+        }
     }
     // Desbloqueo el semaforo de sincronizacion
     op.sem_num = SEM_SYNC;
     DESBLOQUEAR(op);
     semop(IDsem, &op, 3);
+
+    fclose(fpcsv);
 
     return 0;
 }

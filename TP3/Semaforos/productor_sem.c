@@ -6,7 +6,6 @@
 #include <sys/shm.h>
 #include <sys/sem.h>
 #include <sys/ipc.h>
-#include <sys/msg.h>
 #include <sys/time.h>                   // Para obtener el tiempo de UNIX
 
 // Definir puntero al archivo a utilizar
@@ -122,17 +121,35 @@ int main(int argc, char *argv[]){
     // Se lee el archivo binario
     fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
     int memcomp_cnt=0;
-    memoria_comp[0].id=-1;
+    int id=0;
+    int auxBuffer=0;                            //Variable auxiliar para ver en que buffer escribir
     while(!feof(fpdat)){
-            memoria_comp1[memcomp_cnt].dato = buffer.dato;                  // Copia de datos al buffer
+            if(auxBuffer==0){
+                memoria_comp1[memcomp_cnt].dato = buffer.dato;                  // Copia de datos al buffer
 
-            memoria_comp1[memcomp_cnt].id += 1;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
+                memoria_comp1[memcomp_cnt].id = id;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
         
-            gettimeofday(&tiempo, NULL);
-            memoria_comp1[memcomp_cnt].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+                gettimeofday(&tiempo, NULL);
+                memoria_comp1[memcomp_cnt].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
 
-            fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
-            memcomp_cnt++;
+                fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
+                memcomp_cnt++; id++;
+            }
+            else{
+                memoria_comp2[memcomp_cnt].dato = buffer.dato;                  // Copia de datos al buffer
+
+                memoria_comp2[memcomp_cnt].id = id;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
+        
+                gettimeofday(&tiempo, NULL);
+                memoria_comp2[memcomp_cnt].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+
+                fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
+                memcomp_cnt++; id++;
+            }
+            if(memcomp_cnt==CANTIDAD){
+                memcomp_cnt=0;
+                auxBuffer!=auxBuffer;
+            }
     }
     fclose(fpdat);
 
