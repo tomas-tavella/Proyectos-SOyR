@@ -22,7 +22,7 @@ FILE *fpdat;
 typedef struct{
     int id;
     suseconds_t tiempo;               // susesconds_t esta incluido en <sys/types.h> y devuelve el tiempo en micro segundos
-    float dato;
+    char dato[17];
 }buffer_t;
 
 typedef struct{
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]){
     struct timeval tiempo;
     struct timeval tiempo_init;
 
-    float dato_val;
+    char dato_val[17];
 
     mensaje_t mens;
 
@@ -95,7 +95,6 @@ int main(int argc, char *argv[]){
 		exit(2);
 	}
 
-
     // Adosar el proceso a los espacios de memoria mediante un puntero
     buffer1 = (buffer_t *) shmat(IDmem1, (const void *)0,0);
     if (buffer1 == NULL){
@@ -110,7 +109,7 @@ int main(int argc, char *argv[]){
 	}
 
     // Verificar que el archivo exista
-    fpdat = fopen("datos.dat","rb");
+    fpdat = fopen("datos.dat","r");
     if (fpdat == 0) {
         printf("No se puede abrir el archivo.\n");
         return 0;
@@ -119,18 +118,18 @@ int main(int argc, char *argv[]){
     gettimeofday(&tiempo, NULL);                // Obtengo el tiempo de UNIX inicial, al momento que se escribe el primer dato
     tiempo_init = tiempo;
     // Se lee el archivo binario
-    fread(&(dato_val),sizeof(float),1,fpdat);
+    fgets(dato_val,17,fpdat);
     int i;
     int id=0;
     while(!feof(fpdat)){
         msgrcv(IDmens1,(struct msgbuf *)&mens,sizeof(mens.Dato),2,0);
         for(i=0;i<CANTIDAD;i++){
-            buffer1[i].dato=dato_val;
+            strcpy(buffer1[i].dato,dato_val);
             buffer1[i].id=id;                                   // Asigno ID al dato, que se incrementa por cada dato que se lee
             id++;
             gettimeofday(&tiempo, NULL);
             buffer1[i].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);   // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
-            fread(&(dato_val),sizeof(float),1,fpdat);
+            fgets(dato_val,17,fpdat);
         }
         mens.Id_Mensaje=1;  //Tipo 1 es listo para leer, Tipo 2 es listo para escribir
         mens.Dato=1;
@@ -139,12 +138,12 @@ int main(int argc, char *argv[]){
 
         msgrcv(IDmens2,(struct msgbuf *)&mens,sizeof(mens.Dato),2,0);
         for(i=0;i<CANTIDAD;i++){
-            buffer2[i].dato=dato_val;
+            strcpy(buffer2[i].dato,dato_val);
             buffer2[i].id=id;                                 // Asigno ID al dato, que se incrementa por cada dato que se lee
             id++;
             gettimeofday(&tiempo, NULL);
             buffer2[i].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);   // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
-            fread(&(dato_val),sizeof(float),1,fpdat);
+            fgets(dato_val,17,fpdat);
         }
         mens.Id_Mensaje=1;  //Tipo 1 es listo para leer, Tipo 2 es listo para escribir
         mens.Dato=1;

@@ -22,7 +22,7 @@ FILE *fpcsv;
 typedef struct{
     int id;
     suseconds_t tiempo;               // susesconds_t esta incluido en <sys/types.h> y devuelve el tiempo en micro segundos
-    float dato;
+    char dato[17];
 }buffer_t;
 
 typedef struct{
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
     struct timeval tiempo;
     suseconds_t tiempo_init;
 
-    float dato_val;
+    char dato_val[17];
 
     mensaje_t mens;
 
@@ -126,8 +126,8 @@ int main(int argc, char *argv[]){
         if (mens.Dato==-1) break;
         for(i=0;i<CANTIDAD;i++){
             aux=buffer1[i];
-            printf("%d,%ld us,%f\n",aux.id,aux.tiempo,aux.dato);
-            fprintf(fpcsv,"%d,%ld us,%f\n",aux.id,aux.tiempo,aux.dato);
+            printf("%d,%ld us,%s\n",aux.id,aux.tiempo,aux.dato);
+            fprintf(fpcsv,"%d,%ld us,%s\n",aux.id,aux.tiempo,aux.dato);
         }
         mens.Id_Mensaje=2;  //Tipo 1 es listo para leer, Tipo 2 es listo para escribir
         mens.Dato=1;
@@ -137,8 +137,8 @@ int main(int argc, char *argv[]){
         if (mens.Dato==-1) break;
         for(i=0;i<CANTIDAD;i++){
             aux=buffer2[i];
-            printf("%d,%ld us,%f\n",aux.id,aux.tiempo,aux.dato);
-            fprintf(fpcsv,"%d,%ld us,%f\n",aux.id,aux.tiempo,aux.dato);
+            printf("%d,%ld us,%s\n",aux.id,aux.tiempo,aux.dato);
+            fprintf(fpcsv,"%d,%ld us,%s\n",aux.id,aux.tiempo,aux.dato);
         }
         mens.Id_Mensaje=2;  //Tipo 1 es listo para leer, Tipo 2 es listo para escribir
         mens.Dato=1;
