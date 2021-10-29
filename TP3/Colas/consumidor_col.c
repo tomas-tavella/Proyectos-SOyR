@@ -26,37 +26,81 @@ struct datos{
 }buffer;
 
 int main(int argc, char *argv[]){
-    key_t clave;
-    int IDmem;
-    struct datos *memoria_comp = NULL;
+    key_t clave1, clave2, clave3, clave4;
+    int IDmem1, IDmem2, IDmens1, IDmens2;
+    struct datos *memoria_comp1 = NULL;
+    struct datos *memoria_comp2 = NULL;
 
-    // Obtener la clave, verificando si la pudo conseguir
-    clave = ftok(PATH,NUMERO);
-    if (clave == (key_t) -1){
+    // Obtener las claves, verificando si la pudo conseguir
+    clave1 = ftok(PATH,NUMERO);
+    if (clave1 == (key_t) -1){
+		printf("No se pudo obtener una clave\n");
+		exit(1);
+	}
+
+    clave2 = ftok(PATH,NUMERO+1);
+    if (clave2 == (key_t) -1){
+		printf("No se pudo obtener una clave\n");
+		exit(1);
+	}
+
+    clave3 = ftok(PATH,NUMERO+2);
+    if (clave3 == (key_t) -1){
+		printf("No se pudo obtener una clave\n");
+		exit(1);
+	}
+
+    clave4 = ftok(PATH,NUMERO+3;
+    if (clave4 == (key_t) -1){
 		printf("No se pudo obtener una clave\n");
 		exit(1);
 	}
 
     // Llamar al sistema para obtener la memoria compartida
-    IDmem = shmget(clave, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
-    if(IDmem == -1){
+    IDmem1 = shmget(clave1, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
+    if(IDmem1 == -1){
 		printf("No se pudo obtener un ID de memoria compartida\n");
 		exit(2);
 	}
 
-    // Adosar el proceso al espacio de memoria mediante un puntero
-    memoria_comp = (struct datos *) shmat(IDmem, (const void *)0,0);
-    if (memoria_comp == NULL){
+    IDmem2 = shmget(clave2, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
+    if(IDmem2 == -1){
+		printf("No se pudo obtener un ID de memoria compartida\n");
+		exit(2);
+	}
+
+    IDmens1 = msgget(clave3, 0666 | IPC_CREAT);
+    if(IDmens2 == -1){
+		printf("No se pudo obtener un ID de cola de mensajes\n");
+		exit(2);
+	}
+
+    IDmens2 = msgget(clave4, 0666 | IPC_CREAT);
+    if(IDmens2 == -1){
+		printf("No se pudo obtener un ID de cola de mensajes\n");
+		exit(2);
+	}
+
+    // Adosar el proceso a los espacios de memoria mediante un puntero
+    memoria_comp1 = (struct datos *) shmat(IDmem1, (const void *)0,0);
+    if (memoria_comp1 == NULL){
 		printf("No se pudo asociar el puntero a la memoria compartida\n");
 		exit(3);
 	}
 
-    // Verificar que el archivo exista
+    memoria_comp2 = (struct datos *) shmat(IDmem2, (const void *)0,0);
+    if (memoria_comp2 == NULL){
+		printf("No se pudo asociar el puntero a la memoria compartida\n");
+		exit(3);
+	}
+
+    // Verificar que se pueda crear el archivo
     fpcsv = fopen("datos.csv","w");
     if (fpcsv == 0) {
         printf("No se puede crear el archivo.\n");
         return 0;
     }
+
 
     return 0;
 }
