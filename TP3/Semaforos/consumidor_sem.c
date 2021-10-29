@@ -89,5 +89,10 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
+    // Espero a que el productor desbloquee el semaforo para poder leer
+    op.sem_num = SEM_READ;
+    BLOQUEAR(op);
+    semop(IDsem, &op, 3);
+
     return 0;
 }

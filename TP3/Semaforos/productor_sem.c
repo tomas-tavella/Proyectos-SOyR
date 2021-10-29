@@ -107,29 +107,37 @@ int main(int argc, char *argv[]){
     int memcomp_cnt=0;
     memoria_comp[0].id=-1;
     while(!feof(fpdat)){
-        strcpy(memoria_comp[memcomp_cnt].dato , buffer.dato);         // Copia de datos al buffer
 
-        memoria_comp[memcomp_cnt].id += 1;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
+        op.sem_num = SEM_READ;                          // Bloquear el semaforo de lectura
+        BLOQUEAR(op);
+        semop(IDsem, &op, 3);
+        while (memcomp_cnt < CANTIDAD/2){
+            strcpy(memoria_comp[memcomp_cnt].dato , buffer.dato);         // Copia de datos al buffer
+
+            memoria_comp[memcomp_cnt].id += 1;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
         
-        gettimeofday(&tiempo, NULL);
-        memoria_comp[memcomp_cnt].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+            gettimeofday(&tiempo, NULL);
+            memoria_comp[memcomp_cnt].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
 
-        fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
-        memcomp_cnt++;
-
-        if (memcomp_cnt == CANTIDAD/2){
-            op.sem_num = SEM_WRITE;
-            BLOQUEAR(op);
-            semop(IDsem, &op, 3);
-
+            fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
+            memcomp_cnt++;
         }
-        if (memcomp_cnt == CANTIDAD){
-            memcomp_cnt=0;
-            
-            op.sem_num = SEM_READ;
-            BLOQUEAR(op);
-            semop(IDsem, &op, 3);
+        op.sem_num = SEM_READ;                          // Desbloquear el semaforo de lectura
+        DESBLOQUEAR(op);
+        semop(IDsem, &op, 3);
+        
+        while (memcomp_cnt < CANTIDAD){
+            strcpy(memoria_comp[memcomp_cnt].dato , buffer.dato);           // Copia de datos al buffer
+
+            memoria_comp[memcomp_cnt].id += 1;                              // Asigno ID al dato, que se incrementa por cada dato que se lee
+        
+            gettimeofday(&tiempo, NULL);
+            memoria_comp[memcomp_cnt].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+
+            fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
+            memcomp_cnt++;
         }
+       memcomp_cnt = 0;                                                    // Una vez que se llega a la ultima posicion de memoria, lo vuelvo al principio
     }
     fclose(fpdat);
 
