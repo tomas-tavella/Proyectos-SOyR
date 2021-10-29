@@ -39,7 +39,7 @@ int main(int argc, char *argv[]){
     buffer_t *buffer2 = NULL;
 
     struct timeval tiempo;
-    suseconds_t tiempo_init;
+    struct timeval tiempo_init;
 
     float dato_val;
 
@@ -117,7 +117,7 @@ int main(int argc, char *argv[]){
     }
 
     gettimeofday(&tiempo, NULL);                // Obtengo el tiempo de UNIX inicial, al momento que se escribe el primer dato
-    tiempo_init = tiempo.tv_usec;
+    tiempo_init = tiempo;
     // Se lee el archivo binario
     fread(&(dato_val),sizeof(float),1,fpdat);
     int i;
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]){
             buffer1[i].id=id;                                   // Asigno ID al dato, que se incrementa por cada dato que se lee
             id++;
             gettimeofday(&tiempo, NULL);
-            buffer1[i].tiempo = tiempo.tv_usec - tiempo_init;   // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+            buffer1[i].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);   // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
             fread(&(dato_val),sizeof(float),1,fpdat);
         }
         mens.Id_Mensaje=1;  //Tipo 1 es listo para leer, Tipo 2 es listo para escribir
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]){
             buffer2[i].id=id;                                 // Asigno ID al dato, que se incrementa por cada dato que se lee
             id++;
             gettimeofday(&tiempo, NULL);
-            buffer2[i].tiempo = tiempo.tv_usec - tiempo_init;   // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+            buffer2[i].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);   // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
             fread(&(dato_val),sizeof(float),1,fpdat);
         }
         mens.Id_Mensaje=1;  //Tipo 1 es listo para leer, Tipo 2 es listo para escribir
