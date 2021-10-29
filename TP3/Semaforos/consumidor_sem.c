@@ -46,7 +46,7 @@ struct datos{
     float dato;
 }buffer;
 
-int main(int argc, char *argv[]){
+int main(){
     key_t clave1, clave2, clavesem;
     int IDbuf1, IDbuf2, IDsem;
     struct datos *buf1 = NULL;
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]){
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
         while(buf_select == 1 && buf_cnt < CANTIDAD && buf2[buf_cnt].id != -1){
-            fprintf(fpcsv,"%d,%ld,%f\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
+            fprintf(fpcsv,"%d,%ld us,%f\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
             printf("%d,%ld us,%f\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
             buf_cnt++;
         }
