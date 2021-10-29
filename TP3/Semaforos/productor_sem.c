@@ -123,11 +123,11 @@ int main(){
     tiempo_init = tiempo;
     
     // Se lee el archivo binario
-    fread(&(buf1->dato),sizeof(struct datos),1,fpdat);
+    
     int buf_cnt=0;
     int id=0;
     int buf_select=0;                            //Variable auxiliar para ver en que buffer escribir
-    //Ponemos un estado inicial a los semaforos
+    fread(&(buf1[buf_cnt].dato),sizeof(struct datos),1,fpdat);
     
     while(!feof(fpdat)){
 
@@ -138,14 +138,14 @@ int main(){
         while(buf_select==0 && buf_cnt<CANTIDAD){
             //printf("Hola1\n");
             buf1[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
-            //printf("%d,",buf1[buf_cnt].id);
+            printf("%d,",buf1[buf_cnt].id);
         
             gettimeofday(&tiempo, NULL);
             buf1[buf_cnt].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
-            //printf("%ld,",buf1[buf_cnt].tiempo);
+            printf("%ld,",buf1[buf_cnt].tiempo);
 
-            fread(&(buf1->dato),sizeof(struct datos),1,fpdat);
-            //printf("%f\n",buf1[buf_cnt].dato);
+            fread(&(buf1[buf_cnt].dato),sizeof(struct datos),1,fpdat);
+            printf("%f\n",buf1[buf_cnt].dato);
             buf_cnt++; id++;
         }
         // Finalizo una seccion critica (escrbir buffer 1)
@@ -164,14 +164,14 @@ int main(){
         while(buf_select==1 && buf_cnt<CANTIDAD){
             //printf("Hola2\n");
             buf2[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
-            //printf("%d,",buf2[buf_cnt].id);
+            printf("%d,",buf2[buf_cnt].id);
         
             gettimeofday(&tiempo, NULL);
             buf2[buf_cnt].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
-            //printf("%ld,",buf2[buf_cnt].tiempo);
+            printf("%ld,",buf2[buf_cnt].tiempo);
 
-            fread(&(buf2->dato),sizeof(struct datos),1,fpdat);
-            //printf("%f\n",buf2[buf_cnt].dato);
+            fread(&(buf2[buf_cnt].dato),sizeof(struct datos),1,fpdat);
+            printf("%f\n",buf2[buf_cnt].dato);
             buf_cnt++; id++;
         }
         // Finalizo una seccion critica (escribir buffer 2)
@@ -192,9 +192,12 @@ int main(){
     // que se llego al EOF
     if (buf_select == 0){
         buf1[buf_cnt].id = -1;
+        printf("Puso -1 en buf1\n");
     }else{
         buf2[buf_cnt].id = -1;
+        printf("Puso -1 en buf2\n");
     }
+
 
     fclose(fpdat);
 
