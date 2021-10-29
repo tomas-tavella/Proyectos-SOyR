@@ -124,7 +124,7 @@ int main(int argc, char *argv[]){
         memcomp_cnt++;
         if(memcomp_cnt==CANTIDAD){
                 memcomp_cnt=0;
-                auxBuffer!=auxBuffer;
+                auxBuffer = !(auxBuffer);
         }
     }
     // Desbloqueo el semaforo de sincronizacion
