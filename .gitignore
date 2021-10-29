@@ -10,4 +10,11 @@
 *.out
 *.run.xml
 *.synctex.gz
+
+# Ignoro los binarios compilados de los codigos
+
+productor_sem
+consumidor_sem
+productor_col
+consumidor_col
 *.toc
