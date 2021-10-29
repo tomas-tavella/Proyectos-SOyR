@@ -125,7 +125,7 @@ int main(int argc, char *argv[]){
         while(buf_select==1 && buf_cnt<CANTIDAD){
             fprintf(fpcsv,"%d,%ld,%f\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
         }
-        op.sem_num = SEM_WRITE;
+        op.sem_num = SEM_READ;
         BLOQUEAR(op);
         semop(IDsem, &op, 3);
 
