@@ -113,6 +113,18 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
+    int buf_cnt=0;
+    int buf_select=0;
+    while (buf1[buf_cnt].id != NULL || buf2[buf_cnt].id != NULL){               // Si el ID no indica EOF, sigo leyendo
+        op.sem_num = SEM_READ;
+        BLOQUEAR(op);
+        semop(IDsem, &op, 3);
+        // Copiar datos a csv
+        op.sem_num = SEM_WRITE;
+        BLOQUEAR(op);
+        semop(IDsem, &op, 3);
+    }
+    /*
     // Espero a que el productor desbloquee el semaforo de sincronizacion para poder leer
     op.sem_num = SEM_SYNC;
     BLOQUEAR(op);
@@ -137,7 +149,7 @@ int main(int argc, char *argv[]){
     op.sem_num = SEM_SYNC;
     DESBLOQUEAR(op);
     semop(IDsem, &op, 3);
-
+    */
     fclose(fpcsv);
 
     return 0;
