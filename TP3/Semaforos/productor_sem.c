@@ -104,18 +104,18 @@ int main(int argc, char *argv[]){
     
     // Se lee el archivo binario
     fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
-    int memcomp_cnt=0, id=0;
+    int memcomp_cnt=0;
+    memoria_comp[0].id=-1;
     while(!feof(fpdat)){
         strcpy(memoria_comp[memcomp_cnt].dato , buffer.dato);         // Copia de datos al buffer
 
-        memoria_comp[memcomp_cnt].id = id;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
+        memoria_comp[memcomp_cnt].id += 1;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
         
         gettimeofday(&tiempo, NULL);
         memoria_comp[memcomp_cnt].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
 
         fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
         memcomp_cnt++;
-        id++;
 
         if (memcomp_cnt == CANTIDAD/2){
             op.sem_num = SEM_WRITE;
