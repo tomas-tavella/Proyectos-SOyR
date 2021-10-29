@@ -13,7 +13,8 @@ FILE *fpdat;
 
 // Definir los parametros de ftok
 #define NUMERO1 30 
-#define NUMERO2 31   
+#define NUMERO2 31
+#define NUMEROSEM 32   
 #define PATH "/dev/null"
 
 // Cantidad para el tamano de la memoria compartida
@@ -42,14 +43,14 @@ struct datos{
     int id;
     suseconds_t tiempo;               // susesconds_t esta incluido en <sys/types.h> y devuelve el tiempo en micro segundos
     float dato;
-}buffer;
+}aux_struct;
 
 
 int main(int argc, char *argv[]){
-    key_t clave1, clave2;
-    int IDmem1, IDmem2, IDsem;
-    struct datos *memoria_comp1 = NULL;
-    struct datos *memoria_comp2 = NULL;
+    key_t clave1, clave2, clavesem;
+    int IDbuf1, IDbuf2, IDsem;
+    struct datos *buf1 = NULL;
+    struct datos *buf2 = NULL;
     union semun argumento;
     struct timeval tiempo;
     struct sembuf op;
@@ -66,36 +67,41 @@ int main(int argc, char *argv[]){
 		printf("No se pudo obtener la segunda clave\n");
 		exit(2);
 	}
-
-    // Llamar al sistema para obtener la memoria compartida
-    IDmem1 = shmget(clave1, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
-    if(IDmem1 == -1){
-		printf("No se pudo obtener un ID de la primera memoria compartida\n");
+    clavesem = ftok(PATH,NUMEROSEM);
+    if (clavesem == (key_t) -1){
+		printf("No se pudo obtener la clave del semaforo\n");
 		exit(3);
 	}
-    IDmem2 = shmget(clave2, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
-    if(IDmem2 == -1){
-		printf("No se pudo obtener un ID de la segunda memoria compartida\n");
+
+    // Llamar al sistema para obtener la memoria compartida
+    IDbuf1 = shmget(clave1, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
+    if(IDbuf1 == -1){
+		printf("No se pudo obtener un ID de la primera memoria compartida\n");
 		exit(4);
+	}
+    IDbuf2 = shmget(clave2, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
+    if(IDbuf2 == -1){
+		printf("No se pudo obtener un ID de la segunda memoria compartida\n");
+		exit(5);
 	}
 
     // Adosar el proceso al espacio de memoria mediante un puntero
-    memoria_comp1 = (struct datos *) shmat(IDmem1, (const void *)0,0);
-    if (memoria_comp1 == NULL){
-		printf("No se pudo asociar el puntero a la primera memoria compartida\n");
-		exit(5);
-	}
-    memoria_comp2 = (struct datos *) shmat(IDmem2, (const void *)0,0);
-    if (memoria_comp2 == NULL){
+    buf1 = (struct datos *) shmat(IDbuf1, (const void *)0,0);
+    if (buf1 == NULL){
 		printf("No se pudo asociar el puntero a la primera memoria compartida\n");
 		exit(6);
 	}
+    buf2 = (struct datos *) shmat(IDbuf2, (const void *)0,0);
+    if (buf2 == NULL){
+		printf("No se pudo asociar el puntero a la primera memoria compartida\n");
+		exit(7);
+	}
 
     // Creación de semaforos
-    IDsem = semget(clave, 3, 0666 | IPC_CREAT);
+    IDsem = semget(clavesem, 3, 0666 | IPC_CREAT);
     if (IDsem == -1){
         printf("No se puede crear el semáforo\n");
-        exit(7);
+        exit(8);
     }
 
     // Inicialización de semaforos
@@ -119,45 +125,51 @@ int main(int argc, char *argv[]){
     tiempo_init = tiempo.tv_usec;
     
     // Se lee el archivo binario
-    fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
-    int memcomp_cnt=0;
+    fread(&(buf1->dato),sizeof(struct datos),1,fpdat);
+    int buf_cnt=0;
     int id=0;
-    int auxBuffer=0;                            //Variable auxiliar para ver en que buffer escribir
+    int buf_select=0;                            //Variable auxiliar para ver en que buffer escribir
+    //Ponemos un estado inicial a los semaforos
+    
     while(!feof(fpdat)){
-            if(auxBuffer==0){
-                memoria_comp1[memcomp_cnt].dato = buffer.dato;                  // Copia de datos al buffer
-
-                memoria_comp1[memcomp_cnt].id = id;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
+        op.sem_num = SEM_WRITE;
+        BLOQUEAR(op);
+        semop(IDsem, &op, 3);
+        if(buf_select==0){
+                
+            buf1[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
         
-                gettimeofday(&tiempo, NULL);
-                memoria_comp1[memcomp_cnt].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+            gettimeofday(&tiempo, NULL);
+            buf1[buf_cnt].tiempo = tiempo.tv_usec - tiempo_init;       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
 
-                fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
-                memcomp_cnt++; id++;
-            }
-            else{
-                memoria_comp2[memcomp_cnt].dato = buffer.dato;                  // Copia de datos al buffer
+            fread(&(buf1->dato),sizeof(struct datos),1,fpdat);
+            buf_cnt++; id++;
+        }else{
 
-                memoria_comp2[memcomp_cnt].id = id;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
+            buf2[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
         
-                gettimeofday(&tiempo, NULL);
-                memoria_comp2[memcomp_cnt].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+            gettimeofday(&tiempo, NULL);
+            buf2[buf_cnt].tiempo = tiempo.tv_usec - tiempo_init;       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
 
-                fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
-                memcomp_cnt++; id++;
-            }
-            if(memcomp_cnt==CANTIDAD){
-                memcomp_cnt=0;
-                auxBuffer!=auxBuffer;
-            }
+            fread(&(buf2->dato),sizeof(struct datos),1,fpdat);
+            buf_cnt++; id++;
+        }
+        op.sem_num = SEM_WRITE;
+        DESBLOQUEAR(op);
+        semop(IDsem, &op, 3);
+
+        if(buf_cnt==CANTIDAD){
+            buf_cnt=0;
+            buf_select = !(buf_select);
+        }
     }
     fclose(fpdat);
 
     // Se libera la memoria compartida
-    shmdt ((const void *) memoria_comp1);
-    shmdt ((const void *) memoria_comp2);
+    shmdt ((const void *) buf1);
+    shmdt ((const void *) buf2);
 
-	shmctl (IDmem1, IPC_RMID, (struct shmid_ds *)NULL);
-    shmctl (IDmem2, IPC_RMID, (struct shmid_ds *)NULL);
+	shmctl (IDbuf1, IPC_RMID, (struct shmid_ds *)NULL);
+    shmctl (IDbuf2, IPC_RMID, (struct shmid_ds *)NULL);
     return 0;
 }
