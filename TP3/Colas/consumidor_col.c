@@ -16,7 +16,7 @@ FILE *fpcsv;
 #define PATH "/dev/null"
 
 // Cantidad para el tamano de la memoria compartida
-#define CANTIDAD 100
+#define CANTIDAD 50
 
 // Estructura de datos a escribir en el buffer
 typedef struct{
@@ -34,17 +34,17 @@ int main(int argc, char *argv[]){
     key_t clave1, clave2, clave3, clave4;
     int IDmem1, IDmem2, IDmens1, IDmens2;
 
-    struct buffer_t *buffer1 = NULL;
-    struct buffer_t *buffer2 = NULL;
+    buffer_t *buffer1 = NULL;
+    buffer_t *buffer2 = NULL;
 
-    struct buffer_t aux;
+    buffer_t aux;
 
     struct timeval tiempo;
     suseconds_t tiempo_init;
 
     float dato_val;
 
-    struct mensaje_t mens;
+    mensaje_t mens;
 
     // Obtener las claves, verificando si la pudo conseguir
     clave1 = ftok(PATH,NUMERO);
