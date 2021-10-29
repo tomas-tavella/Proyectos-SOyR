@@ -65,49 +65,54 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 
-    clave4 = ftok(PATH,NUMERO+3;
+    clave4 = ftok(PATH,NUMERO+3);
     if (clave4 == (key_t) -1){
 		printf("No se pudo obtener una clave\n");
 		exit(1);
 	}
 
     // Llamar al sistema para obtener la memoria compartida
-    IDmem1 = shmget(clave1, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
+    IDmem1 = shmget(clave1, CANTIDAD*sizeof(buffer_t), 0666);
     if(IDmem1 == -1){
 		printf("No se pudo obtener un ID de memoria compartida\n");
 		exit(2);
 	}
 
-    IDmem2 = shmget(clave2, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
+    IDmem2 = shmget(clave2, CANTIDAD*sizeof(buffer_t), 0666);
     if(IDmem2 == -1){
 		printf("No se pudo obtener un ID de memoria compartida\n");
 		exit(2);
 	}
 
-    IDmens1 = msgget(clave3, 0600 | IPC_CREAT);
+    IDmens1 = msgget(clave3, 0600);
     if(IDmens2 == -1){
 		printf("No se pudo obtener un ID de cola de mensajes\n");
 		exit(2);
 	}
 
-    IDmens2 = msgget(clave4, 0600 | IPC_CREAT);
+    IDmens2 = msgget(clave4, 0600);
     if(IDmens2 == -1){
 		printf("No se pudo obtener un ID de cola de mensajes\n");
 		exit(2);
 	}
 
     // Adosar el proceso a los espacios de memoria mediante un puntero
-    buffer1 = (struct datos *) shmat(IDmem1, (const void *)0,0);
+    buffer1 = (buffer_t *) shmat(IDmem1, (const void *)0,0);
     if (buffer1 == NULL){
 		printf("No se pudo asociar el puntero a la memoria compartida\n");
 		exit(3);
 	}
 
-    buffer2 = (struct datos *) shmat(IDmem2, (const void *)0,0);
+    buffer2 = (buffer_t *) shmat(IDmem2, (const void *)0,0);
     if (buffer2 == NULL){
 		printf("No se pudo asociar el puntero a la memoria compartida\n");
 		exit(3);
 	}
+
+    mens.Id_Mensaje=2;
+    mens.Dato=1;
+    msgsnd(IDmens1,(struct msgbuf *)&mens,sizeof(mens.Dato),0);
+    msgsnd(IDmens2,(struct msgbuf *)&mens,sizeof(mens.Dato),0);
 
     // Verificar que se pueda crear el archivo
     fpcsv = fopen("datos.csv","w");
@@ -115,34 +120,26 @@ int main(int argc, char *argv[]){
         printf("No se puede crear el archivo.\n");
         return 0;
     }
-    int end=0;
+    int i;
     while(1){
         msgrcv(IDmens1,(struct msgbuf *)&mens,sizeof(mens.Dato),1,0);
+        if (mens.Dato==-1) break;
         for(i=0;i<CANTIDAD;i++){
             aux=buffer1[i];
-            if (aux.id==-1){
-                end=1;
-                break;
-            }
-            printf("%d,%d us,%f\n",aux.id,aux.tiempo,aux.dato);
-            fprintf(fpcsv,"%d,%d us,%f\n",aux.id,aux.tiempo,aux.dato);
+            printf("%d,%ld us,%f\n",aux.id,aux.tiempo,aux.dato);
+            fprintf(fpcsv,"%d,%ld us,%f\n",aux.id,aux.tiempo,aux.dato);
         }
-        if (end) break;
         mens.Id_Mensaje=2;  //Tipo 1 es listo para leer, Tipo 2 es listo para escribir
         mens.Dato=1;
         msgsnd(IDmens1,(struct msgbuf *)&mens,sizeof(mens.Dato),0);
 
         msgrcv(IDmens2,(struct msgbuf *)&mens,sizeof(mens.Dato),1,0);
+        if (mens.Dato==-1) break;
         for(i=0;i<CANTIDAD;i++){
-            aux=buffer1[i];
-            if (aux.id==-1){
-                end=1;
-                break;
-            }
-            printf("%d,%d us,%f\n",aux.id,aux.tiempo,aux.dato);
-            fprintf(fpcsv,"%d,%d us,%f\n",aux.id,aux.tiempo,aux.dato);
+            aux=buffer2[i];
+            printf("%d,%ld us,%f\n",aux.id,aux.tiempo,aux.dato);
+            fprintf(fpcsv,"%d,%ld us,%f\n",aux.id,aux.tiempo,aux.dato);
         }
-        if (end) break;
         mens.Id_Mensaje=2;  //Tipo 1 es listo para leer, Tipo 2 es listo para escribir
         mens.Dato=1;
         msgsnd(IDmens2,(struct msgbuf *)&mens,sizeof(mens.Dato),0);
@@ -153,7 +150,7 @@ int main(int argc, char *argv[]){
     shmdt ((const void *) buffer1);
     shmdt ((const void *) buffer2);
 
-	shmctl (IDmem1, IPC_RMID, (struct shmid_ds *)NULL);
+    shmctl (IDmem1, IPC_RMID, (struct shmid_ds *)NULL);
     shmctl (IDmem2, IPC_RMID, (struct shmid_ds *)NULL);
 
     msgctl (IDmens1, IPC_RMID, (struct msqid_ds *)NULL);

@@ -64,20 +64,20 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 
-    clave4 = ftok(PATH,NUMERO+3;
+    clave4 = ftok(PATH,NUMERO+3);
     if (clave4 == (key_t) -1){
 		printf("No se pudo obtener una clave\n");
 		exit(1);
 	}
 
     // Llamar al sistema para obtener la memoria compartida y las colas de mensaje
-    IDmem1 = shmget(clave1, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
+    IDmem1 = shmget(clave1, CANTIDAD*sizeof(buffer_t), 0666 | IPC_CREAT);
     if(IDmem1 == -1){
 		printf("No se pudo obtener un ID de memoria compartida\n");
 		exit(2);
 	}
 
-    IDmem2 = shmget(clave2, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
+    IDmem2 = shmget(clave2, CANTIDAD*sizeof(buffer_t), 0666 | IPC_CREAT);
     if(IDmem2 == -1){
 		printf("No se pudo obtener un ID de memoria compartida\n");
 		exit(2);
@@ -97,13 +97,13 @@ int main(int argc, char *argv[]){
 
 
     // Adosar el proceso a los espacios de memoria mediante un puntero
-    buffer1 = (struct datos *) shmat(IDmem1, (const void *)0,0);
+    buffer1 = (buffer_t *) shmat(IDmem1, (const void *)0,0);
     if (buffer1 == NULL){
 		printf("No se pudo asociar el puntero a la memoria compartida\n");
 		exit(3);
 	}
 
-    buffer2 = (struct datos *) shmat(IDmem2, (const void *)0,0);
+    buffer2 = (buffer_t *) shmat(IDmem2, (const void *)0,0);
     if (buffer2 == NULL){
 		printf("No se pudo asociar el puntero a la memoria compartida\n");
 		exit(3);
@@ -118,34 +118,37 @@ int main(int argc, char *argv[]){
 
     gettimeofday(&tiempo, NULL);                // Obtengo el tiempo de UNIX inicial, al momento que se escribe el primer dato
     tiempo_init = tiempo.tv_usec;
-    
     // Se lee el archivo binario
     fread(&(dato_val),sizeof(float),1,fpdat);
     int i;
-    buffer1[0].id=-1;
+    int id=0;
     while(!feof(fpdat)){
         msgrcv(IDmens1,(struct msgbuf *)&mens,sizeof(mens.Dato),2,0);
         for(i=0;i<CANTIDAD;i++){
-            buffer1.dato=dato_val;
-            buffer1[i].id += 1;                                 // Asigno ID al dato, que se incrementa por cada dato que se lee
+            buffer1[i].dato=dato_val;
+            buffer1[i].id=id;                                   // Asigno ID al dato, que se incrementa por cada dato que se lee
+            id++;
             gettimeofday(&tiempo, NULL);
             buffer1[i].tiempo = tiempo.tv_usec - tiempo_init;   // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
             fread(&(dato_val),sizeof(float),1,fpdat);
         }
         mens.Id_Mensaje=1;  //Tipo 1 es listo para leer, Tipo 2 es listo para escribir
         mens.Dato=1;
+        if (feof(fpdat)) mens.Dato=-1;
         msgsnd(IDmens1,(struct msgbuf *)&mens,sizeof(mens.Dato),0);
 
         msgrcv(IDmens2,(struct msgbuf *)&mens,sizeof(mens.Dato),2,0);
         for(i=0;i<CANTIDAD;i++){
-            buffer1.dato=dato_val;
-            buffer1[i].id += 1;                                 // Asigno ID al dato, que se incrementa por cada dato que se lee
+            buffer2[i].dato=dato_val;
+            buffer2[i].id=id;                                 // Asigno ID al dato, que se incrementa por cada dato que se lee
+            id++;
             gettimeofday(&tiempo, NULL);
-            buffer1[i].tiempo = tiempo.tv_usec - tiempo_init;   // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+            buffer2[i].tiempo = tiempo.tv_usec - tiempo_init;   // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
             fread(&(dato_val),sizeof(float),1,fpdat);
         }
         mens.Id_Mensaje=1;  //Tipo 1 es listo para leer, Tipo 2 es listo para escribir
         mens.Dato=1;
+        if (feof(fpdat)) mens.Dato=-1;
         msgsnd(IDmens2,(struct msgbuf *)&mens,sizeof(mens.Dato),0);
     }
     fclose(fpdat);
@@ -153,12 +156,6 @@ int main(int argc, char *argv[]){
     // Se libera la memoria compartida
     shmdt ((const void *) buffer1);
     shmdt ((const void *) buffer2);
-
-	shmctl (IDmem1, IPC_RMID, (struct shmid_ds *)NULL);
-    shmctl (IDmem2, IPC_RMID, (struct shmid_ds *)NULL);
-
-    msgctl (IDmens1, IPC_RMID, (struct msqid_ds *)NULL);
-    msgctl (IDmens2, IPC_RMID, (struct msqid_ds *)NULL);
 
     return 0;
 }
