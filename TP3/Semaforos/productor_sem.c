@@ -52,9 +52,8 @@ int main(int argc, char *argv[]){
     struct datos *buf1 = NULL;
     struct datos *buf2 = NULL;
     union semun argumento;
-    struct timeval tiempo;
+    struct timeval tiempo, tiempo_init;
     struct sembuf op;
-    suseconds_t tiempo_init;
 
     // Obtener la clave, verificando si la pudo conseguir
     clave1 = ftok(PATH,NUMERO1);
@@ -122,7 +121,7 @@ int main(int argc, char *argv[]){
     }
 
     gettimeofday(&tiempo, NULL);                // Obtengo el tiempo de UNIX inicial, al momento que se escribe el primer dato
-    tiempo_init = tiempo.tv_usec;
+    tiempo_init = tiempo;
     
     // Se lee el archivo binario
     fread(&(buf1->dato),sizeof(struct datos),1,fpdat);
@@ -141,7 +140,7 @@ int main(int argc, char *argv[]){
             buf1[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
         
             gettimeofday(&tiempo, NULL);
-            buf1[buf_cnt].tiempo = tiempo.tv_usec - tiempo_init;       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+            buf1[buf_cnt].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
 
             fread(&(buf1->dato),sizeof(struct datos),1,fpdat);
             buf_cnt++; id++;
@@ -151,7 +150,7 @@ int main(int argc, char *argv[]){
             buf2[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
         
             gettimeofday(&tiempo, NULL);
-            buf2[buf_cnt].tiempo = tiempo.tv_usec - tiempo_init;       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+            buf2[buf_cnt].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
 
             fread(&(buf2->dato),sizeof(struct datos),1,fpdat);
             buf_cnt++; id++;
