@@ -121,7 +121,8 @@ int main(int argc, char *argv[]){
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
         while(buf_select==0 && buf_cnt<CANTIDAD && buf1[buf_cnt].id != -1){
-            fprintf(fpcsv,"%d,%ld,%f\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
+            fprintf(fpcsv,"%d,%ld us,%f\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
+            printf("%d,%ld us,%f\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
             buf_cnt++;
         }
         // Finalizo seccion critica (leer buffer 1)
@@ -135,6 +136,7 @@ int main(int argc, char *argv[]){
         semop(IDsem, &op, 1);
         while(buf_select==1 && buf_cnt<CANTIDAD && buf2[buf_cnt].id != -1){
             fprintf(fpcsv,"%d,%ld,%f\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
+            printf("%d,%ld us,%f\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
             buf_cnt++;
         }
         // Finalizo seccion critica (leer buffer 2)
