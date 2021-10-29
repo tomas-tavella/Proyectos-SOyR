@@ -72,12 +72,12 @@ int main(int argc, char *argv[]){
 	}
 
     // Llamar al sistema para obtener la memoria compartida
-    IDbuf1 = shmget(clave1, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
+    IDbuf1 = shmget(clave1, CANTIDAD*sizeof(struct datos), 0666);
     if(IDbuf1 == -1){
 		printf("No se pudo obtener un ID de la primera memoria compartida\n");
 		exit(3);
 	}
-    IDbuf2 = shmget(clave2, CANTIDAD*sizeof(struct datos), 0666 | IPC_CREAT);
+    IDbuf2 = shmget(clave2, CANTIDAD*sizeof(struct datos), 0666);
     if(IDbuf2 == -1){
 		printf("No se pudo obtener un ID de la segunda memoria compartida\n");
 		exit(4);

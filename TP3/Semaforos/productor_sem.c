@@ -163,6 +163,14 @@ int main(int argc, char *argv[]){
             buf_select = !(buf_select);
         }
     }
+    // Se pone un ID NULL despues de llegar al ultimo elemento, para avisar al consumidor
+    // que se llego al EOF
+    if (buf_select == 0){
+        buf1[buf_cnt].id = NULL;
+    }else{
+        buf2[buf_cnt].id = NULL;
+    }
+
     fclose(fpdat);
 
     // Se libera la memoria compartida
