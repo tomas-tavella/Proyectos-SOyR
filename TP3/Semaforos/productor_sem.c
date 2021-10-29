@@ -136,16 +136,16 @@ int main(int argc, char *argv[]){
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
         while(buf_select==0 && buf_cnt<CANTIDAD){
-            printf("Hola1\n");
+            //printf("Hola1\n");
             buf1[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
-            printf("%d,",buf1[buf_cnt].id);
+            //printf("%d,",buf1[buf_cnt].id);
         
             gettimeofday(&tiempo, NULL);
             buf1[buf_cnt].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
-            printf("%ld,",buf1[buf_cnt].tiempo);
+            //printf("%ld,",buf1[buf_cnt].tiempo);
 
             fread(&(buf1->dato),sizeof(struct datos),1,fpdat);
-            printf("%f\n",buf1[buf_cnt].dato);
+            //printf("%f\n",buf1[buf_cnt].dato);
             buf_cnt++; id++;
         }
         // Finalizo una seccion critica (escrbir buffer 1)
@@ -157,17 +157,21 @@ int main(int argc, char *argv[]){
         op.sem_num = SEM_BUF2;
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
+
+        op.sem_num = SEM_SYNC;              
+        BLOQUEAR(op);
+        semop(IDsem, &op, 1);
         while(buf_select==1 && buf_cnt<CANTIDAD){
-            printf("Hola2\n");
+            //printf("Hola2\n");
             buf2[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
-            printf("%d,",buf2[buf_cnt].id);
+            //printf("%d,",buf2[buf_cnt].id);
         
             gettimeofday(&tiempo, NULL);
             buf2[buf_cnt].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
-            printf("%ld,",buf2[buf_cnt].tiempo);
+            //printf("%ld,",buf2[buf_cnt].tiempo);
 
             fread(&(buf2->dato),sizeof(struct datos),1,fpdat);
-            printf("%f\n",buf2[buf_cnt].dato);
+            //printf("%f\n",buf2[buf_cnt].dato);
             buf_cnt++; id++;
         }
         // Finalizo una seccion critica (escribir buffer 2)
@@ -177,6 +181,11 @@ int main(int argc, char *argv[]){
 
         buf_cnt=0;
         buf_select = !(buf_select);
+
+        // Bloqueo el semaforo de sincronizacion, que en principio lo tiene bloqueado el consumidor leyendo los datos
+        op.sem_num = SEM_SYNC;              
+        BLOQUEAR(op);
+        semop(IDsem, &op, 1);
 
     }
     // Se pone un ID NULL despues de llegar al ultimo elemento, para avisar al consumidor

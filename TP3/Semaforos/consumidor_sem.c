@@ -120,7 +120,7 @@ int main(int argc, char *argv[]){
         op.sem_num = SEM_BUF1;
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
-        while(buf_select==0 && buf_cnt<CANTIDAD && buf1[buf_cnt].id != -1){
+        while(buf_select==0 && buf_cnt < CANTIDAD && buf1[buf_cnt].id != -1){
             fprintf(fpcsv,"%d,%ld us,%f\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
             printf("%d,%ld us,%f\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
             buf_cnt++;
@@ -130,11 +130,15 @@ int main(int argc, char *argv[]){
         DESBLOQUEAR(op);
         semop(IDsem, &op, 1);
 
+        op.sem_num = SEM_SYNC;
+        DESBLOQUEAR(op);
+        semop(IDsem, &op, 1);
+
         // Comienzo seccion critica (leer buffer 2)
         op.sem_num = SEM_BUF2;
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
-        while(buf_select==1 && buf_cnt<CANTIDAD && buf2[buf_cnt].id != -1){
+        while(buf_select == 1 && buf_cnt < CANTIDAD && buf2[buf_cnt].id != -1){
             fprintf(fpcsv,"%d,%ld,%f\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
             printf("%d,%ld us,%f\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
             buf_cnt++;
@@ -143,6 +147,11 @@ int main(int argc, char *argv[]){
         op.sem_num = SEM_BUF2;
         DESBLOQUEAR(op);
         semop(IDsem, &op, 1);
+
+        op.sem_num = SEM_SYNC;
+        DESBLOQUEAR(op);
+        semop(IDsem, &op, 1);
+
 
         if (buf1[buf_cnt-1].id == -1 || buf2[buf_cnt-1].id == -1){
             break;

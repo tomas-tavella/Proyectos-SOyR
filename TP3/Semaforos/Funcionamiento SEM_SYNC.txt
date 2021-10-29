@@ -1,0 +1,7 @@
+Empieza el SEM_SYNC bloqueado
+
+Cuando el PRODUCTOR termina de escribir BUF2, trata de bloquear el SEM_SYNC, que lo desbloquea el CONSUMIDOR al terminar de leer BUF1
+
+El PRODUCTOR sobreescribe BUF1 una vez que el CONSUMIDOR desbloquea SEM_SYNC al terminar de leer BUF1
+
+Cuando el PRODUCTOR trata de sobreescribir BUF2, trata de bloquear SEM_SYNC, pero primero lo debe desbloquear el CONSUMIDOR al terminar de leer BUF2
