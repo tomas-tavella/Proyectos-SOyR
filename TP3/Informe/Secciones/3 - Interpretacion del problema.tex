@@ -1,15 +1,17 @@
 \section{Interpretación del problema}
-Para este programa, se debe crear un espacio de memoria compartida utilizando las funciones de la biblioteca \texttt{<sys/shm.h>}, en el que existirá un \textit{buffer ping-pong}: un \textit{buffer} que se divide en dos mitades, y mientras el proceso productor escribe en una de las mitades, el proceso consumidor lee de la otra mitad que ya fue escrita. Al terminar la escritura y lectura, se "intercambian" las mitades y se repite el procedimiento.\\
+Para este programa, se debe crear dos espacios de memoria compartida utilizando las funciones de la biblioteca \texttt{<sys/shm.h>}, en los que existirán las dos mitades un \textit{buffer ping-pong}.\\
 
-El proceso productor debe leer datos del archivo \texttt{datos.dat} y almacenarlos en forma de estructuras con los siguientes datos:\\
+Los datos leídos del archivo \texttt{datos.dat} se almacenan en una estructura con los siguientes elementos:
 
 \begin{itemize}
     \item Una variable de tipo \texttt{int} que almacena un identificador menor a 50000.
     \item Una etiqueta con el tiempo en el que fue escrito el dato, con precisión de micro segundos.
-    \item El dato que se leyó del archivo.\\
+    \item El dato que se leyó del archivo, de tipo \texttt{float}.\\
 \end{itemize}
 
-Mientras tanto, el proceso consumidor debe leer estas estructuras en la otra mitad del \textit{buffer} a medida que estén disponibles, para imprimirlas en pantalla y pasarlas a formato \texttt{.csv} (mediante las conversiones apropiadas) para luego escribirlas en un nuevo archivo \texttt{datos.csv}.\\
+Como no se aclara el tamaño del \textit{buffer} en el enunciado, se elige que este tenga un tamaño total de 100 estructuras de las mencionadas previamente, dividido en dos mitades de 50 estructuras.\\
+
+El proceso productor debe leer datos del archivo \texttt{datos.dat} y almacenar las estructuras en su mitad del \textit{buffer}, mientras que el proceso consumidor debe leerlas en la otra mitad del \textit{buffer} a medida que estén disponibles, para imprimirlas en pantalla y pasarlas a formato \texttt{.csv} (mediante las conversiones apropiadas) para luego escribirlas en un nuevo archivo \texttt{datos.csv}.\\
 
 Para administrar el \textit{buffer} de manera que no surjan condiciones de carrera y tanto el productor como el consumidor puedan trabajar en secciones críticas sin interrupciones, se van a crear dos programas que utilizan métodos distintos para este fin:\\
 
