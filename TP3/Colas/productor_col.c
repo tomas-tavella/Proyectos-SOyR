@@ -19,20 +19,31 @@ FILE *fpdat;
 #define CANTIDAD 50
 
 // Estructura de datos a escribir en el buffer
-struct datos{
+typedef struct{
     int id;
     suseconds_t tiempo;               // susesconds_t esta incluido en <sys/types.h> y devuelve el tiempo en micro segundos
-    char dato[30];
-}buffer;
+    float dato;
+}buffer_t;
 
+typedef struct{
+	long Id_Mensaje;
+	int Dato;
+}mensaje_t;
 
 int main(int argc, char *argv[]){
+
     key_t clave1, clave2, clave3, clave4;
     int IDmem1, IDmem2, IDmens1, IDmens2;
-    struct datos *memoria_comp1 = NULL;
-    struct datos *memoria_comp2 = NULL;
+
+    struct buffer_t *buffer1 = NULL;
+    struct buffer_t *buffer2 = NULL;
+
     struct timeval tiempo;
     suseconds_t tiempo_init;
+
+    float dato_val;
+
+    struct mensaje_t mens;
 
     // Obtener las claves, verificando si la pudo conseguir
     clave1 = ftok(PATH,NUMERO);
@@ -72,13 +83,13 @@ int main(int argc, char *argv[]){
 		exit(2);
 	}
 
-    IDmens1 = msgget(clave3, 0666 | IPC_CREAT);
+    IDmens1 = msgget(clave3, 0600 | IPC_CREAT);
     if(IDmens2 == -1){
 		printf("No se pudo obtener un ID de cola de mensajes\n");
 		exit(2);
 	}
 
-    IDmens2 = msgget(clave4, 0666 | IPC_CREAT);
+    IDmens2 = msgget(clave4, 0600 | IPC_CREAT);
     if(IDmens2 == -1){
 		printf("No se pudo obtener un ID de cola de mensajes\n");
 		exit(2);
@@ -86,14 +97,14 @@ int main(int argc, char *argv[]){
 
 
     // Adosar el proceso a los espacios de memoria mediante un puntero
-    memoria_comp1 = (struct datos *) shmat(IDmem1, (const void *)0,0);
-    if (memoria_comp1 == NULL){
+    buffer1 = (struct datos *) shmat(IDmem1, (const void *)0,0);
+    if (buffer1 == NULL){
 		printf("No se pudo asociar el puntero a la memoria compartida\n");
 		exit(3);
 	}
 
-    memoria_comp2 = (struct datos *) shmat(IDmem2, (const void *)0,0);
-    if (memoria_comp2 == NULL){
+    buffer2 = (struct datos *) shmat(IDmem2, (const void *)0,0);
+    if (buffer2 == NULL){
 		printf("No se pudo asociar el puntero a la memoria compartida\n");
 		exit(3);
 	}
@@ -109,25 +120,45 @@ int main(int argc, char *argv[]){
     tiempo_init = tiempo.tv_usec;
     
     // Se lee el archivo binario
-    fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
-    int memcomp_cnt=0;
-    memoria_comp1[0].id=-1;
+    fread(&(dato_val),sizeof(float),1,fpdat);
+    int i;
+    buffer1[0].id=-1;
     while(!feof(fpdat)){
+        msgrcv(IDmens1,(struct msgbuf *)&mens,sizeof(mens.Dato),2,0);
+        for(i=0;i<CANTIDAD;i++){
+            buffer1.dato=dato_val;
+            buffer1[i].id += 1;                                 // Asigno ID al dato, que se incrementa por cada dato que se lee
+            gettimeofday(&tiempo, NULL);
+            buffer1[i].tiempo = tiempo.tv_usec - tiempo_init;   // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+            fread(&(dato_val),sizeof(float),1,fpdat);
+        }
+        mens.Id_Mensaje=1;  //Tipo 1 es listo para leer, Tipo 2 es listo para escribir
+        mens.Dato=1;
+        msgsnd(IDmens1,(struct msgbuf *)&mens,sizeof(mens.Dato),0);
 
-        memoria_comp1[memcomp_cnt].id += 1;                             // Asigno ID al dato, que se incrementa por cada dato que se lee
-        gettimeofday(&tiempo, NULL);
-        memoria_comp1[memcomp_cnt].tiempo = tiempo.tv_usec - tiempo_init;      // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
-        fread(&(buffer.dato),sizeof(struct datos),1,fpdat);
-        memcomp_cnt++;
-
+        msgrcv(IDmens2,(struct msgbuf *)&mens,sizeof(mens.Dato),2,0);
+        for(i=0;i<CANTIDAD;i++){
+            buffer1.dato=dato_val;
+            buffer1[i].id += 1;                                 // Asigno ID al dato, que se incrementa por cada dato que se lee
+            gettimeofday(&tiempo, NULL);
+            buffer1[i].tiempo = tiempo.tv_usec - tiempo_init;   // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+            fread(&(dato_val),sizeof(float),1,fpdat);
+        }
+        mens.Id_Mensaje=1;  //Tipo 1 es listo para leer, Tipo 2 es listo para escribir
+        mens.Dato=1;
+        msgsnd(IDmens2,(struct msgbuf *)&mens,sizeof(mens.Dato),0);
     }
     fclose(fpdat);
 
     // Se libera la memoria compartida
-    shmdt ((const void *) memoria_comp1);
-    shmdt ((const void *) memoria_comp2);
+    shmdt ((const void *) buffer1);
+    shmdt ((const void *) buffer2);
 
 	shmctl (IDmem1, IPC_RMID, (struct shmid_ds *)NULL);
     shmctl (IDmem2, IPC_RMID, (struct shmid_ds *)NULL);
+
+    msgctl (IDmens1, IPC_RMID, (struct msqid_ds *)NULL);
+    msgctl (IDmens2, IPC_RMID, (struct msqid_ds *)NULL);
+
     return 0;
 }
