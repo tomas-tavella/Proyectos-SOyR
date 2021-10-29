@@ -135,7 +135,8 @@ int main(int argc, char *argv[]){
         op.sem_num = SEM_WRITE;
         BLOQUEAR(op);
         semop(IDsem, &op, 3);
-        if(buf_select==0){
+        // Comienzo una seccion
+        while(buf_select==0 && buf_cnt<CANTIDAD){
                 
             buf1[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
         
@@ -144,8 +145,9 @@ int main(int argc, char *argv[]){
 
             fread(&(buf1->dato),sizeof(struct datos),1,fpdat);
             buf_cnt++; id++;
-        }else{
-
+        }
+        while(buf_select==1 && buf_cnt<CANTIDAD){
+            
             buf2[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
         
             gettimeofday(&tiempo, NULL);
