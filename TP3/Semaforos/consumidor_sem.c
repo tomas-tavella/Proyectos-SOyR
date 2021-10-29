@@ -119,10 +119,20 @@ int main(int argc, char *argv[]){
         op.sem_num = SEM_READ;
         BLOQUEAR(op);
         semop(IDsem, &op, 3);
-        // Copiar datos a csv
+        while(buf_select==0 && buf_cnt<CANTIDAD){
+            fprintf(fpcsv,"%d,%ld,%f\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
+        }
+        while(buf_select==1 && buf_cnt<CANTIDAD){
+            fprintf(fpcsv,"%d,%ld,%f\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
+        }
         op.sem_num = SEM_WRITE;
         BLOQUEAR(op);
         semop(IDsem, &op, 3);
+
+        if(buf_cnt==CANTIDAD){
+            buf_cnt=0;
+            buf_select = !(buf_select);
+        }
     }
     /*
     // Espero a que el productor desbloquee el semaforo de sincronizacion para poder leer

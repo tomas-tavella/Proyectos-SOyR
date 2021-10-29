@@ -134,7 +134,7 @@ int main(int argc, char *argv[]){
         op.sem_num = SEM_WRITE;
         BLOQUEAR(op);
         semop(IDsem, &op, 3);
-        // Comienzo una seccion
+        // Comienzo una seccion critica
         while(buf_select==0 && buf_cnt<CANTIDAD){
                 
             buf1[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
@@ -142,7 +142,7 @@ int main(int argc, char *argv[]){
             gettimeofday(&tiempo, NULL);
             buf1[buf_cnt].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
 
-            fread(&(buf1->dato),sizeof(struct datos),1,fpdat);
+            fread(&(buf1->dato),sizeof(struct datos),fpdat);
             buf_cnt++; id++;
         }
         while(buf_select==1 && buf_cnt<CANTIDAD){
@@ -155,6 +155,7 @@ int main(int argc, char *argv[]){
             fread(&(buf2->dato),sizeof(struct datos),1,fpdat);
             buf_cnt++; id++;
         }
+        // Fin de seccion critica
         op.sem_num = SEM_WRITE;
         DESBLOQUEAR(op);
         semop(IDsem, &op, 3);
