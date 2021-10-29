@@ -22,8 +22,8 @@ FILE *fpdat;
 
 // Defino los distintos semaforos
 #define SEM_SYNC 0
-#define SEM_READ 1
-#define SEM_WRITE 2
+#define SEM_BUF1 1
+#define SEM_BUF2 2
 
 // Definir las operaciones para los semaforos
 #define BLOQUEAR(OP) ((OP).sem_op = -1)             // OP es una estructura
@@ -104,14 +104,13 @@ int main(int argc, char *argv[]){
     }
 
     // Inicialización de semaforos
-    op.sem_flg = 0;                 // Nunca usamos flags para los semaforos
-
-    argumento.val = 1; //Semaforo de sincronizacion inicializado en verde
+    op.sem_flg = 0;
+    argumento.val = 0; //Semaforo de sincronizacion en rojo
     semctl (IDsem, SEM_SYNC, SETVAL, argumento);
-    argumento.val = 0; //Semaforo de lectura inicializado en rojo
-    semctl (IDsem, SEM_READ, SETVAL, argumento);
-    argumento.val = 1; //Semaforo de escritura inicializado en verde
-    semctl (IDsem, SEM_WRITE, SETVAL, argumento);
+    argumento.val = 1; //Semaforo del buffer 1 en verde
+    semctl (IDsem, SEM_BUF1, SETVAL, argumento);
+    argumento.val = 1; //Semaforo del buffer 2 en verde
+    semctl (IDsem, SEM_BUF2, SETVAL, argumento);
 
     // Verificar que el archivo exista
     fpdat = fopen("datos.dat","rb");
@@ -131,46 +130,61 @@ int main(int argc, char *argv[]){
     //Ponemos un estado inicial a los semaforos
     
     while(!feof(fpdat)){
-        op.sem_num = SEM_WRITE;
+
+        // Comienzo una seccion critica (escribir buffer 1)
+        op.sem_num = SEM_BUF1;
         BLOQUEAR(op);
-        semop(IDsem, &op, 3);
-        // Comienzo una seccion critica
+        semop(IDsem, &op, 1);
         while(buf_select==0 && buf_cnt<CANTIDAD){
-                
+            printf("Hola1\n");
             buf1[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
+            printf("%d,",buf1[buf_cnt].id);
         
             gettimeofday(&tiempo, NULL);
             buf1[buf_cnt].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+            printf("%ld,",buf1[buf_cnt].tiempo);
 
-            fread(&(buf1->dato),sizeof(struct datos),fpdat);
+            fread(&(buf1->dato),sizeof(struct datos),1,fpdat);
+            printf("%f\n",buf1[buf_cnt].dato);
             buf_cnt++; id++;
         }
+        // Finalizo una seccion critica (escrbir buffer 1)
+        op.sem_num = SEM_BUF1;
+        DESBLOQUEAR(op);
+        semop(IDsem, &op, 1);
+
+        // Comienzo una seccion critica (escribir buffer 2)
+        op.sem_num = SEM_BUF2;
+        BLOQUEAR(op);
+        semop(IDsem, &op, 1);
         while(buf_select==1 && buf_cnt<CANTIDAD){
-            
+            printf("Hola2\n");
             buf2[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
+            printf("%d,",buf2[buf_cnt].id);
         
             gettimeofday(&tiempo, NULL);
             buf2[buf_cnt].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
+            printf("%ld,",buf2[buf_cnt].tiempo);
 
             fread(&(buf2->dato),sizeof(struct datos),1,fpdat);
+            printf("%f\n",buf2[buf_cnt].dato);
             buf_cnt++; id++;
         }
-        // Fin de seccion critica
-        op.sem_num = SEM_WRITE;
+        // Finalizo una seccion critica (escribir buffer 2)
+        op.sem_num = SEM_BUF2;
         DESBLOQUEAR(op);
-        semop(IDsem, &op, 3);
+        semop(IDsem, &op, 1);
 
-        if(buf_cnt==CANTIDAD){
-            buf_cnt=0;
-            buf_select = !(buf_select);
-        }
+        buf_cnt=0;
+        buf_select = !(buf_select);
+
     }
     // Se pone un ID NULL despues de llegar al ultimo elemento, para avisar al consumidor
     // que se llego al EOF
     if (buf_select == 0){
-        buf1[buf_cnt].id = NULL;
+        buf1[buf_cnt].id = -1;
     }else{
-        buf2[buf_cnt].id = NULL;
+        buf2[buf_cnt].id = -1;
     }
 
     fclose(fpdat);

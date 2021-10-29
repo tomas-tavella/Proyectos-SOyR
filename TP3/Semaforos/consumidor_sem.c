@@ -23,8 +23,8 @@ FILE *fpcsv;
 
 // Defino los distintos semaforos
 #define SEM_SYNC 0
-#define SEM_READ 1
-#define SEM_WRITE 2
+#define SEM_BUF1 1
+#define SEM_BUF2 2
 
 // Definir las operaciones para los semaforos
 #define BLOQUEAR(OP) ((OP).sem_op = -1)             // OP es una estructura
@@ -97,14 +97,14 @@ int main(int argc, char *argv[]){
 
 
     // Creación de semaforos
-    IDsem = semget(clavesem, 3, 0666 | IPC_CREAT);
+    IDsem = semget(clavesem, 3, 0666);
     if (IDsem == -1){
         printf("No se puede crear el semáforo\n");
         exit(4);
     }
 
     // Inicialización de semaforos
-    op.sem_flg = 0;                 // Nunca usamos flags para los semaforos
+    op.sem_flg = 0;
 
     // Verificar que el archivo exista
     fpcsv = fopen("datos.csv","w");
@@ -115,52 +115,49 @@ int main(int argc, char *argv[]){
 
     int buf_cnt=0;
     int buf_select=0;
-    while (buf1[buf_cnt].id != NULL || buf2[buf_cnt].id != NULL){               // Si el ID no indica EOF, sigo leyendo
-        op.sem_num = SEM_READ;
+    while (1){
+        // Comienzo seccion critica (leer buffer 1)
+        op.sem_num = SEM_BUF1;
         BLOQUEAR(op);
-        semop(IDsem, &op, 3);
-        while(buf_select==0 && buf_cnt<CANTIDAD){
+        semop(IDsem, &op, 1);
+        while(buf_select==0 && buf_cnt<CANTIDAD && buf1[buf_cnt].id != -1){
             fprintf(fpcsv,"%d,%ld,%f\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
+            buf_cnt++;
         }
-        while(buf_select==1 && buf_cnt<CANTIDAD){
-            fprintf(fpcsv,"%d,%ld,%f\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
-        }
-        op.sem_num = SEM_READ;
+        // Finalizo seccion critica (leer buffer 1)
+        op.sem_num = SEM_BUF1;
+        DESBLOQUEAR(op);
+        semop(IDsem, &op, 1);
+
+        // Comienzo seccion critica (leer buffer 2)
+        op.sem_num = SEM_BUF2;
         BLOQUEAR(op);
-        semop(IDsem, &op, 3);
+        semop(IDsem, &op, 1);
+        while(buf_select==1 && buf_cnt<CANTIDAD && buf2[buf_cnt].id != -1){
+            fprintf(fpcsv,"%d,%ld,%f\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
+            buf_cnt++;
+        }
+        // Finalizo seccion critica (leer buffer 2)
+        op.sem_num = SEM_BUF2;
+        DESBLOQUEAR(op);
+        semop(IDsem, &op, 1);
 
-        if(buf_cnt==CANTIDAD){
-            buf_cnt=0;
-            buf_select = !(buf_select);
+        if (buf1[buf_cnt-1].id == -1 || buf2[buf_cnt-1].id == -1){
+            break;
         }
-    }
-    /*
-    // Espero a que el productor desbloquee el semaforo de sincronizacion para poder leer
-    op.sem_num = SEM_SYNC;
-    BLOQUEAR(op);
-    semop(IDsem, &op, 3);
 
-    int memcomp_cnt = 0;
-    int auxBuffer=0; //Variable auxiliar para ver de que buffer leer
-    while (memcomp_cnt < 2*CANTIDAD){
-        if(auxBuffer==0){
-            fprintf(fpcsv,"%d,%ld,%f\n",buf1[memcomp_cnt].id,buf1[memcomp_cnt].tiempo,buf1[memcomp_cnt].dato);
-        }
-        else{
-            fprintf(fpcsv,"%d,%ld,%f\n",buf2[memcomp_cnt].id,buf2[memcomp_cnt].tiempo,buf2[memcomp_cnt].dato);
-        }
-        memcomp_cnt++;
-        if(memcomp_cnt==CANTIDAD){
-                memcomp_cnt=0;
-                auxBuffer = !(auxBuffer);
-        }
+        buf_cnt=0;
+        buf_select = !(buf_select);
+
     }
-    // Desbloqueo el semaforo de sincronizacion
-    op.sem_num = SEM_SYNC;
-    DESBLOQUEAR(op);
-    semop(IDsem, &op, 3);
-    */
+
     fclose(fpcsv);
+
+    shmdt ((const void *) buf1);
+    shmdt ((const void *) buf2);
+
+    shmctl (IDbuf1, IPC_RMID, (struct shmid_ds *)NULL);
+    shmctl (IDbuf2, IPC_RMID, (struct shmid_ds *)NULL);
 
     return 0;
 }
