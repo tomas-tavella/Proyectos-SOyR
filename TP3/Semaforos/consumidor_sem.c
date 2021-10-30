@@ -143,7 +143,9 @@ int main(){
             fprintf(fpcsv,"%d,%ld us,%s\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
             printf("%d,%ld us,%s\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
             buf_cnt++;
+            
         }
+        //sleep(1);
         UNBLOCK(op,SEM_BUF2);
         // Finalizo seccion critica (leer buffer 2)
         
