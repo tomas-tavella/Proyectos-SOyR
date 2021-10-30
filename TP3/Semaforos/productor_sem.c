@@ -135,15 +135,16 @@ int main(){
     
     int buf_cnt=0;
     int id=0;
-    int buf_select=0;                            //Variable auxiliar para ver en que buffer escribir
+    //int buf_select=0;                            //Variable auxiliar para ver en que buffer escribir
+    int eof_buf=0;                   // Si es 1, termino en buf1, si es 2 en buf2
     
-    while(!feof(fpdat)){
+    while(1){
 
         // Comienzo una seccion critica (escribir buffer 1)
         // Tambien esta bloqueado el sem. de sincronizacion del final del loop anterior
         BLOCK(op,SEM_BUF1);
         fgets(dato_val,17,fpdat);
-        while(buf_select==0 && buf_cnt<CANTIDAD){
+        while(/*buf_select==0 && */buf_cnt<CANTIDAD){
             
             strcpy(buf1[buf_cnt].dato,dato_val);                        // Copio los datos a la memoria compartida
 
@@ -157,8 +158,18 @@ int main(){
             printf("%s\n",buf1[buf_cnt].dato);
             fgets(dato_val,17,fpdat);
             
+            if (feof(fpdat)){           // Chequeo si se termino el archivo
+                eof_buf = 1;
+                break;                  // Entonces salgo del loop
+            }else{
+                eof_buf = 0;
+            }
+
             buf_cnt++; id++;
         }
+        if (eof_buf == 1) break;       // Salgo del loop principal, conservando la posicion en buf1 donde se encontro EOF
+
+        buf_cnt = 0;                    // Reseteo el contador
         UNBLOCK(op,SEM_BUF1);
         // Finalizo una seccion critica (escrbir buffer 1)
 
@@ -167,7 +178,7 @@ int main(){
 
         BLOCK(op,SEM_SYNC);         // Bloqueo el semaforo de sincronizacion, que es desbloqueado por el consumidor una vez que lee los datos de buf1
         fgets(dato_val,17,fpdat);
-        while(buf_select==1 && buf_cnt<CANTIDAD){
+        while(/*buf_select==1 && */buf_cnt<CANTIDAD){
             
             strcpy(buf2[buf_cnt].dato,dato_val);                        // Copio los datos a la memoria compartida
 
@@ -181,26 +192,36 @@ int main(){
             printf("%s\n",buf2[buf_cnt].dato);
             fgets(dato_val,17,fpdat);
 
+            if (feof(fpdat)){           // Chequeo si se termino el archivo
+                eof_buf = 2;
+                break;                  // Entonces salgo del loop
+            }else{
+                eof_buf = 0;
+            }
+
             buf_cnt++; id++;
         }
+        if (eof_buf == 2) break;       // Salgo del loop principal, conservando la posicion en buf2 donde se encontro EOF
+
+        buf_cnt = 0;
         //sleep(1);             // El SEM_SYNC anda como deberia probando con sleep en el productor
         UNBLOCK(op,SEM_BUF2);
         // Finalizo una seccion critica (escribir buffer 2)
 
-        buf_cnt=0;
-        buf_select = !(buf_select);
+        //buf_cnt=0;
+        //buf_select = !(buf_select);
 
         BLOCK(op,SEM_SYNC);         // Bloqueo el semaforo de sincronizacion, que es desbloqueado por el consumidor una vez que lee los datos de buf1
 
     }
     // Se pone un ID NULL despues de llegar al ultimo elemento, para avisar al consumidor
     // que se llego al EOF
-    if (buf_select == 0){
+    if (eof_buf == 1){
         buf1[buf_cnt].id = -1;
-        printf("Puso -1 en buf1\n");
-    }else{
+        printf("Pongo -1 en buf1\n");
+    }else if (eof_buf == 2){
         buf2[buf_cnt].id = -1;
-        printf("Puso -1 en buf2\n");
+        printf("Pongo -1 en buf2\n");
     }
 
 
