@@ -2,7 +2,7 @@
 
 Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolución del problema planteado:
 \begin{itemize}
-    \item Para el manejo de procesos se utilizaron:
+    \item Para la resolucion con semaforos:
     \begin{itemize}
         \item \texttt{<sys/types.h>}
         \item \texttt{<sys/wait.h>}
@@ -60,60 +60,20 @@ Donde \texttt{nombre\_señal} se corresponde con \texttt{SIGUSR1}, \texttt{SIGUS
 A continuación se muestra un pseudocódigo correspondiente con el código en C.\\
 
 \begin{lstlisting}[language=C]
+Productor:
 INICIO
-    Declaracion y asignacion de variables y funciones
-    if(Cantidad de argumentos es menor a 2){
-        Imprime error en pantalla;
-        salir;
+    Declaración y asignación de variables, macros y estructuras;
+    Se obtiene la clave de las dos memorias compartidas y el semáforo (en el caso de que no las obtenga imprime error);
+    Se llama al sistema para obtener el ID de las memorias compartidas (en el caso de que no las obtenga imprime error);
+    Se asocia el espacio de memoria compartida con un puntero(si no puede asociar imprime error);
+    Creación de semáforos (si no los puede crear imprime error);
+    Inicialización de semáforos;
+    Verificación de la existencia del archivo datos.dat;
+    Se obtiene el tiempo de UNIX inicial;
+    Inicializo variables auxiliares para los buffers;
+    Mientras(1){
+	
     }
-
-    Se convierte la cantidad de elementos de cadena de caracteres a entero;
-    if(Cantidad cantidad de elementos es mayor a 20){
-        Imprime error en pantalla;
-        salir;
-    }
-
-    Imprime en pantalla el PID del proceso;
-    Reserva el espacio para el vector de elementos de tipo double y los genera;
-    Se asignan las signals a sus respectivos handlers
-    Se imprime en pantalla que se esta a la espera de las signals y se queda esperando;
-FIN
-
-trapUSR1(){
-    if(La cantidad de hijos es menor al maximo){
-        if(Se crea un proceso y el proceso actual es un hijo){
-            Se muestran los elementos del vector separados por comas junto con la identificacion del proceso padre;
-        }
-        else{
-            Se incrementa el contador de hijos;
-        }
-    else{
-        Imprime que se llego al maximo de hijos;
-    }
-}
-
-trapUSR2(){
-    Se inicializan variables;
-    if(La cantidad de hilos es menor al maximo){
-        Se crea un hilo nuevo, llamando a thread_function;
-        Se recupera el valor de suma que devuelve thread_function;
-        Se imprime la suma en pantalla;
-    }
-    else{
-        Imprime que se llego al maximo de hilos;
-    }
-}
-
-trapTERM(){
-    Se espera a que terminen todos los hijos e hilos;
-    Se liberan los recursos de los hijos una vez que terminan;
-}
-
-thread_function(){
-    Se multiplican e imprimen los elementos del vector por si mismos, separados por espacios;
-    Se realiza la suma de todos los elementos;
-    Se devuelve la suma;
-}
 
 
 \end{lstlisting}
