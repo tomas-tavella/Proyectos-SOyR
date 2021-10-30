@@ -183,13 +183,10 @@ int main(){
             strcpy(buf2[buf_cnt].dato,dato_val);                        // Copio los datos a la memoria compartida
 
             buf2[buf_cnt].id = id;                                      // Asigno ID al dato, que se incrementa por cada dato que se lee
-            printf("%d,",buf2[buf_cnt].id);
         
             gettimeofday(&tiempo, NULL);
             buf2[buf_cnt].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
-            printf("%ld,",buf2[buf_cnt].tiempo);
 
-            printf("%s\n",buf2[buf_cnt].dato);
             fgets(dato_val,17,fpdat);
 
             // Chequeo de EOF
