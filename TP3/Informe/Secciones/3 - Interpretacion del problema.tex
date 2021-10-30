@@ -1,5 +1,5 @@
 \section{Interpretación del problema}
-Para este programa, se debe crear dos espacios de memoria compartida utilizando las funciones de la biblioteca \texttt{<sys/shm.h>}, en los que existirán las dos mitades un \textit{buffer ping-pong}.\\
+Para este programa, se debe crear dos espacios de memoria compartida utilizando las funciones de la biblioteca \texttt{<sys/shm.h>}, en los que existirán las dos mitades de un \textit{buffer ping-pong}.\\
 
 Los datos leídos del archivo \texttt{datos.dat} se almacenan en una estructura con los siguientes elementos:
 
@@ -11,11 +11,11 @@ Los datos leídos del archivo \texttt{datos.dat} se almacenan en una estructura 
 
 Como no se aclara el tamaño del \textit{buffer} en el enunciado, se elige que este tenga un tamaño total de 100 estructuras de las mencionadas previamente, dividido en dos mitades de 50 estructuras.\\
 
-El proceso productor debe leer datos del archivo \texttt{datos.dat} y almacenar las estructuras en su mitad del \textit{buffer}, mientras que el proceso consumidor debe leerlas en la otra mitad del \textit{buffer} a medida que estén disponibles, para imprimirlas en pantalla y pasarlas a formato \texttt{.csv} (mediante las conversiones apropiadas) para luego escribirlas en un nuevo archivo \texttt{datos.csv}.\\
+El proceso productor debe leer datos del archivo \texttt{datos.dat} y almacenar las estructuras en su mitad del \textit{buffer}, mientras que el proceso consumidor debe leerlas en la otra mitad del \textit{buffer} a medida que estén disponibles, para imprimirlas en pantalla y escribirlas en un nuevo archivo \texttt{datos.csv}.\\
 
 Para administrar el \textit{buffer} de manera que no surjan condiciones de carrera y tanto el productor como el consumidor puedan trabajar en secciones críticas sin interrupciones, se van a crear dos programas que utilizan métodos distintos para este fin:\\
 
 \begin{itemize}
-    \item \textbf{Semáforos y variables compartidas:} se utilizan los semáforos con las llamadas a sistema contenidas en la biblioteca \texttt{<sys/sem.h>} y variables compartidas mediante \texttt{<sys/ipc.h>}.
-    \item \textbf{Colas de mensajes:} se utilizan las colas de mensajes mediante las llamadas a sistema de la biblioteca \texttt{<sys/msg.h>}.\\
+    \item \textbf{Semáforos:} se utilizan los semáforos para sincronizar con las llamadas a sistema contenidas en la biblioteca \texttt{<sys/sem.h>} y memoria compartida mediante \texttt{<sys/ipc.h>}.
+    \item \textbf{Colas de mensajes:} se utilizan las colas de mensajes para sincronizar mediante las llamadas a sistema de la biblioteca \texttt{<sys/msg.h>}.\\
 \end{itemize}
