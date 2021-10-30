@@ -135,7 +135,6 @@ int main(){
     
     int buf_cnt=0;
     int id=0;
-    //int buf_select=0;                            //Variable auxiliar para ver en que buffer escribir
     int eof_buf=0;                   // Si es 1, termino en buf1, si es 2 en buf2
     
     while(1){
@@ -144,7 +143,7 @@ int main(){
         // Tambien esta bloqueado el sem. de sincronizacion del final del loop anterior
         BLOCK(op,SEM_BUF1);
         fgets(dato_val,17,fpdat);
-        while(/*buf_select==0 && */buf_cnt<CANTIDAD){
+        while(buf_cnt<CANTIDAD){
             
             strcpy(buf1[buf_cnt].dato,dato_val);                        // Copio los datos a la memoria compartida
 
@@ -178,7 +177,7 @@ int main(){
 
         BLOCK(op,SEM_SYNC);         // Bloqueo el semaforo de sincronizacion, que es desbloqueado por el consumidor una vez que lee los datos de buf1
         fgets(dato_val,17,fpdat);
-        while(/*buf_select==1 && */buf_cnt<CANTIDAD){
+        while(buf_cnt<CANTIDAD){
             
             strcpy(buf2[buf_cnt].dato,dato_val);                        // Copio los datos a la memoria compartida
 
@@ -208,9 +207,6 @@ int main(){
         UNBLOCK(op,SEM_BUF2);
         // Finalizo una seccion critica (escribir buffer 2)
 
-        //buf_cnt=0;
-        //buf_select = !(buf_select);
-
         BLOCK(op,SEM_SYNC);         // Bloqueo el semaforo de sincronizacion, que es desbloqueado por el consumidor una vez que lee los datos de buf1
 
     }
@@ -218,10 +214,8 @@ int main(){
     // que se llego al EOF
     if (eof_buf == 1){
         buf1[buf_cnt].id = -1;
-        printf("Pongo -1 en buf1\n");
     }else if (eof_buf == 2){
         buf2[buf_cnt].id = -1;
-        printf("Pongo -1 en buf2\n");
     }
 
 
