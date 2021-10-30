@@ -145,7 +145,7 @@ int main(){
             buf_cnt++;
             
         }
-        //sleep(1);
+        //sleep(1);             // El SEM_SYNC anda como deberia probando con sleep en el consumidor
         UNBLOCK(op,SEM_BUF2);
         // Finalizo seccion critica (leer buffer 2)
         

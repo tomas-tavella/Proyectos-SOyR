@@ -183,6 +183,7 @@ int main(){
 
             buf_cnt++; id++;
         }
+        //sleep(1);             // El SEM_SYNC anda como deberia probando con sleep en el productor
         UNBLOCK(op,SEM_BUF2);
         // Finalizo una seccion critica (escribir buffer 2)
 
