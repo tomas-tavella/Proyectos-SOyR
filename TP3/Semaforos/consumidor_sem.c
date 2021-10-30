@@ -84,24 +84,24 @@ int main(){
     IDbuf1 = shmget(clave1, CANTIDAD*sizeof(struct datos), 0666);
     if(IDbuf1 == -1){
 		printf("No se pudo obtener un ID de la primera memoria compartida\n");
-		exit(3);
+		exit(4);
 	}
     IDbuf2 = shmget(clave2, CANTIDAD*sizeof(struct datos), 0666);
     if(IDbuf2 == -1){
 		printf("No se pudo obtener un ID de la segunda memoria compartida\n");
-		exit(4);
+		exit(5);
 	}
 
     // Adosar el proceso al espacio de memoria mediante un puntero
     buf1 = (struct datos *) shmat(IDbuf1, (const void *)0,0);
     if (buf1 == NULL){
 		printf("No se pudo asociar el puntero a la primera memoria compartida\n");
-		exit(5);
+		exit(6);
 	}
     buf2 = (struct datos *) shmat(IDbuf2, (const void *)0,0);
     if (buf2 == NULL){
 		printf("No se pudo asociar el puntero a la primera memoria compartida\n");
-		exit(6);
+		exit(7);
 	}
 
 
@@ -109,7 +109,7 @@ int main(){
     IDsem = semget(clavesem, 3, 0666);
     if (IDsem == -1){
         printf("No se puede crear el semáforo\n");
-        exit(4);
+        exit(8);
     }
 
     // Inicialización de semaforos

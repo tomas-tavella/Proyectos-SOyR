@@ -157,7 +157,8 @@ int main(){
             printf("%s\n",buf1[buf_cnt].dato);
             fgets(dato_val,17,fpdat);
             
-            if (feof(fpdat)){           // Chequeo si se termino el archivo
+            // Chequeo de EOF
+            if (feof(fpdat)){           // Si se termina...
                 eof_buf = 1;
                 break;                  // Entonces salgo del loop
             }else{
@@ -191,7 +192,8 @@ int main(){
             printf("%s\n",buf2[buf_cnt].dato);
             fgets(dato_val,17,fpdat);
 
-            if (feof(fpdat)){           // Chequeo si se termino el archivo
+            // Chequeo de EOF
+            if (feof(fpdat)){           // Si se termina...
                 eof_buf = 2;
                 break;                  // Entonces salgo del loop
             }else{
