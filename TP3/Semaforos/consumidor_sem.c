@@ -126,11 +126,12 @@ int main(){
             printf("%d,%ld us,%s\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
             buf_cnt++;
         }
-        // Finalizo seccion critica (leer buffer 1)
         op.sem_num = SEM_BUF1;
         DESBLOQUEAR(op);
         semop(IDsem, &op, 1);
+        // Finalizo seccion critica (leer buffer 1)
 
+        // Desbloqueo el semaforo de sincronizacion una vez que leo todos los datos de buf1
         op.sem_num = SEM_SYNC;
         DESBLOQUEAR(op);
         semop(IDsem, &op, 1);
@@ -144,11 +145,12 @@ int main(){
             printf("%d,%ld us,%s\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
             buf_cnt++;
         }
-        // Finalizo seccion critica (leer buffer 2)
         op.sem_num = SEM_BUF2;
         DESBLOQUEAR(op);
         semop(IDsem, &op, 1);
+        // Finalizo seccion critica (leer buffer 2)
 
+        // Desbloqueo el semaforo de sincronizacion una vez que leo todos los datos de buf2
         op.sem_num = SEM_SYNC;
         DESBLOQUEAR(op);
         semop(IDsem, &op, 1);

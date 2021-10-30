@@ -132,6 +132,7 @@ int main(){
     while(!feof(fpdat)){
 
         // Comienzo una seccion critica (escribir buffer 1)
+        // Tambien esta bloqueado el sem. de sincronizacion del final del loop anterior
         op.sem_num = SEM_BUF1;
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
@@ -152,17 +153,18 @@ int main(){
             
             buf_cnt++; id++;
         }
-        // Finalizo una seccion critica (escrbir buffer 1)
         op.sem_num = SEM_BUF1;
         DESBLOQUEAR(op);
         semop(IDsem, &op, 1);
+        // Finalizo una seccion critica (escrbir buffer 1)
 
         // Comienzo una seccion critica (escribir buffer 2)
         op.sem_num = SEM_BUF2;
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
 
-        op.sem_num = SEM_SYNC;              
+        // Bloqueo el semaforo de sincronizacion, que es desbloqueado por el consumidor una vez que lee los datos de buf1
+        op.sem_num = SEM_SYNC;                        
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
         fgets(dato_val,17,fpdat);
@@ -190,7 +192,7 @@ int main(){
         buf_cnt=0;
         buf_select = !(buf_select);
 
-        // Bloqueo el semaforo de sincronizacion, que en principio lo tiene bloqueado el consumidor leyendo los datos
+        // Bloqueo el semaforo de sincronizacion, que es desbloqueado por el consumidor una vez que lee los datos de buf1
         op.sem_num = SEM_SYNC;              
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
