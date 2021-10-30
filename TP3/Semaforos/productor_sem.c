@@ -26,8 +26,16 @@ FILE *fpdat;
 #define SEM_BUF2 2
 
 // Definir las operaciones para los semaforos
-#define BLOQUEAR(OP) ((OP).sem_op = -1)             // OP es una estructura
-#define DESBLOQUEAR(OP) ((OP).sem_op = +1)
+#define BLOCK(OP,sem) {\
+    OP.sem_num = sem; \
+    OP.sem_op = -1; \
+    semop(IDsem, &OP, 1);\
+}
+#define UNBLOCK(OP,sem) {\
+    OP.sem_num = sem; \
+    OP.sem_op = +1; \
+    semop(IDsem, &OP, 1);\
+}
 
 // Crear la union necesaria para semctl (Linux-specific)
 // Union es como struct, pero solo uno de los elementos puede tomar una valor a la vez
@@ -133,9 +141,7 @@ int main(){
 
         // Comienzo una seccion critica (escribir buffer 1)
         // Tambien esta bloqueado el sem. de sincronizacion del final del loop anterior
-        op.sem_num = SEM_BUF1;
-        BLOQUEAR(op);
-        semop(IDsem, &op, 1);
+        BLOCK(op,SEM_BUF1);
         fgets(dato_val,17,fpdat);
         while(buf_select==0 && buf_cnt<CANTIDAD){
             
@@ -153,20 +159,14 @@ int main(){
             
             buf_cnt++; id++;
         }
-        op.sem_num = SEM_BUF1;
-        DESBLOQUEAR(op);
-        semop(IDsem, &op, 1);
+        UNBLOCK(op,SEM_BUF1);
         // Finalizo una seccion critica (escrbir buffer 1)
 
         // Comienzo una seccion critica (escribir buffer 2)
-        op.sem_num = SEM_BUF2;
-        BLOQUEAR(op);
-        semop(IDsem, &op, 1);
+        BLOCK(op,SEM_BUF2);
 
         // Bloqueo el semaforo de sincronizacion, que es desbloqueado por el consumidor una vez que lee los datos de buf1
-        op.sem_num = SEM_SYNC;                        
-        BLOQUEAR(op);
-        semop(IDsem, &op, 1);
+        BLOCK(op,SEM_SYNC);
         fgets(dato_val,17,fpdat);
         while(buf_select==1 && buf_cnt<CANTIDAD){
             
@@ -184,18 +184,14 @@ int main(){
 
             buf_cnt++; id++;
         }
+        UNBLOCK(op,SEM_BUF2);
         // Finalizo una seccion critica (escribir buffer 2)
-        op.sem_num = SEM_BUF2;
-        DESBLOQUEAR(op);
-        semop(IDsem, &op, 1);
 
         buf_cnt=0;
         buf_select = !(buf_select);
 
         // Bloqueo el semaforo de sincronizacion, que es desbloqueado por el consumidor una vez que lee los datos de buf1
-        op.sem_num = SEM_SYNC;              
-        BLOQUEAR(op);
-        semop(IDsem, &op, 1);
+        BLOCK(op,SEM_SYNC);
 
     }
     // Se pone un ID NULL despues de llegar al ultimo elemento, para avisar al consumidor

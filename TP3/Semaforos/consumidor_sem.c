@@ -27,8 +27,16 @@ FILE *fpcsv;
 #define SEM_BUF2 2
 
 // Definir las operaciones para los semaforos
-#define BLOQUEAR(OP) ((OP).sem_op = -1)             // OP es una estructura
-#define DESBLOQUEAR(OP) ((OP).sem_op = +1)
+#define BLOCK(OP,sem) {\
+    OP.sem_num = sem; \
+    OP.sem_op = -1; \
+    semop(IDsem, &OP, 1);\
+}
+#define UNBLOCK(OP,sem) {\
+    OP.sem_num = sem; \
+    OP.sem_op = +1; \
+    semop(IDsem, &OP, 1);\
+}
 
 // Crear la union necesaria para semctl (Linux-specific)
 // Union es como struct, pero solo uno de los elementos puede tomar una valor a la vez
@@ -118,43 +126,30 @@ int main(){
     int buf_select=0;
     while (1){
         // Comienzo seccion critica (leer buffer 1)
-        op.sem_num = SEM_BUF1;
-        BLOQUEAR(op);
-        semop(IDsem, &op, 1);
+        BLOCK(op,SEM_BUF1);
         while(buf_select==0 && buf_cnt < CANTIDAD && buf1[buf_cnt].id != -1){
             fprintf(fpcsv,"%d,%ld us,%s\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
             printf("%d,%ld us,%s\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
             buf_cnt++;
         }
-        op.sem_num = SEM_BUF1;
-        DESBLOQUEAR(op);
-        semop(IDsem, &op, 1);
+        UNBLOCK(op,SEM_BUF1);
         // Finalizo seccion critica (leer buffer 1)
 
         // Desbloqueo el semaforo de sincronizacion una vez que leo todos los datos de buf1
-        op.sem_num = SEM_SYNC;
-        DESBLOQUEAR(op);
-        semop(IDsem, &op, 1);
+        UNBLOCK(op,SEM_SYNC);
 
         // Comienzo seccion critica (leer buffer 2)
-        op.sem_num = SEM_BUF2;
-        BLOQUEAR(op);
-        semop(IDsem, &op, 1);
+        BLOCK(op,SEM_BUF2);
         while(buf_select == 1 && buf_cnt < CANTIDAD && buf2[buf_cnt].id != -1){
             fprintf(fpcsv,"%d,%ld us,%s\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
             printf("%d,%ld us,%s\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
             buf_cnt++;
         }
-        op.sem_num = SEM_BUF2;
-        DESBLOQUEAR(op);
-        semop(IDsem, &op, 1);
+        UNBLOCK(op,SEM_BUF2);
         // Finalizo seccion critica (leer buffer 2)
 
         // Desbloqueo el semaforo de sincronizacion una vez que leo todos los datos de buf2
-        op.sem_num = SEM_SYNC;
-        DESBLOQUEAR(op);
-        semop(IDsem, &op, 1);
-
+        UNBLOCK(op,SEM_SYNC);
 
         if (buf1[buf_cnt-1].id == -1 || buf2[buf_cnt-1].id == -1){
             break;
