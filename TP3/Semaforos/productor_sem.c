@@ -214,12 +214,12 @@ int main(){
     }
     // Se pone un ID NULL despues de llegar al ultimo elemento, para avisar al consumidor
     // que se llego al EOF
-    if (eof_flag == 1){
-        buf1[buf_cnt].id = -1;
-    }else if (eof_flag == 2){
-        buf2[buf_cnt].id = -1;
+    switch (eof_flag){
+        case 1 :
+            buf1[buf_cnt].id = -1;
+        case 2 :
+            buf2[buf_cnt].id = -1;
     }
-
 
     fclose(fpdat);
 
