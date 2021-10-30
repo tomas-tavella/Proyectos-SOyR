@@ -165,8 +165,7 @@ int main(){
         // Comienzo una seccion critica (escribir buffer 2)
         BLOCK(op,SEM_BUF2);
 
-        // Bloqueo el semaforo de sincronizacion, que es desbloqueado por el consumidor una vez que lee los datos de buf1
-        BLOCK(op,SEM_SYNC);
+        BLOCK(op,SEM_SYNC);         // Bloqueo el semaforo de sincronizacion, que es desbloqueado por el consumidor una vez que lee los datos de buf1
         fgets(dato_val,17,fpdat);
         while(buf_select==1 && buf_cnt<CANTIDAD){
             
@@ -190,8 +189,7 @@ int main(){
         buf_cnt=0;
         buf_select = !(buf_select);
 
-        // Bloqueo el semaforo de sincronizacion, que es desbloqueado por el consumidor una vez que lee los datos de buf1
-        BLOCK(op,SEM_SYNC);
+        BLOCK(op,SEM_SYNC);         // Bloqueo el semaforo de sincronizacion, que es desbloqueado por el consumidor una vez que lee los datos de buf1
 
     }
     // Se pone un ID NULL despues de llegar al ultimo elemento, para avisar al consumidor

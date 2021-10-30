@@ -135,8 +135,7 @@ int main(){
         UNBLOCK(op,SEM_BUF1);
         // Finalizo seccion critica (leer buffer 1)
 
-        // Desbloqueo el semaforo de sincronizacion una vez que leo todos los datos de buf1
-        UNBLOCK(op,SEM_SYNC);
+        UNBLOCK(op,SEM_SYNC);       // Desbloqueo el semaforo de sincronizacion una vez que leo todos los datos de buf1
 
         // Comienzo seccion critica (leer buffer 2)
         BLOCK(op,SEM_BUF2);
@@ -147,9 +146,8 @@ int main(){
         }
         UNBLOCK(op,SEM_BUF2);
         // Finalizo seccion critica (leer buffer 2)
-
-        // Desbloqueo el semaforo de sincronizacion una vez que leo todos los datos de buf2
-        UNBLOCK(op,SEM_SYNC);
+        
+        UNBLOCK(op,SEM_SYNC);       // Desbloqueo el semaforo de sincronizacion una vez que leo todos los datos de buf2
 
         if (buf1[buf_cnt-1].id == -1 || buf2[buf_cnt-1].id == -1){
             break;
