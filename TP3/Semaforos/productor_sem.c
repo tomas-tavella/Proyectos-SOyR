@@ -42,8 +42,8 @@ union semun {
 struct datos{
     int id;
     suseconds_t tiempo;               // susesconds_t esta incluido en <sys/types.h> y devuelve el tiempo en micro segundos
-    float dato;
-}aux_struct;
+    char dato[17];
+};
 
 
 int main(){
@@ -54,6 +54,7 @@ int main(){
     union semun argumento;
     struct timeval tiempo, tiempo_init;
     struct sembuf op;
+    char dato_val[17];
 
     // Obtener la clave, verificando si la pudo conseguir
     clave1 = ftok(PATH,NUMERO1);
@@ -127,7 +128,6 @@ int main(){
     int buf_cnt=0;
     int id=0;
     int buf_select=0;                            //Variable auxiliar para ver en que buffer escribir
-    fread(&(buf1[buf_cnt].dato),sizeof(struct datos),1,fpdat);
     
     while(!feof(fpdat)){
 
@@ -135,17 +135,21 @@ int main(){
         op.sem_num = SEM_BUF1;
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
+        fgets(dato_val,17,fpdat);
         while(buf_select==0 && buf_cnt<CANTIDAD){
-            //printf("Hola1\n");
-            buf1[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
+            
+            strcpy(buf1[buf_cnt].dato,dato_val);                        // Copio los datos a la memoria compartida
+
+            buf1[buf_cnt].id = id;                                      // Asigno ID al dato, que se incrementa por cada dato que se lee
             printf("%d,",buf1[buf_cnt].id);
         
             gettimeofday(&tiempo, NULL);
             buf1[buf_cnt].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
             printf("%ld,",buf1[buf_cnt].tiempo);
 
-            fread(&(buf1[buf_cnt].dato),sizeof(struct datos),1,fpdat);
-            printf("%f\n",buf1[buf_cnt].dato);
+            printf("%s\n",buf1[buf_cnt].dato);
+            fgets(dato_val,17,fpdat);
+            
             buf_cnt++; id++;
         }
         // Finalizo una seccion critica (escrbir buffer 1)
@@ -161,17 +165,21 @@ int main(){
         op.sem_num = SEM_SYNC;              
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
+        fgets(dato_val,17,fpdat);
         while(buf_select==1 && buf_cnt<CANTIDAD){
-            //printf("Hola2\n");
-            buf2[buf_cnt].id = id;                                     // Asigno ID al dato, que se incrementa por cada dato que se lee
+            
+            strcpy(buf2[buf_cnt].dato,dato_val);                        // Copio los datos a la memoria compartida
+
+            buf2[buf_cnt].id = id;                                      // Asigno ID al dato, que se incrementa por cada dato que se lee
             printf("%d,",buf2[buf_cnt].id);
         
             gettimeofday(&tiempo, NULL);
             buf2[buf_cnt].tiempo = 1000000*(tiempo.tv_sec - tiempo_init.tv_sec) + (tiempo.tv_usec - tiempo_init.tv_usec);       // Le resto el tiempo inicial al tiempo actual para obtener el timestamp
             printf("%ld,",buf2[buf_cnt].tiempo);
 
-            fread(&(buf2[buf_cnt].dato),sizeof(struct datos),1,fpdat);
-            printf("%f\n",buf2[buf_cnt].dato);
+            printf("%s\n",buf2[buf_cnt].dato);
+            fgets(dato_val,17,fpdat);
+
             buf_cnt++; id++;
         }
         // Finalizo una seccion critica (escribir buffer 2)

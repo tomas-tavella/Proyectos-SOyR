@@ -43,8 +43,8 @@ union semun {
 struct datos{
     int id;
     suseconds_t tiempo;               // susesconds_t esta incluido en <sys/types.h> y devuelve el tiempo en micro segundos
-    float dato;
-}buffer;
+    char dato[17];
+};
 
 int main(){
     key_t clave1, clave2, clavesem;
@@ -53,6 +53,7 @@ int main(){
     struct datos *buf2 = NULL;
     union semun argumento;
     struct sembuf op;
+    char dato_val[17];
 
     // Obtener la clave, verificando si la pudo conseguir
     clave1 = ftok(PATH,NUMERO1);
@@ -121,8 +122,8 @@ int main(){
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
         while(buf_select==0 && buf_cnt < CANTIDAD && buf1[buf_cnt].id != -1){
-            fprintf(fpcsv,"%d,%ld us,%f\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
-            printf("%d,%ld us,%f\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
+            fprintf(fpcsv,"%d,%ld us,%s\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
+            printf("%d,%ld us,%s\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
             buf_cnt++;
         }
         // Finalizo seccion critica (leer buffer 1)
@@ -139,8 +140,8 @@ int main(){
         BLOQUEAR(op);
         semop(IDsem, &op, 1);
         while(buf_select == 1 && buf_cnt < CANTIDAD && buf2[buf_cnt].id != -1){
-            fprintf(fpcsv,"%d,%ld us,%f\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
-            printf("%d,%ld us,%f\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
+            fprintf(fpcsv,"%d,%ld us,%s\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
+            printf("%d,%ld us,%s\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
             buf_cnt++;
         }
         // Finalizo seccion critica (leer buffer 2)
