@@ -2,13 +2,20 @@
 
 Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolución del problema planteado:
 \begin{itemize}
-    \item Para la resolucion con semaforos:
+    \item Para ambas implementaciones:
     \begin{itemize}
-        \item \texttt{<sys/types.h>}
-        \item \texttt{<sys/wait.h>}
+        \item \texttt{<sys/ipc.h>} para la comunicación entre procesos.
+        \item \texttt{<sys/time.h>} para obtener el tiempo de la \textit{timestamp}.
+        \item \texttt{<sys/shm.h>} para la memoria compartida.
     \end{itemize}
-    \item \texttt{<signal.h>} para el manejo de señales.
-    \item \texttt{<pthread.h>} para el manejo de \textit{threads} o hilos.\\
+    \item Para la resolución con semáforos:
+    \begin{itemize}
+        \item \texttt{<sys/sem.h>}
+    \end{itemize}
+    \item Para la resolución por colas de mensajes:
+    \begin{itemize}
+        \item \texttt{<sys/msg.h>}
+    \end{itemize}
 \end{itemize}
 
 En el \texttt{main()} del programa, se utiliza la función \texttt{malloc()} (definida en las bibliotecas estándar) para reservar el espacio de memoria para el vector de N elementos.\\
