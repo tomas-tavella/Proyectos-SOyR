@@ -135,7 +135,7 @@ int main(){
     
     int buf_cnt=0;
     int id=0;
-    int eof_buf=0;                   // Si es 1, termino en buf1, si es 2 en buf2
+    int eof_flag=0;                   // Si es 1, termino en buf1, si es 2 en buf2
     
     while(1){
 
@@ -159,15 +159,15 @@ int main(){
             
             // Chequeo de EOF
             if (feof(fpdat)){           // Si se termina...
-                eof_buf = 1;
+                eof_flag = 1;
                 break;                  // Entonces salgo del loop
             }else{
-                eof_buf = 0;
+                eof_flag = 0;
             }
 
             buf_cnt++; id++;
         }
-        if (eof_buf == 1) break;       // Salgo del loop principal, conservando la posicion en buf1 donde se encontro EOF
+        if (eof_flag == 1) break;       // Salgo del loop principal, conservando la posicion en buf1 donde se encontro EOF
 
         buf_cnt = 0;                    // Reseteo el contador
         UNBLOCK(op,SEM_BUF1);
@@ -194,15 +194,15 @@ int main(){
 
             // Chequeo de EOF
             if (feof(fpdat)){           // Si se termina...
-                eof_buf = 2;
+                eof_flag = 2;
                 break;                  // Entonces salgo del loop
             }else{
-                eof_buf = 0;
+                eof_flag = 0;
             }
 
             buf_cnt++; id++;
         }
-        if (eof_buf == 2) break;       // Salgo del loop principal, conservando la posicion en buf2 donde se encontro EOF
+        if (eof_flag == 2) break;       // Salgo del loop principal, conservando la posicion en buf2 donde se encontro EOF
 
         buf_cnt = 0;
         //sleep(1);             // El SEM_SYNC anda como deberia probando con sleep en el productor
@@ -214,9 +214,9 @@ int main(){
     }
     // Se pone un ID NULL despues de llegar al ultimo elemento, para avisar al consumidor
     // que se llego al EOF
-    if (eof_buf == 1){
+    if (eof_flag == 1){
         buf1[buf_cnt].id = -1;
-    }else if (eof_buf == 2){
+    }else if (eof_flag == 2){
         buf2[buf_cnt].id = -1;
     }
 
