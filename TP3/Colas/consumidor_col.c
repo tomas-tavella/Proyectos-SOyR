@@ -126,8 +126,8 @@ int main(int argc, char *argv[]){
         if (mens.Dato==-1) break;
         for(i=0;i<CANTIDAD;i++){
             aux=buffer1[i];
-            printf("%d,%ld us,%s\n",aux.id,aux.tiempo,aux.dato);
-            fprintf(fpcsv,"%d,%ld us,%s\n",aux.id,aux.tiempo,aux.dato);
+            printf("%d,%ld us,%lf\n",aux.id,aux.tiempo,atof(aux.dato));
+            fprintf(fpcsv,"%d,%ld us,%lf\n",aux.id,aux.tiempo,atof(aux.dato));
         }
         mens.Id_Mensaje=2;  //Tipo 1 es listo para leer, Tipo 2 es listo para escribir
         mens.Dato=1;

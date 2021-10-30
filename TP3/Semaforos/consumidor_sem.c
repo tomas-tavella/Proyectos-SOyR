@@ -126,8 +126,8 @@ int main(){
         // Comienzo seccion critica (leer buffer 1)
         BLOCK(op,SEM_BUF1);
         while(buf_cnt < CANTIDAD && buf1[buf_cnt].id != -1){
-            fprintf(fpcsv,"%d,%ld us,%s\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
-            printf("%d,%ld us,%s\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,buf1[buf_cnt].dato);
+            fprintf(fpcsv,"%d,%ld us,%lf\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,atof(buf1[buf_cnt].dato));
+            printf("%d,%ld us,%lf\n",buf1[buf_cnt].id,buf1[buf_cnt].tiempo,atof(buf1[buf_cnt].dato));
             buf_cnt++;
 
             if (buf1[buf_cnt].id == -1){
@@ -147,8 +147,8 @@ int main(){
         // Comienzo seccion critica (leer buffer 2)
         BLOCK(op,SEM_BUF2);
         while(buf_cnt < CANTIDAD && buf2[buf_cnt].id != -1){
-            fprintf(fpcsv,"%d,%ld us,%s\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
-            printf("%d,%ld us,%s\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,buf2[buf_cnt].dato);
+            fprintf(fpcsv,"%d,%ld us,%lf\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,atof(buf2[buf_cnt].dato));
+            printf("%d,%ld us,%lf\n",buf2[buf_cnt].id,buf2[buf_cnt].tiempo,atof(buf2[buf_cnt].dato));
             buf_cnt++;
 
             if (buf2[buf_cnt].id == -1){
