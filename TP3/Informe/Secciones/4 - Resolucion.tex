@@ -4,17 +4,17 @@ Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolu
 \begin{itemize}
     \item Para ambas implementaciones:
     \begin{itemize}
-        \item \texttt{<sys/ipc.h>} para la comunicación entre procesos.
-        \item \texttt{<sys/time.h>} para obtener el tiempo de la \textit{timestamp}.
-        \item \texttt{<sys/shm.h>} para la memoria compartida.
+        \item \texttt{<sys/ipc.h>}: biblioteca de \textit{System V} para la comunicación entre procesos.
+        \item \texttt{<sys/time.h>}: biblioteca de \textit{System V} para obtener el tiempo de la \textit{timestamp}.
+        \item \texttt{<sys/shm.h>}: biblioteca de \textit{System V} para la memoria compartida.
     \end{itemize}
     \item Para la resolución con semáforos:
     \begin{itemize}
-        \item \texttt{<sys/sem.h>}
+        \item \texttt{<sys/sem.h>}: implementación de \textit{System V} para semáforos.
     \end{itemize}
     \item Para la resolución por colas de mensajes:
     \begin{itemize}
-        \item \texttt{<sys/msg.h>}
+        \item \texttt{<sys/msg.h>}: implementación de \textit{System V} para colas de mensajes.
     \end{itemize}
 \end{itemize}
 
@@ -27,7 +27,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 \begin{lstlisting}[language=C]          % No usar tildes en el pseudocódigo
     Productor:
     INICIO
-        Declaracion y asignacin de variables, macros y estructuras;
+        Declaracion y asignacion de variables, macros y estructuras;
         Se obtiene la clave de las dos memorias compartidas y el semaforo (en el caso de que no las obtenga imprime error);
         Se llama al sistema para obtener el ID de las memorias compartidas (en el caso de que no las obtenga imprime error);
         Se asocia el espacio de memoria compartida con un puntero(si no puede asociar imprime error);
