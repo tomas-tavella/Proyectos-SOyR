@@ -231,5 +231,6 @@ int main(){
     shmctl (IDbuf2, IPC_RMID, (struct shmid_ds *)NULL);
 
     semctl (IDsem, SEM_SYNC, IPC_RMID);         // Remuevo los semaforos
+    
     return 0;
 }
