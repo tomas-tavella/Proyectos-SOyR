@@ -66,16 +66,16 @@ Donde \texttt{nombre\_señal} se corresponde con \texttt{SIGUSR1}, \texttt{SIGUS
 
 A continuación se muestra un pseudocódigo correspondiente con el código en C.\\
 
-\begin{lstlisting}[language=C]
+\begin{lstlisting}[language=C]          % No usar tildes en el pseudocódigo
 Productor:
 INICIO
-    Declaración y asignación de variables, macros y estructuras;
-    Se obtiene la clave de las dos memorias compartidas y el semáforo (en el caso de que no las obtenga imprime error);
+    Declaracion y asignacin de variables, macros y estructuras;
+    Se obtiene la clave de las dos memorias compartidas y el semaforo (en el caso de que no las obtenga imprime error);
     Se llama al sistema para obtener el ID de las memorias compartidas (en el caso de que no las obtenga imprime error);
     Se asocia el espacio de memoria compartida con un puntero(si no puede asociar imprime error);
-    Creación de semáforos (si no los puede crear imprime error);
-    Inicialización de semáforos;
-    Verificación de la existencia del archivo datos.dat;
+    Creacion de semaforos (si no los puede crear imprime error);
+    Inicializacion de semaforos;
+    Verificacion de la existencia del archivo datos.dat;
     Se obtiene el tiempo de UNIX inicial;
     Inicializo variables auxiliares para los buffers;
     Mientras(1){
