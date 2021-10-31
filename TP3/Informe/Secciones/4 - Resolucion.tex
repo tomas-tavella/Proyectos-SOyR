@@ -47,11 +47,64 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 \subsection{Realización con colas de mensajes}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\\
+La implementación por cola de mensajes emplea dos colas con dos tipos de mensajes. Se utiliza una \textit{queue} por buffer, y los tipos de mensaje indican si el buffer está listo para ser escrito, o para ser leído. El productor siempre envía mensajes de un tipo, y el consumidor envía mensajes del otro.
 
 \subsubsection{Pseudocódigo}
 
-Acá el pseudocódigo de la realización con colas de mensajes.\\
+\begin{lstlisting}[language=C]          % No usar tildes en el pseudocódigo
+    Productor:
+    INICIO
+        Declarar y asignar variables, macros y estructuras;
+        Obtener la clave de las dos memorias compartidas y colas de mensaje (en el caso de que no las obtenga imprime error);
+        Llamar al sistema para obtener el ID de las memorias compartidas (en el caso de que no las obtenga imprime error);
+        Asociar el espacio de memoria compartida con un puntero(si no puede asociar imprime error);
+        Crear colas de mensajes (si no los puede crear imprime error);
+        Verificar de la existencia del archivo datos.dat;
+        Obtener el tiempo de UNIX inicial;
+        Inicializar variables auxiliares para los buffers;
+        Mientras(no es el fin del archivo){
+            Esperar mensaje que se puede escribir el buffer 1;
+            Llenar buffer con datos;
+            Preparar mensaje de "listo para leer";
+            Enviar mensaje en cola 1;
+
+            Esperar mensaje que se puede escribir el buffer 2;
+            Llenar buffer con datos;
+            Preparar mensaje de "listo para leer";
+            Enviar mensaje en cola 2;
+        }
+        Cerrar archivo;
+        Liberar memoria compartida;
+    FIN
+
+    Consumidor:
+    INICIO
+        Declarar y asignar variables, macros y estructuras;
+        Obtener la clave de las dos memorias compartidas y colas de mensaje (en el caso de que no las obtenga imprime error);
+        Llamar al sistema para obtener el ID de las memorias compartidas (en el caso de que no las obtenga imprime error);
+        Asociar el espacio de memoria compartida con un puntero(si no puede asociar imprime error);
+        Crear colas de mensajes (si no los puede crear imprime error);
+        Enviar mensaje de "ambos buffers listos para escribir";
+        Abrir archivo de destino en modo escritura;
+        Mientras(1){
+            Esperar mensaje que se puede leer el buffer 1;
+            Si el mensaje indicaba fin del archivo, salir;
+            Leer buffer, imprimir en pantalla y en archivo de destino;
+            Preparar mensaje de "listo para escribir";
+            Enviar mensaje en cola 1;
+
+            Esperar mensaje que se puede leer el buffer 2;
+            Si el mensaje indicaba fin del archivo, salir;
+            Leer buffer, imprimir en pantalla y en archivo de destino;
+            Preparar mensaje de "listo para escribir";
+            Enviar mensaje en cola 2;
+        }
+        Cerrar archivo;
+        Liberar memoria compartida;
+        Liberar colas de mensajes;
+    FIN
+    
+\end{lstlisting}
 
 \subsection{Compilación y ejecución de los programas}
 
@@ -72,3 +125,5 @@ Con lo que se obtienen cuatro archivos binarios ejecutables, los cuales, estando
     \texttt{\$ ./prod\_col}\\
     \texttt{\$ ./cons\_col}\\
 \end{center}
+
+Es importante ejecutar los productores antes que los consumidores, para cualquiera de las dos implementaciones, por la forma en que se maneja la sincronización.
