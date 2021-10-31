@@ -53,6 +53,22 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 Acá el pseudocódigo de la realización con colas de mensajes.\\
 
-\subsection{Compilación de los programas}
+\subsection{Compilación y ejecución de los programas}
 
+Con el código completo, para compilar los programas a un archivo binario ejecutable se llama al comando \texttt{gcc} (\textit{GNU C Compiler}):
 
+\begin{center}
+    \texttt{\$ gcc productor\_sem.c -o prod\_sem}\\
+    \texttt{\$ gcc consumidor\_sem.c -o cons\_sem}\\
+    \texttt{\$ gcc productor\_col.c -o prod\_col}\\
+    \texttt{\$ gcc consumidor\_col.c -o cons\_col}\\
+\end{center}
+
+Con lo que se obtienen cuatro archivos binarios ejecutables, los cuales, estando situados en la carpeta en la que se encuentran, se ejecutan desde la terminal de la siguiente manera:
+
+\begin{center}
+    \texttt{\$ ./prod\_sem}\\
+    \texttt{\$ ./cons\_sem}\\
+    \texttt{\$ ./prod\_col}\\
+    \texttt{\$ ./cons\_col}\\
+\end{center}
