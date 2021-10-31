@@ -5,7 +5,7 @@ Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolu
     \item Para ambas implementaciones:
     \begin{itemize}
         \item \texttt{<sys/ipc.h>}: biblioteca de \textit{System V} para la comunicación entre procesos.
-        \item \texttt{<sys/time.h>}: biblioteca de \textit{System V} para obtener el tiempo de la \textit{timestamp}.
+        \item \texttt{<sys/time.h>}: biblioteca para obtener el tiempo de la \textit{timestamp}.
         \item \texttt{<sys/shm.h>}: biblioteca de \textit{System V} para la memoria compartida.
     \end{itemize}
     \item Para la resolución con semáforos:
@@ -14,13 +14,15 @@ Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolu
     \end{itemize}
     \item Para la resolución por colas de mensajes:
     \begin{itemize}
-        \item \texttt{<sys/msg.h>}: implementación de \textit{System V} para colas de mensajes.
+        \item \texttt{<sys/msg.h>}: implementación de \textit{System V} para colas de mensajes.\\
     \end{itemize}
 \end{itemize}
 
+En ambos casos se eligió reservar dos segmentos de memoria compartida, uno para cada mitad del \textit{buffer}, con capacidad para almacenar 100 estructuras de datos en total. Esto se logró mediante la función \texttt{shmget()} (contenida en la biblioteca \texttt{<sys/shm.h>}), a la cual se le pasan como argumentos el tamaño del segmento y una clave única (obtenida con la función \texttt{ftok()}) que debe ser la misma para el productor y el consumidor, para así poder compartir los segmentos creados.\\
+
 \subsection{Realización con semáforos}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\\
 
 \subsubsection{Pseudocódigo}
 
@@ -45,57 +47,12 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 \subsection{Realización con colas de mensajes}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\\
 
 \subsubsection{Pseudocódigo}
 
-Acá el pseudocódigo de la realización con colas de mensajes.
+Acá el pseudocódigo de la realización con colas de mensajes.\\
 
-% En el \texttt{main()} del programa, se utiliza la función \texttt{malloc()} (definida en las bibliotecas estándar) para reservar el espacio de memoria para el vector de N elementos.\\
+\subsection{Compilación de los programas}
 
-% Para el manejo de señales, se utiliza la función \texttt{signal()} (parte de \texttt{<signal.h>}), que se encarga de instalar \textit{signal handlers} para las distintas señales que el programa va a recibir. Esta función toma dos parámetros: el número o nombre de la señal a manejar; y la función que se va a encargar del manejo de la señal.\\ 
-
-% Para el manejo de procesos padres e hijos, fueron de utilidad las siguientes funciones (parte de las bibliotecas \texttt{<unistd.h>} y \texttt{<sys/wait.h>}):
-
-% \begin{itemize}
-%     \item \textbf{\texttt{fork()}}: Genera una copia de la imagen del proceso padre y se la asigna al proceso hijo, al cual se le asignan nuevos identificadores. Para distinguir al padre del hijo, esta función devuelve 0 al ser llamada en el hijo y el PID del hijo al ser llamada en el padre. 
-%     \item \texttt{getpid()}: Devuelve el PID del proceso que hace la llamada al sistema.
-%     \item \texttt{getppid()}: Devuelve el PID del proceso padre del proceso que hace la llamada al sistema.
-%     \item \texttt{waitpid()}: Suspende la ejecución del proceso que llama a la función hasta que el hijo con el PID especificado termine.
-%     \item \texttt{wait()}: Suspende la ejecución del proceso que llama a la función hasta que algún proceso hijo termine.\\
-% \end{itemize}
-
-% En tanto al manejo de los \textit{threads}, se utilizaron las siguientes funciones:
-
-% \begin{itemize}
-%     \item \texttt{pthread\_create()}: Crea un nuevo \textit{thread}, le asigna la función que este va a ejecutar y le pasa los argumentos.
-%     \item \texttt{pthread\_exit()}: Finaliza el \textit{thread} en el que se llama, y devuelve un valor que se le especifica a la función que creó el \textit{thread}.
-%     \item \texttt{pthread\_join()}: Detiene el thread en ejecución hasta que otro hilo termina, y recupera el valor que este devolvió.\\
-% \end{itemize}
-
-% Para compilar el código a un archivo binario ejecutable, se debe utilizar el comando \texttt{gcc} (\textit{GNU C Compiler}) en la terminal, agregando el argumento \texttt{-pthread} para permitir la utilización de \textit{threads}:
-
-% \begin{center}
-%     \texttt{\$ gcc entregable2.c -o vector\_procesos\_hilos -pthread}
-% \end{center}
-
-% Donde \texttt{vector\_procesos\_hilos} es el archivo compilado ejecutable. Para correrlo, se debe llamar al archivo seguido del número de elementos que se quiera el vector:
-
-% \begin{center}
-%     \texttt{\$ ./vector\_procesos\_hilos <N>}
-% \end{center}
-
-% Si no se pasa la cantidad de argumentos requerida, el programa sugiere un ejemplo con la sintaxis correcta.\\
-
-% Para el envío de señales al programa, se debe utilizar el comando \texttt{kill}. Una forma más amigable con el usuario para no tener que recordar el número de la señal ni el PID del proceso es utilizar los siguientes argumentos:
-
-% \begin{center}
-%     \texttt{\$ kill -s <nombre\_señal>\ \$(pidof vector\_procesos\_hilos)}
-% \end{center}
-
-% Donde \texttt{nombre\_señal} se corresponde con \texttt{SIGUSR1}, \texttt{SIGUSR2} o \texttt{SIGTERM}, y el comando \texttt{pidof} devuelve el PID del programa en ejecución sin necesidad de buscarlo manualmente.\\
-
-% \subsection{Pseudocódigo}
-
-% A continuación se muestra un pseudocódigo correspondiente con el código en C.\\
 
