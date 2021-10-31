@@ -10,6 +10,7 @@
 *.out
 *.run.xml
 *.synctex.gz
+*.synctex(busy)
 *.toc
 
 # Ignoro los binarios compilados de los codigos
