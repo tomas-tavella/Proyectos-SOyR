@@ -29,18 +29,107 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 \begin{lstlisting}[language=C]          % No usar tildes en el pseudocódigo
     Productor:
     INICIO
-        Declaracion y asignacion de variables, macros y estructuras;
+        Declaración y asignacion de variables, macros y estructuras;
         Se obtiene la clave de las dos memorias compartidas y el semaforo (en el caso de que no las obtenga imprime error);
         Se llama al sistema para obtener el ID de las memorias compartidas (en el caso de que no las obtenga imprime error);
         Se asocia el espacio de memoria compartida con un puntero(si no puede asociar imprime error);
-        Creacion de semaforos (si no los puede crear imprime error);
+        Creación de semaforos (si no los puede crear imprime error);
         Inicializacion de semaforos;
-        Verificacion de la existencia del archivo datos.dat;
+        Verificación de la existencia del archivo datos.dat;
         Se obtiene el tiempo de UNIX inicial;
         Inicializo variables auxiliares para los buffers;
         Mientras(1){
-        
+	        Se bloquea el semaforo del Buffer1;
+	        Se lee una linea del archivo .dat;
+	        Mientras(No se llegue al fin del buffer1){
+		        Se copian los datos en el buffer1;
+		        Se lee una linea del archivo .dat;
+		        Si(Se llego al final del archivo){
+			        Se sale del bucle;
+                }
+                Sino{
+    	            Sigue en el bucle;
+                }
+                Se incrementan la variable para recorrer el buffer y la del id;
+	        }
+	        Si(Se llego al final del archivo){
+	            Se sale del bucle;
+            }
+            Se resetea la variable que recorre el buffer;
+            Se desbloquea el semaforo del Buffer1;
+            Se bloquea el semaforo del Buffer2;
+            Se bloquea el semaforo de sincronizacion;
+            Se lee una linea del archivo.dat;
+            Mientras(No se llegue al fin del buffer2){
+		        Se copian los datos en el buffer2;
+		        Se lee una linea del archivo .dat;
+		        Si(Se llego al final del archivo){
+			        Se sale del bucle;
+                }
+                Sino{
+                    Sigue en el bucle;
+                }
+                Se incrementan la variable para recorrer el buffer y la del ID;
+            }
+            Si(Se llego al final del archivo){
+        	    Se sale del bucle;
+            }
+            Se resetea la variable que recorre el buffer;
+            Se desbloquea el semaforo del Buffer2;
+            Se bloquea el semaforo de sincronizacion;
         }
+        Se pone un ID Null despues de llegar al ultimo elemento para avisarle al consumidor que se llego al EOF;
+        Se cierra el archivo .dat;
+        Se libera la memoria compartida y se remueven los semaforos;
+    FIN
+
+    Consumidor:
+    INICIO
+        Declaración y asignacion de variables, macros y estructuras;
+        Se obtiene la clave de las dos memorias compartidas y el semaforo (en el caso de que no las obtenga imprime error);
+        Se llama al sistema para obtener el ID de las memorias compartidas (en el caso de que no las obtenga imprime error);
+        Se asocia el espacio de memoria compartida con un puntero(si no puede asociar imprime error);
+        Creación de semaforos (si no los puede crear imprime error);
+        Inicializacion de semaforos;
+        Verificación de la existencia del archivo datos.dat;
+        Inicializo variables auxiliares para los buffers;
+        Mientras(1){
+	        Se bloquea el semaforo del Buffer1;
+	        Mientras(No se llegue al fin del buffer1 y el ID del mismo no sea -1){
+		        Se copian los datos del buffer1 en el archivo csv y se imprimen en pantalla;
+		        Se incrementan la variable para recorrer el buffer;
+		        Si(Se encontro el ID -1){
+			        Se sale del bucle;
+                }
+	        }
+	        Se resetea la variable que recorre el buffer;
+	        Si(Se encontro el ID -1){
+	            Se sale del bucle principal;
+            }
+            Se desbloquea el semaforo del Buffer1;
+            Se desbloquea el semaforo de sincronizacion;
+            Se bloquea el semaforo del Buffer2;
+		    Mientras(No se llegue al fin del buffer2 y el ID del mismo no sea -1){
+		        Se copian los datos del buffer2 en el archivo csv y se imprimen en pantalla;
+		        Se incrementan la variable para recorrer el buffer;
+		        Si(Se encontro el ID -1){
+			        Se sale del bucle;
+                }
+	        }
+	        Se resetea la variable que recorre el buffer;
+	        Si(Se encontro el ID -1){
+	            Se sale del bucle principal;
+            }
+            Se desbloquea el semaforo del Buffer2;
+            Se desbloquea el semaforo de sincronizacion;
+            Si(Se encontro el ID -1){
+	            Se sale del bucle principal;
+            }
+        }
+        Se cierra el archivo .csv;
+        Se libera la memoria compartida y se remueven los semaforos;
+    FIN
+
     
     
 \end{lstlisting}
