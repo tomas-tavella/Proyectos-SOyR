@@ -20,6 +20,8 @@ Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolu
 
 En ambos casos se eligió reservar dos segmentos de memoria compartida, uno para cada mitad del \textit{buffer}, con capacidad para almacenar 100 estructuras de datos en total. Esto se logró mediante la función \texttt{shmget()} (contenida en la biblioteca \texttt{<sys/shm.h>}), a la cual se le pasan como argumentos el tamaño del segmento y una clave única (obtenida con la función \texttt{ftok()}) que debe ser la misma para el productor y el consumidor, para así poder compartir los segmentos creados.\\
 
+Además, dado que los requerimientos no establecen que se debe hacer en el caso que el productor quiera escribir un \textit{buffer} que aun no fue consumido, se decidió priorizar la integridad de los datos a detrimento de la velocidad de respuesta, por lo que el productor espera a que el consumidor finalize de leer los datos del textit{buffer}.\\
+
 \subsection{Realización con semáforos}
 
 Para la implementación con semáforos, se utilizaron las funciones \texttt{semget()}, \texttt{semctl()}, \texttt{semop()} incluidas en la biblioteca apropiada para implementar 3 semáforos distintos:
