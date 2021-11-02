@@ -1,0 +1,6 @@
+ipc.h
+shm.h
+sem.h
+shmget
+ftok
+gcc
