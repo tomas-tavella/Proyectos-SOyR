@@ -13,6 +13,7 @@
 *.synctex(busy)
 *.toc
 *.pdf
+**/.vscode/
 
 # Ignoro los binarios compilados de los codigos
 
