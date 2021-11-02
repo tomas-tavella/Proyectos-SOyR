@@ -43,105 +43,96 @@ Finalmente, al terminar de correr el productor, se llaman a \texttt{shmctl()} y 
 \begin{lstlisting}[language=C]          % No usar tildes en el pseudocódigo
     Productor:
     INICIO
-        Declaracion y asignacion de variables, macros y estructuras;
-        Se obtiene la clave de las dos memorias compartidas y el semaforo (en el caso de que no las obtenga imprime error);
-        Se llama al sistema para obtener el ID de las memorias compartidas (en el caso de que no las obtenga imprime error);
-        Se asocia el espacio de memoria compartida con un puntero(si no puede asociar imprime error);
-        Creacion de semaforos (si no los puede crear imprime error);
-        Inicializacion de semaforos;
-        Verificacion de la existencia del archivo datos.dat;
-        Se obtiene el tiempo de UNIX inicial;
-        Inicializo variables auxiliares para los buffers;
+        Declarar y asignar variables, macros y estructuras;
+        Obtener la clave de las dos memorias compartidas y el semaforo (en el caso de no obtenerlas imprimir error);
+        Llamar al sistema para obtener el ID de las memorias compartidas (en el caso de que no obtenerlas imprimir error);
+        Asociar el espacio de memoria compartida con un puntero (si no puede asociar imprimir error);
+        Crear semaforos (si no puede crear imprimir error);
+        Inicializar semaforos;
+        Verificar la existencia del archivo datos.dat;
+        Obtener el tiempo de UNIX inicial;
+        Inicializar variables auxiliares para los buffers;
         Mientras(1){
-	        Se bloquea el semaforo del Buffer1;
-	        Se lee una linea del archivo .dat;
+	        Bloquear el semaforo del buffer1;
+	        Leer una linea del archivo .dat;
 	        Mientras(No se llegue al fin del buffer1){
-		        Se copian los datos en el buffer1;
-		        Se lee una linea del archivo .dat;
-		        Si(Se llego al final del archivo){
-			        Se sale del bucle;
+		        Copiar los datos en el buffer1;
+		        Leer una linea del archivo .dat;
+		        Si(Se llega al final del archivo){
+			        Salir del bucle y avisar que el ultimo elemento se escribio en el buffer1;
                 }
-                Sino{
-    	            Sigue en el bucle;
-                }
-                Se incrementan la variable para recorrer el buffer y la del id;
+                Incrementar la variable para recorrer el buffer y la del id;
 	        }
-	        Si(Se llego al final del archivo){
-	            Se sale del bucle;
-            }
-            Se resetea la variable que recorre el buffer;
-            Se desbloquea el semaforo del Buffer1;
-            Se bloquea el semaforo del Buffer2;
-            Se bloquea el semaforo de sincronizacion;
-            Se lee una linea del archivo.dat;
+            Resetear la variable que recorre el buffer;
+            Desbloquear el semaforo del buffer1;
+            Bloquear el semaforo del buffer2;
+            Bloquear el semaforo de sincronizacion;
+            Leer una linea del archivo.dat;
             Mientras(No se llegue al fin del buffer2){
-		        Se copian los datos en el buffer2;
-		        Se lee una linea del archivo .dat;
-		        Si(Se llego al final del archivo){
+		        Copiar los datos en el buffer2;
+		        Leer una linea del archivo .dat;
+		        Si(Se llega al final del archivo){
 			        Se sale del bucle;
                 }
-                Sino{
-                    Sigue en el bucle;
-                }
-                Se incrementan la variable para recorrer el buffer y la del ID;
+                Incrementar la variable para recorrer el buffer y la del ID;
             }
-            Si(Se llego al final del archivo){
-        	    Se sale del bucle;
+            Si(Se llega al final del archivo){
+        	    Se sale del bucle y avisar que el ultimo elemento se escribio en el buffer2;
             }
-            Se resetea la variable que recorre el buffer;
-            Se desbloquea el semaforo del Buffer2;
-            Se bloquea el semaforo de sincronizacion;
+            Resetear la variable que recorre el buffer;
+            Desbloquear el semaforo del buffer2;
+            Bloquear el semaforo de sincronizacion;
         }
-        Se pone un ID Null despues de llegar al ultimo elemento para avisarle al consumidor que se llego al EOF;
-        Se cierra el archivo .dat;
-        Se libera la memoria compartida y se remueven los semaforos;
+        Poner un ID Null despues de llegar al ultimo elemento del buffer correspondiente para avisarle al consumidor que se llego al EOF;
+        Cerrar el archivo .dat;
+        Liberar la memoria compartida y se remover los semaforos;
     FIN
 
     Consumidor:
     INICIO
-        Declaracion y asignacion de variables, macros y estructuras;
-        Se obtiene la clave de las dos memorias compartidas y el semaforo (en el caso de que no las obtenga imprime error);
-        Se llama al sistema para obtener el ID de las memorias compartidas (en el caso de que no las obtenga imprime error);
-        Se asocia el espacio de memoria compartida con un puntero(si no puede asociar imprime error);
-        Creacion de semaforos (si no los puede crear imprime error);
-        Inicializacion de semaforos;
-        Verificacion de la existencia del archivo datos.dat;
-        Inicializo variables auxiliares para los buffers;
+        Declarar y asignar variables, macros y estructuras;
+        Obtener la clave de las dos memorias compartidas y el semaforo (en el caso de no obtenerlas imprimir error);
+        Llamar al sistema para obtener el ID de las memorias compartidas (en el caso de que no obtenerlas imprimir error);
+        Asociar el espacio de memoria compartida con un puntero (si no puede asociar imprimir error);
+        Crear semaforos (si no puede crear imprimir error);
+        Inicializar de semaforos;
+        Verificar la existencia del archivo datos.dat;
+        Inicializar variables auxiliares para los buffers;
         Mientras(1){
-	        Se bloquea el semaforo del Buffer1;
-	        Mientras(No se llegue al fin del buffer1 y el ID del mismo no sea -1){
-		        Se copian los datos del buffer1 en el archivo csv y se imprimen en pantalla;
-		        Se incrementan la variable para recorrer el buffer;
+	        Bloquear el semaforo del Buffer1;
+	        Mientras(No se llega al fin del buffer1 y el ID del mismo sea distinto a -1){
+		        Copiar los datos del buffer1 en el archivo csv e imprimirlos en pantalla;
+		        Incrementar la variable para recorrer el buffer;
 		        Si(Se encontro el ID -1){
-			        Se sale del bucle;
+			        Salir del bucle;
                 }
 	        }
-	        Se resetea la variable que recorre el buffer;
+	        Resetear la variable que recorre el buffer;
 	        Si(Se encontro el ID -1){
-	            Se sale del bucle principal;
+	            Salir del bucle principal;
             }
-            Se desbloquea el semaforo del Buffer1;
-            Se desbloquea el semaforo de sincronizacion;
-            Se bloquea el semaforo del Buffer2;
-		    Mientras(No se llegue al fin del buffer2 y el ID del mismo no sea -1){
-		        Se copian los datos del buffer2 en el archivo csv y se imprimen en pantalla;
-		        Se incrementan la variable para recorrer el buffer;
+            Desbloquear el semaforo del buffer1;
+            Desbloquear el semaforo de sincronizacion;
+            Bloquear el semaforo del buffer2;
+		    Mientras(No se llegue al fin del buffer2 y el ID del mismo sea distinto a -1){
+		        Copiar los datos del buffer2 en el archivo csv e imprimirlos en pantalla;
+		        Incrementar la variable para recorrer el buffer;
 		        Si(Se encontro el ID -1){
-			        Se sale del bucle;
+			        Salir del bucle;
                 }
 	        }
-	        Se resetea la variable que recorre el buffer;
+	        Resetear la variable que recorre el buffer;
 	        Si(Se encontro el ID -1){
-	            Se sale del bucle principal;
+	            Salir del bucle principal;
             }
-            Se desbloquea el semaforo del Buffer2;
-            Se desbloquea el semaforo de sincronizacion;
+            Desbloquear el semaforo del buffer2;
+            Desbloquear el semaforo de sincronizacion;
             Si(Se encontro el ID -1){
-	            Se sale del bucle principal;
+	            Salir del bucle principal;
             }
         }
-        Se cierra el archivo .csv;
-        Se libera la memoria compartida y se remueven los semaforos;
+        Cerrar el archivo .csv;
+        Liberar la memoria compartida y remover los semaforos;
     FIN
 
     
