@@ -12,6 +12,7 @@
 *.synctex.gz
 *.synctex(busy)
 *.toc
+*.pdf
 
 # Ignoro los binarios compilados de los codigos
 
