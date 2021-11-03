@@ -20,3 +20,7 @@ prod
 cons
 *.csv
 *.csv#
+
+# Ignoro otros archivos que no quiero trackear
+
+*.save
