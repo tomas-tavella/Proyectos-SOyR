@@ -40,8 +40,8 @@ Finalmente, al terminar de correr el productor, se llaman a \texttt{shmctl()} y 
 
 \subsubsection{Pseudocódigo}
 
-\begin{lstlisting}[language=C]          % No usar tildes en el pseudocódigo
-    
+\begin{lstlisting}[language=C]          % No usar tildes en el pseudocódigo y dejar una linea vacía al principio y al final
+
     Productor:
     INICIO
         Declarar y asignar variables, macros y estructuras;
@@ -136,8 +136,6 @@ Finalmente, al terminar de correr el productor, se llaman a \texttt{shmctl()} y 
         Liberar la memoria compartida y remover los semaforos;
     FIN
 
-    
-    
 \end{lstlisting}
 
 \subsection{Realización con colas de mensajes}
@@ -146,7 +144,7 @@ La implementación por cola de mensajes emplea dos colas con dos tipos de mensaj
 
 \subsubsection{Pseudocódigo}
 
-\begin{lstlisting}[language=C]          % No usar tildes en el pseudocódigo
+\begin{lstlisting}[language=C]          % No usar tildes en el pseudocódigo y dejar una linea vacía al principio y al final
 
     Productor:
     INICIO
