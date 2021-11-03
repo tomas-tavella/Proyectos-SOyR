@@ -1,0 +1,69 @@
+\documentclass{article}
+
+% Configuración de leguaje
+\usepackage[spanish]{babel}
+
+% Configurar tamaño de pagina y márgenes
+\usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage{csquotes}
+\usepackage[backend=biber]{biblatex}            % Paquete para bibliografía
+\addbibresource{Bibliografia.bib}               % Llamo al archivo que contiene las referencias
+
+% Paquetes utiles
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=black]{hyperref}
+\usepackage{float}                              % Permite forzar una posición para una figura
+\usepackage{svg}                                % Para poder insertar SVGs
+\usepackage[justification=centering]{caption}   % Para poder centrar captions de figuras
+\usepackage{gensymb}                            % Símbolo de grados (\degree)
+\usepackage{subfigure}                          % Para poder usar subfiguras (logos de UNLP y FI juntos)
+\usepackage{listings}                           % Para poder incluir código
+\usepackage{xcolor}                             % Para poder definir colores        
+
+\definecolor{codegreen}{rgb}{0,0.6,0}           % Colores para el código
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{                       % Parametros para setear como se 
+    backgroundcolor=\color{backcolour},         % muestra el codigo
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\scriptsize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4
+}
+
+\lstset{style=mystyle}
+
+\begin{document}
+
+    \nocite{*}                                  % Se usa para que aparezcan todas la referencias del .bib sin tener que 
+                                                % citarlas en el texto
+    \input{Secciones/1 - Portada.tex}
+
+    \tableofcontents \newpage
+
+    \input{Secciones/2 - Enunciado.tex}
+
+    \input{Secciones/3 - Interpretacion del problema.tex}
+
+    \input{Secciones/4 - Resolucion.tex}
+
+    \input{Secciones/5 - Conclusiones.tex}
+
+    %\printbibliography 
+    
+\end{document}

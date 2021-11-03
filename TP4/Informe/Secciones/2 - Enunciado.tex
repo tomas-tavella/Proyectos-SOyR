@@ -1,0 +1,14 @@
+\section{Enunciado}
+Se desea implementar un \textit{buffer ping-pong} para que un proceso genere datos y otro los consuma. La implementación debe utilizar memoria compartida para los datos producidos y leídos.\\
+
+El proceso productor debe leer datos desde el archivo \texttt{datos.dat} y almacenarlos en un \textit{buffer ping-pong} de estructuras, cuyos campos son:\\
+
+\begin{itemize}
+    \item Un identificador entero menor que 50000.
+    \item Una etiqueta de tiempo con precisión de microsegundos.
+    \item El dato leído desde el archivo \texttt{datos.dat}.\\
+\end{itemize}
+
+El proceso consumidor debe leer desde el \textit{buffer ping-pong} e imprimir los valores leídos en pantalla a medida que estén disponibles. También debe almacenarlos en un archivo llamado \texttt{datos.csv}, a razón de una estructura por línea, con los valores separados por comas (CSV).\\
+
+Deben implementarse dos variantes del problema, una que administre el \textit{buffer ping-pong} usando semáforos y variables compartidas, y otro que utilice colas de mensajes. En ambos casos decida y justifique que se va a hacer cuando el productor llene ambos \textit{buffers} y el consumidor no consumió los datos.
