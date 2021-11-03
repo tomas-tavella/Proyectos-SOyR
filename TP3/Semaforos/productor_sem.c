@@ -157,11 +157,14 @@ int main(){
             // Chequeo de EOF
             if (feof(fpdat)){           // Si se termina...
                 eof_flag = 1;
-                goto LoopEnd_eof;                  // Entonces salgo de los dos loops
+                break;                  // Entonces salgo del loop
+            }else{
+                eof_flag = 0;
             }
 
             buf_cnt++; id++;
         }
+        if (eof_flag == 1) break;       // Salgo del loop principal, conservando la posicion en buf1 donde se encontro EOF
 
         buf_cnt = 0;                    // Reseteo el contador
         UNBLOCK(op,SEM_BUF1);
@@ -186,11 +189,14 @@ int main(){
             // Chequeo de EOF
             if (feof(fpdat)){           // Si se termina...
                 eof_flag = 2;
-                goto LoopEnd_eof;                  // Entonces salgo de los dos loops
+                break;                  // Entonces salgo del loop
+            }else{
+                eof_flag = 0;
             }
 
             buf_cnt++; id++;
         }
+        if (eof_flag == 2) break;       // Salgo del loop principal, conservando la posicion en buf2 donde se encontro EOF
 
         buf_cnt = 0;
         //sleep(1);             // El SEM_SYNC anda como deberia probando con sleep en el productor
@@ -202,13 +208,12 @@ int main(){
     }
     // Se pone un ID NULL despues de llegar al ultimo elemento, para avisar al consumidor
     // que se llego al EOF
-    LoopEnd_eof:
-        switch (eof_flag){
-            case 1 :
-                buf1[buf_cnt].id = -1;
-            case 2 :
-                buf2[buf_cnt].id = -1;
-        }
+    switch (eof_flag){
+        case 1 :
+            buf1[buf_cnt].id = -1;
+        case 2 :
+            buf2[buf_cnt].id = -1;
+    }
 
     fclose(fpdat);
 
