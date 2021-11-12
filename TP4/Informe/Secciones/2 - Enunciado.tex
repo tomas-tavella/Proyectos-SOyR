@@ -1,14 +1,21 @@
 \section{Enunciado}
-Se desea implementar un \textit{buffer ping-pong} para que un proceso genere datos y otro los consuma. La implementación debe utilizar memoria compartida para los datos producidos y leídos.\\
+En la planta industrial de una empresa, hay cuatro dependencias: Gerencia, Producción, Administración y Expedición.\\
 
-El proceso productor debe leer datos desde el archivo \texttt{datos.dat} y almacenarlos en un \textit{buffer ping-pong} de estructuras, cuyos campos son:\\
+Se contrata un servicio para proveer internet, y se quiere diseñar la interconexión de las dependencias asignando a cada una de ellas subredes separadas, asignando 32 direcciones IP a cada una de las subredes pertenecientes a Producción y Administración, 16 direcciones IP a cada subred de Gerencia y Expedición y además se quiere proveer WiFi en el Comedor, mediante otra subred con 64 direcciones IP.\\
 
-\begin{itemize}
-    \item Un identificador entero menor que 50000.
-    \item Una etiqueta de tiempo con precisión de microsegundos.
-    \item El dato leído desde el archivo \texttt{datos.dat}.\\
-\end{itemize}
+La planta industrial tiene dos edificios separados, en el primero de ellos se ubican Producción y Expedición y en el segundo se encuentran Administración, Gerencia y el Comedor.\\
 
-El proceso consumidor debe leer desde el \textit{buffer ping-pong} e imprimir los valores leídos en pantalla a medida que estén disponibles. También debe almacenarlos en un archivo llamado \texttt{datos.csv}, a razón de una estructura por línea, con los valores separados por comas (CSV).\\
+El proveedor de servicio de Internet, instala la conexión en el primer edificio y provee un router que desde el lado externo está conectado a la subred \texttt{198.235.150.128/25} con dirección IP texttt{198.235.150.136} con \textit{Default Gateway} tiene \texttt{198.235.150.129}. Del lado interno de la empresa, provee la subred clase C \texttt{198.235.151.0/24}, y la dirección asignada al router es \texttt{198.235.151.1}. La máscara de esta subred puede modificarse, pero no el IP del router.\\
 
-Deben implementarse dos variantes del problema, una que administre el \textit{buffer ping-pong} usando semáforos y variables compartidas, y otro que utilice colas de mensajes. En ambos casos decida y justifique que se va a hacer cuando el productor llene ambos \textit{buffers} y el consumidor no consumió los datos.
+\begin{enumerate}
+    \item Proponga un esquema de conexión de las distintas subredes, que emplee un router en cada uno de los edificios, y que utilice una subred diferente para interconectar ambos routers. Esta última subred debe emplear la mínima cantidad posible de direcciones IP.
+    \item Asigne números de subred y máscaras a cada subred. Enumere las direcciones de red y de broadcast de cada una de ellas, trate de que queden la mayor cantidad de direcciones libres para eventuales ampliaciones. 
+    \item Asigne un \textit{Default Gateway} a cada subred.
+    \item Para evitar instalar protocolos de ruteo internos, la empresa decide instalar rutas estáticas en los routers. Escriba cuales serían las tablas de ruteo necesarias en cada router, para que todos los hosts puedan alcanzar Internet, y además se puedan comunicar entre sí.  Si en su diseño de red, los routers poseen más de una interfaz, enumérelas como \texttt{IF0}, \texttt{IF1}, ... , \texttt{IFN} si necesita explicitar la interfaz de salida.
+    \item Simule su diseño en \textit{CORE}:
+    \begin{enumerate}
+        \item En la simulación, debe mostrarse por lo menos dos hosts conectados en cada subred, excepto en el enlace entre routers.
+        \item En la simulación debe ser posible  observar el funcionamiento del protocolo ARP para obtener las direcciones físicas.
+        \item También debe ser posible mostrar la conectividad entre los diferentes hosts de  la red y con la salida a Internet mediante el uso del comando \texttt{ping}.
+    \end{enumerate}
+\end{enumerate}
