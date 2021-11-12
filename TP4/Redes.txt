@@ -1,0 +1,51 @@
+Externo
+
+	198.235.150.128/25 -> 7 bits de hosts = 127
+	Direccion router: 198.235.150.136
+	Default: 198.235.150.129
+
+	Mascara de subred: 255.255.255.128
+
+Interno
+
+	198.235.151.0/24 -> 8 bits de hosts = 255 hosts
+	Direccion router: 198.235.151.1
+
+	- Produccion -> 		32 hosts
+	- Administracion -> 	32 hosts
+	- Gerencia -> 			16 hosts
+	- Expedicion -> 		16 hosts
+	- Comedor -> 			64 hosts
+	
+Edificio 1: Produccion y Expedicion -> 48 hosts -> 6 bits = 64 hosts -> /26
+	
+	- Produccion: /27 -> M 255.255.255.224
+	- Expedicion: /28 -> M 255.255.255.240
+	Libres: 16 direcciones IP libres
+
+Edificio 2: Gerencia, Administracion y Comedor -> 112 hosts -> 7 bits = 64 hosts -> /25
+
+	- Administracion: 	/27 -> M 255.255.255.224
+	- Gerencia: 		/28 -> M 255.255.255.240
+	- Comedor: 			/26 -> M 255.255.255.192
+	Libres: 16 direcciones IP libres
+	
+Red de interconexion: /30
+	
+	Red interna: 198.235.151.00000000
+	
+	
+Edificio 1: 198.235.151.10000000
+	
+	- Produccion: 198.235.151.110|00000 -> 198.235.151.192/27 [.193,.223]
+	- Expedicion: 198.235.151.1000|0000 -> 198.235.151.128/28 [.129,.143]
+	
+Edificio 2: 198.235.151.00000000
+
+	- Administracion: 	198.235.151.000|00000 -> 198.235.151.0/27 	[.1,.31]
+	- Expedicion: 		198.235.151.0010|0000 -> 198.235.151.32/28	[.33,.47] 
+	- Comedor:			198.235.151.01|000000 -> 198.235.151.64/26	[.65,.127]
+	
+Red Interconexion: 198.235.151.101000|00 -> 198.235.151.160/30		[.161,.162]
+
+
