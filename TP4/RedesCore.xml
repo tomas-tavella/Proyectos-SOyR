@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenario compiled="true" name="RedesCore.xml" version="1.0" xmlns="nmfPlan" xmlns:CORE="coreSpecific">
+  <network id="Produccion" name="Produccion">
+    <point lat="47.5739588316" lon="-122.129635649" type="gps"/>
+    <type>ethernet</type>
+    <host id="Produccion/Produccion" name="Produccion">
+      <type domain="CORE">hub</type>
+      <interface id="Produccion/Produccion/e0" name="e0"/>
+      <interface id="Produccion/Produccion/e1" name="e1"/>
+      <interface id="Produccion/Produccion/e2" name="e2"/>
+      <alias domain="COREID">4</alias>
+      <point lat="47.5739588316" lon="-122.129635649" type="gps"/>
+    </host>
+    <member type="interface">Edificio1/eth1</member>
+    <member type="interface">Produccion/Produccion/e0</member>
+    <member type="interface">n9/eth0</member>
+    <member type="interface">Produccion/Produccion/e1</member>
+    <member type="interface">n18/eth0</member>
+    <member type="interface">Produccion/Produccion/e2</member>
+    <member type="channel">Produccion/chan0</member>
+    <member type="channel">Produccion/chan1</member>
+    <member type="channel">Produccion/chan2</member>
+    <channel id="Produccion/chan0" name="chan0">
+      <type>ethernet</type>
+      <member index="0" type="interface">Edificio1/eth1</member>
+      <member index="1" type="interface">Produccion/Produccion/e0</member>
+    </channel>
+    <channel id="Produccion/chan1" name="chan1">
+      <type>ethernet</type>
+      <member index="0" type="interface">n9/eth0</member>
+      <member index="1" type="interface">Produccion/Produccion/e1</member>
+    </channel>
+    <channel id="Produccion/chan2" name="chan2">
+      <type>ethernet</type>
+      <member index="0" type="interface">n18/eth0</member>
+      <member index="1" type="interface">Produccion/Produccion/e2</member>
+    </channel>
+  </network>
+  <network id="Expedicion" name="Expedicion">
+    <point lat="47.5739567024" lon="-122.125806244" type="gps"/>
+    <type>ethernet</type>
+    <host id="Expedicion/Expedicion" name="Expedicion">
+      <type domain="CORE">hub</type>
+      <interface id="Expedicion/Expedicion/e0" name="e0"/>
+      <interface id="Expedicion/Expedicion/e1" name="e1"/>
+      <interface id="Expedicion/Expedicion/e2" name="e2"/>
+      <alias domain="COREID">5</alias>
+      <point lat="47.5739567024" lon="-122.125806244" type="gps"/>
+    </host>
+    <member type="interface">Edificio1/eth2</member>
+    <member type="interface">Expedicion/Expedicion/e0</member>
+    <member type="interface">n10/eth0</member>
+    <member type="interface">Expedicion/Expedicion/e1</member>
+    <member type="interface">n17/eth0</member>
+    <member type="interface">Expedicion/Expedicion/e2</member>
+    <member type="channel">Expedicion/chan0</member>
+    <member type="channel">Expedicion/chan1</member>
+    <member type="channel">Expedicion/chan2</member>
+    <channel id="Expedicion/chan0" name="chan0">
+      <type>ethernet</type>
+      <member index="0" type="interface">Edificio1/eth2</member>
+      <member index="1" type="interface">Expedicion/Expedicion/e0</member>
+    </channel>
+    <channel id="Expedicion/chan1" name="chan1">
+      <type>ethernet</type>
+      <member index="0" type="interface">n10/eth0</member>
+      <member index="1" type="interface">Expedicion/Expedicion/e1</member>
+    </channel>
+    <channel id="Expedicion/chan2" name="chan2">
+      <type>ethernet</type>
+      <member index="0" type="interface">n17/eth0</member>
+      <member index="1" type="interface">Expedicion/Expedicion/e2</member>
+    </channel>
+  </network>
+  <network id="Administracion" name="Administracion">
+    <point lat="47.5740487605" lon="-122.12195532" type="gps"/>
+    <type>ethernet</type>
+    <host id="Administracion/Administracion" name="Administracion">
+      <type domain="CORE">hub</type>
+      <interface id="Administracion/Administracion/e0" name="e0"/>
+      <interface id="Administracion/Administracion/e1" name="e1"/>
+      <interface id="Administracion/Administracion/e2" name="e2"/>
+      <alias domain="COREID">6</alias>
+      <point lat="47.5740487605" lon="-122.12195532" type="gps"/>
+    </host>
+    <member type="interface">Edificio2/eth1</member>
+    <member type="interface">Administracion/Administracion/e0</member>
+    <member type="interface">n14/eth0</member>
+    <member type="interface">Administracion/Administracion/e1</member>
+    <member type="interface">n16/eth0</member>
+    <member type="interface">Administracion/Administracion/e2</member>
+    <member type="channel">Administracion/chan0</member>
+    <member type="channel">Administracion/chan1</member>
+    <member type="channel">Administracion/chan2</member>
+    <channel id="Administracion/chan0" name="chan0">
+      <type>ethernet</type>
+      <member index="0" type="interface">Edificio2/eth1</member>
+      <member index="1" type="interface">Administracion/Administracion/e0</member>
+    </channel>
+    <channel id="Administracion/chan1" name="chan1">
+      <type>ethernet</type>
+      <member index="0" type="interface">n14/eth0</member>
+      <member index="1" type="interface">Administracion/Administracion/e1</member>
+    </channel>
+    <channel id="Administracion/chan2" name="chan2">
+      <type>ethernet</type>
+      <member index="0" type="interface">n16/eth0</member>
+      <member index="1" type="interface">Administracion/Administracion/e2</member>
+    </channel>
+  </network>
+  <network id="Gerencia" name="Gerencia">
+    <point lat="47.5736557753" lon="-122.118232195" type="gps"/>
+    <type>ethernet</type>
+    <host id="Gerencia/Gerencia" name="Gerencia">
+      <type domain="CORE">hub</type>
+      <interface id="Gerencia/Gerencia/e0" name="e0"/>
+      <interface id="Gerencia/Gerencia/e1" name="e1"/>
+      <interface id="Gerencia/Gerencia/e2" name="e2"/>
+      <alias domain="COREID">7</alias>
+      <point lat="47.5736557753" lon="-122.118232195" type="gps"/>
+    </host>
+    <member type="interface">Edificio2/eth2</member>
+    <member type="interface">Gerencia/Gerencia/e0</member>
+    <member type="interface">n11/eth0</member>
+    <member type="interface">Gerencia/Gerencia/e1</member>
+    <member type="interface">n15/eth0</member>
+    <member type="interface">Gerencia/Gerencia/e2</member>
+    <member type="channel">Gerencia/chan0</member>
+    <member type="channel">Gerencia/chan1</member>
+    <member type="channel">Gerencia/chan2</member>
+    <channel id="Gerencia/chan0" name="chan0">
+      <type>ethernet</type>
+      <member index="0" type="interface">Edificio2/eth2</member>
+      <member index="1" type="interface">Gerencia/Gerencia/e0</member>
+    </channel>
+    <channel id="Gerencia/chan1" name="chan1">
+      <type>ethernet</type>
+      <member index="0" type="interface">n11/eth0</member>
+      <member index="1" type="interface">Gerencia/Gerencia/e1</member>
+    </channel>
+    <channel id="Gerencia/chan2" name="chan2">
+      <type>ethernet</type>
+      <member index="0" type="interface">n15/eth0</member>
+      <member index="1" type="interface">Gerencia/Gerencia/e2</member>
+    </channel>
+  </network>
+  <network id="Comedor" name="Comedor">
+    <point lat="47.5740595124" lon="-122.114575474" type="gps"/>
+    <type>ethernet</type>
+    <host id="Comedor/Comedor" name="Comedor">
+      <type domain="CORE">hub</type>
+      <interface id="Comedor/Comedor/e0" name="e0"/>
+      <interface id="Comedor/Comedor/e1" name="e1"/>
+      <interface id="Comedor/Comedor/e2" name="e2"/>
+      <alias domain="COREID">8</alias>
+      <point lat="47.5740595124" lon="-122.114575474" type="gps"/>
+    </host>
+    <member type="interface">Edificio2/eth3</member>
+    <member type="interface">Comedor/Comedor/e0</member>
+    <member type="interface">n12/eth0</member>
+    <member type="interface">Comedor/Comedor/e1</member>
+    <member type="interface">n13/eth0</member>
+    <member type="interface">Comedor/Comedor/e2</member>
+    <member type="channel">Comedor/chan0</member>
+    <member type="channel">Comedor/chan1</member>
+    <member type="channel">Comedor/chan2</member>
+    <channel id="Comedor/chan0" name="chan0">
+      <type>ethernet</type>
+      <member index="0" type="interface">Edificio2/eth3</member>
+      <member index="1" type="interface">Comedor/Comedor/e0</member>
+    </channel>
+    <channel id="Comedor/chan1" name="chan1">
+      <type>ethernet</type>
+      <member index="0" type="interface">n12/eth0</member>
+      <member index="1" type="interface">Comedor/Comedor/e1</member>
+    </channel>
+    <channel id="Comedor/chan2" name="chan2">
+      <type>ethernet</type>
+      <member index="0" type="interface">n13/eth0</member>
+      <member index="1" type="interface">Comedor/Comedor/e2</member>
+    </channel>
+  </network>
+  <network id="net0" name="net0">
+    <type>ethernet</type>
+    <alias domain="COREID">26268</alias>
+    <member type="interface">Edificio1/eth3</member>
+    <member type="interface">Edificio2/eth0</member>
+    <member type="channel">net0/chan0</member>
+    <channel id="net0/chan0" name="chan0">
+      <type>ethernet</type>
+      <member index="0" type="interface">Edificio1/eth3</member>
+      <member index="1" type="interface">Edificio2/eth0</member>
+    </channel>
+  </network>
+  <network id="net1" name="net1">
+    <type>ethernet</type>
+    <alias domain="COREID">45853</alias>
+    <member type="interface">Proveedor/eth0</member>
+    <member type="interface">Edificio1/eth0</member>
+    <member type="channel">net1/chan0</member>
+    <channel id="net1/chan0" name="chan0">
+      <type>ethernet</type>
+      <member index="0" type="interface">Proveedor/eth0</member>
+      <member index="1" type="interface">Edificio1/eth0</member>
+    </channel>
+  </network>
+  <router id="Proveedor" name="Proveedor">
+    <type domain="CORE">router</type>
+    <interface id="Proveedor/eth0" name="eth0">
+      <member index="0" type="channel">net1/chan0</member>
+      <member type="network">net1</member>
+      <address type="mac">00:00:00:aa:00:00</address>
+      <address type="IPv4">192.235.150.129/25</address>
+    </interface>
+    <alias domain="COREID">1</alias>
+    <point lat="47.5778402135" lon="-122.12709796" type="gps"/>
+  </router>
+  <router id="Edificio1" name="Edificio1">
+    <type domain="CORE">router</type>
+    <interface id="Edificio1/eth0" name="eth0">
+      <member index="1" type="channel">net1/chan0</member>
+      <member type="network">net1</member>
+      <address type="mac">00:00:00:aa:00:01</address>
+      <address type="IPv4">192.235.150.136/25</address>
+    </interface>
+    <interface id="Edificio1/eth1" name="eth1">
+      <member index="0" type="channel">Produccion/chan0</member>
+      <member type="network">Produccion</member>
+      <address type="mac">00:00:00:aa:00:02</address>
+      <address type="IPv4">198.235.151.193/27</address>
+    </interface>
+    <interface id="Edificio1/eth2" name="eth2">
+      <member index="0" type="channel">Expedicion/chan0</member>
+      <member type="network">Expedicion</member>
+      <address type="mac">00:00:00:aa:00:03</address>
+      <address type="IPv4">198.235.151.129/28</address>
+    </interface>
+    <interface id="Edificio1/eth3" name="eth3">
+      <member index="0" type="channel">net0/chan0</member>
+      <member type="network">net0</member>
+      <address type="mac">00:00:00:aa:00:04</address>
+      <address type="IPv4">198.235.151.161/30</address>
+    </interface>
+    <alias domain="COREID">2</alias>
+    <point lat="47.5758307633" lon="-122.12731087" type="gps"/>
+  </router>
+  <router id="Edificio2" name="Edificio2">
+    <type domain="CORE">router</type>
+    <interface id="Edificio2/eth0" name="eth0">
+      <member index="1" type="channel">net0/chan0</member>
+      <member type="network">net0</member>
+      <address type="mac">00:00:00:aa:00:05</address>
+      <address type="IPv4">198.235.151.162/30</address>
+    </interface>
+    <interface id="Edificio2/eth1" name="eth1">
+      <member index="0" type="channel">Administracion/chan0</member>
+      <member type="network">Administracion</member>
+      <address type="mac">00:00:00:aa:00:06</address>
+      <address type="IPv4">198.235.151.193/27</address>
+    </interface>
+    <interface id="Edificio2/eth2" name="eth2">
+      <member index="0" type="channel">Gerencia/chan0</member>
+      <member type="network">Gerencia</member>
+      <address type="mac">00:00:00:aa:00:07</address>
+      <address type="IPv4">198.235.151.33/28</address>
+    </interface>
+    <interface id="Edificio2/eth3" name="eth3">
+      <member index="0" type="channel">Comedor/chan0</member>
+      <member type="network">Comedor</member>
+      <address type="mac">00:00:00:aa:00:08</address>
+      <address type="IPv4">198.235.151.65/26</address>
+    </interface>
+    <alias domain="COREID">3</alias>
+    <point lat="47.5756961841" lon="-122.118537015" type="gps"/>
+  </router>
+  <host id="n9" name="n9">
+    <type domain="CORE">PC</type>
+    <interface id="n9/eth0" name="eth0">
+      <member index="0" type="channel">Produccion/chan1</member>
+      <member type="network">Produccion</member>
+      <address type="mac">00:00:00:aa:00:09</address>
+      <address type="IPv4">198.235.151.20/27</address>
+    </interface>
+    <alias domain="COREID">9</alias>
+    <point lat="47.5725027944" lon="-122.131634276" type="gps"/>
+  </host>
+  <host id="n10" name="n10">
+    <type domain="CORE">PC</type>
+    <interface id="n10/eth0" name="eth0">
+      <member index="0" type="channel">Expedicion/chan1</member>
+      <member type="network">Expedicion</member>
+      <address type="mac">00:00:00:aa:00:0b</address>
+      <address type="IPv4">198.235.151.20/28</address>
+    </interface>
+    <alias domain="COREID">10</alias>
+    <point lat="47.572547583" lon="-122.126866809" type="gps"/>
+  </host>
+  <host id="n11" name="n11">
+    <type domain="CORE">PC</type>
+    <interface id="n11/eth0" name="eth0">
+      <member index="0" type="channel">Gerencia/chan1</member>
+      <member type="network">Gerencia</member>
+      <address type="mac">00:00:00:aa:00:0f</address>
+      <address type="IPv4">198.235.151.20/28</address>
+    </interface>
+    <alias domain="COREID">11</alias>
+    <point lat="47.5725540578" lon="-122.118888914" type="gps"/>
+  </host>
+  <host id="n12" name="n12">
+    <type domain="CORE">PC</type>
+    <interface id="n12/eth0" name="eth0">
+      <member index="0" type="channel">Comedor/chan1</member>
+      <member type="network">Comedor</member>
+      <address type="mac">00:00:00:aa:00:11</address>
+      <address type="IPv4">198.235.151.20/26</address>
+    </interface>
+    <alias domain="COREID">12</alias>
+    <point lat="47.5726579947" lon="-122.114858379" type="gps"/>
+  </host>
+  <host id="n13" name="n13">
+    <type domain="CORE">PC</type>
+    <interface id="n13/eth0" name="eth0">
+      <member index="0" type="channel">Comedor/chan2</member>
+      <member type="network">Comedor</member>
+      <address type="mac">00:00:00:aa:00:12</address>
+      <address type="IPv4">198.235.151.21/26</address>
+    </interface>
+    <alias domain="COREID">13</alias>
+    <point lat="47.5713935307" lon="-122.113663101" type="gps"/>
+  </host>
+  <host id="n14" name="n14">
+    <type domain="CORE">PC</type>
+    <interface id="n14/eth0" name="eth0">
+      <member index="0" type="channel">Administracion/chan1</member>
+      <member type="network">Administracion</member>
+      <address type="mac">00:00:00:aa:00:0d</address>
+      <address type="IPv4">198.235.151.20/27</address>
+    </interface>
+    <alias domain="COREID">14</alias>
+    <point lat="47.5729191151" lon="-122.122492764" type="gps"/>
+  </host>
+  <host id="n15" name="n15">
+    <type domain="CORE">PC</type>
+    <interface id="n15/eth0" name="eth0">
+      <member index="0" type="channel">Gerencia/chan2</member>
+      <member type="network">Gerencia</member>
+      <address type="mac">00:00:00:aa:00:10</address>
+      <address type="IPv4">198.235.151.21/28</address>
+    </interface>
+    <alias domain="COREID">15</alias>
+    <point lat="47.5713962176" lon="-122.117512254" type="gps"/>
+  </host>
+  <host id="n16" name="n16">
+    <type domain="CORE">host</type>
+    <interface id="n16/eth0" name="eth0">
+      <member index="0" type="channel">Administracion/chan2</member>
+      <member type="network">Administracion</member>
+      <address type="mac">00:00:00:aa:00:0e</address>
+      <address type="IPv4">198.235.151.10/27</address>
+    </interface>
+    <alias domain="COREID">16</alias>
+    <point lat="47.5717732848" lon="-122.120916373" type="gps"/>
+  </host>
+  <host id="n17" name="n17">
+    <type domain="CORE">host</type>
+    <interface id="n17/eth0" name="eth0">
+      <member index="0" type="channel">Expedicion/chan2</member>
+      <member type="network">Expedicion</member>
+      <address type="mac">00:00:00:aa:00:0c</address>
+      <address type="IPv4">198.235.151.10/28</address>
+    </interface>
+    <alias domain="COREID">17</alias>
+    <point lat="47.5719461451" lon="-122.124104558" type="gps"/>
+  </host>
+  <host id="n18" name="n18">
+    <type domain="CORE">host</type>
+    <interface id="n18/eth0" name="eth0">
+      <member index="0" type="channel">Produccion/chan2</member>
+      <member type="network">Produccion</member>
+      <address type="mac">00:00:00:aa:00:0a</address>
+      <address type="IPv4">198.235.151.10/27</address>
+    </interface>
+    <alias domain="COREID">18</alias>
+    <point lat="47.5720487088" lon="-122.128709975" type="gps"/>
+  </host>
+  <CORE:defaultservices>
+    <device type="router">
+      <service name="zebra"/>
+      <service name="OSPFv2"/>
+      <service name="OSPFv3"/>
+      <service name="vtysh"/>
+      <service name="IPForward"/>
+    </device>
+    <device type="host">
+      <service name="DefaultRoute"/>
+      <service name="SSH"/>
+    </device>
+    <device type="PC">
+      <service name="DefaultRoute"/>
+    </device>
+  </CORE:defaultservices>
+  <CORE:sessionconfig>
+    <origin alt="2.0" lat="47.5791667" lon="-122.132322" scale100="150.0"/>
+    <metadata>
+      <parameter name="global_options">interface_names=no ip_addresses=yes ipv6_addresses=yes node_labels=yes link_labels=yes show_api=no background_images=no annotations=yes grid=yes traffic_start=0</parameter>
+      <parameter name="canvas c1">{name {Canvas1}}</parameter>
+    </metadata>
+  </CORE:sessionconfig>
+</scenario>
