@@ -1,48 +1,69 @@
 \section{Resolución}
 
-Lo primero que se hizo fue definir las direcciones que iban a ser utilizadas.\\
+La primera tarea realizada para la resolución fue definir las direcciones que iban a ser utilizadas.\\
 
-Del lado externo el enunciado indica que se está conectado a la subred 198.235.150.128/25, por lo tanto, se tienen 7 bits para hosts (127 posibles) y la máscara es 255.255.255.128 = 255.255.255.10000000. La dirección asignada al router es 198.235.150.136 con Default Gateway 198.235.150.129.\\
+En el enunciado, se especifica que del se está conectado a la subred \texttt{198.235.150.128/25}, por lo tanto, se tienen 7 bits para hosts (127 posibles) y la máscara es \texttt{255.255.255.128 = 255.255.255.10000000}. La dirección asignada al router es \texttt{198.235.150.136} con \textit{Default Gateway} \texttt{198.235.150.129}.\\
 
 Sería un error confundir la dirección asignada al router con el Default Gateway ya que esta última es la conexión hacia el proveedor y si se pone esta conexión hacia el lado del router cuando se quiera enviar un paquete de salida habría que hacer una tabla de ruteo por cada dirección de salida que se quiere tener.\\
 
-Del lado interno se provee la subred de clase C 198.235.151.0/24, por lo tanto, se tienen 8 bits para hosts (255 posibles) y la máscara es 255.255.255.0 = 255.255.255.00000000. La dirección asignada al router es 198.235.151.1.\\
+Del lado interno se provee la subred de clase C \texttt{198.235.151.0/24}, por lo tanto, se tienen 8 bits para hosts (255 posibles) y la máscara es \texttt{255.255.255.0 = 255.255.255.00000000}. La dirección asignada al router es \texttt{198.235.151.1}.\\
 
 Asimismo, del lado interno se tienen 5 dependencias:
 \begin{itemize}
-    \item \textbf{Producción} que requiere 32 hosts por lo tanto requiere 5 bits y la máscara es /27, es decir 255.255.255.224.
+    \item \textbf{Producción} que requiere 32 hosts por lo tanto requiere 5 bits y la máscara es /27, es decir \texttt{255.255.255.224}.
     \item \textbf{Administración} que requiere 32 hosts, es igual a producción.
-    \item \textbf{Gerencia} que requiere 16 hosts por lo tanto requiere 4 bits y la máscara es /28, es decir 255.255.255.240.
+    \item \textbf{Gerencia} que requiere 16 hosts por lo tanto requiere 4 bits y la máscara es /28, es decir \texttt{255.255.255.240}.
     \item \textbf{Expedición} que requiere 16 hosts, es igual que gerencia.
-    \item \textbf{Comedor} que requiere 64 hosts por lo tanto requiere 6 bits y la máscara es /26, es decir 255.255.255.192.
+    \item \textbf{Comedor} que requiere 64 hosts por lo tanto requiere 6 bits y la máscara es /26, es decir \texttt{255.255.255.192}.
 \end{itemize}
 
-En el edificio 1 se tiene producción y expedición lo cual significa que se necesitan 48 hosts, por lo tanto, se requieren 6 bits y la máscara es /26, es decir 255.255.255.192 (quedan 16 direcciones IP libres).\\
+En el edificio 1 se tiene producción y expedición lo cual significa que se necesitan 48 hosts, por lo tanto, se requieren 6 bits y la máscara es /26, es decir \texttt{255.255.255.192} (quedan 16 direcciones IP libres).\\
 
-En el edificio 2 en cambio se encuentran gerencia, administración y comedor lo cual significa que se necesitan 112 hosts, por lo tanto, se requieren 7 bits y la máscara es /25, es decir 255.255.255.128 (quedan 16 direcciones IP libres).\\
+En el edificio 2 en cambio se encuentran gerencia, administración y comedor lo cual significa que se necesitan 112 hosts, por lo tanto, se requieren 7 bits y la máscara es /25, es decir \texttt{255.255.255.128} (quedan 16 direcciones IP libres).\\
 
-El enunciado también dice que la red que conecta ambos edificios tiene que ser de la mínima cantidad posible por lo tanto es una máscara /30, es decir 255.255.255.252. Esto es porque se necesita una dirección para cada router, una para el broadcast y una para la Gateway. \\
+El enunciado también dice que la red que conecta ambos edificios tiene que ser de la mínima cantidad posible por lo tanto es una máscara /30, es decir \texttt{255.255.255.252}. Esto es porque se necesita una dirección para cada router, una para el \textit{broadcast} y una para la \textit{Gateway}. \\
 
-Luego, se calculan las subredes utilizadas. La dirección de red es 192.235.151.00000000 por lo tanto a continuación se proceden a especificar las subredes a utilizar para el edificio 1, 2 y la red de interconexión.\\
+Luego, se calculan las subredes utilizadas. La dirección de red es \texttt{192.235.151.00000000} por lo tanto a continuación se proceden a especificar las subredes a utilizar para el edificio 1, 2 y la red de interconexión.\\
 
 \begin{itemize}
-    \item Subred Edificio 1: 192.235.151.10000000 
+    \item \textbf{Subred Edificio 1}: \texttt{192.235.151.10000000} 
     \begin{itemize}
-        \item \textbf{Producción}: 192.235.151.110|00000, la dirección IP es 198.235.151.192/27.
-        \item \textbf{Producción}: 192.235.151.1000|0000, la dirección IP es 198.235.151.128/28.
+        \item \textbf{Producción}: \texttt{192.235.151.110|00000}, la dirección IP es \texttt{198.235.151.192/27}.
+        \item \textbf{Producción}: \texttt{192.235.151.1000|0000}, la dirección IP es \texttt{198.235.151.128/28}.
     \end{itemize}
-    \item Subred Edificio 2: 192.235.151.10000000 
+    \item \textbf{Subred Edificio 2}: \texttt{192.235.151.10000000} 
     \begin{itemize}
-        \item \textbf{Administración}: 192.235.151. 000|00000, la dirección IP es 198.235.151.0/27.
-        \item \textbf{Gerencia}: 192.235.151.0010|0000, la dirección IP es 198.235.151.32/28.
-        \item \textbf{Producción}: 192.235.151. 01|000000, la dirección IP es 198.235.151.64/26.
+        \item \textbf{Administración}: \texttt{192.235.151. 000|00000}, la dirección IP es \texttt{198.235.151.0/27}.
+        \item \textbf{Gerencia}: \texttt{192.235.151.0010|0000}, la dirección IP es \texttt{198.235.151.32/28}.
+        \item \textbf{Producción}: \texttt{192.235.151. 01|000000}, la dirección IP es \texttt{198.235.151.64/26}.
     \end{itemize}
 \end{itemize}
 
-Como el edificio 1 tiene menos conexiones IP asignadas se utilizará este mismo para la red de interconexión. Esta es 192.235.151.101000|00, la dirección IP es 198.235.151.160/30.\\
+Como el edificio 1 tiene menos conexiones IP asignadas se utilizará este mismo para la red de interconexión. Esta es \texttt{192.235.151.101000|00}, la dirección IP es \texttt{198.235.151.160/30}.\\
 
-Por último, para verificar que ninguna red esta dentro de otra se verifica el rango de direcciones posible, es decir la dirección mas grande y chica que puede tener un host.\\
+Por último, para verificar que ninguna red esta dentro de otra, se verifica el rango de direcciones posible (es decir la dirección máxima y mínima que puede tener un host). Se resume esta información en el siguiente cuadro:\\
 
-%Aca va la tabla
 
-Ta joya.
+\begin{table}[H]
+    \rowcolors{2}{white}{lightgray}
+    \centering
+    \begin{tabular}{c|c|c|c}
+        %\hline
+        \textbf{Nombre} & \textbf{Dirección de subred} & \textbf{Dirección mínima} & \textbf{Dirección máxima} \\
+        \hline
+        Producción & \small\texttt{192.235.151.192/27} & \small\texttt{192.235.151.193} & \small\texttt{192.235.151.223} \\ 
+        %\hline
+        Expedición & \small\texttt{192.235.151.128/28} & \small\texttt{192.235.151.129} & \small\texttt{192.235.151.143} \\ 
+        %\hline
+        Administración & \small\texttt{192.235.151.0/27} & \small\texttt{192.235.151.1} & \small\texttt{192.235.151.31} \\ 
+        %\hline
+        Gerencia & \small\texttt{192.235.151.32/28} & \small\texttt{192.235.151.33} & \small\texttt{192.235.151.47} \\ 
+        %\hline
+        Comedor & \small\texttt{192.235.151.64/26} & \small\texttt{192.235.151.65} & \small\texttt{192.235.151.127} \\ 
+        %\hline
+        Red de interconexión & \small\texttt{192.235.151.160/30} & \small\texttt{192.235.151.161} & \small\texttt{192.235.151.162} \\ 
+        %\hline}
+    \end{tabular}
+    \caption{Direcciones mínimas y máximas de cada subred}
+    \label{tabla_minmax}
+\end{table}

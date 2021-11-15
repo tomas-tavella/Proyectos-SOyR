@@ -13,19 +13,21 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{graphicx}
+\usepackage[table]{xcolor}                      % Para poder definir colores
 \usepackage[colorlinks=true, allcolors=black]{hyperref}
 \usepackage{float}                              % Permite forzar una posición para una figura
 \usepackage{svg}                                % Para poder insertar SVGs
 \usepackage[justification=centering]{caption}   % Para poder centrar captions de figuras
 \usepackage{gensymb}                            % Símbolo de grados (\degree)
 \usepackage{subfigure}                          % Para poder usar subfiguras (logos de UNLP y FI juntos)
-\usepackage{listings}                           % Para poder incluir código
-\usepackage{xcolor}                             % Para poder definir colores        
+\usepackage{listings}                           % Para poder incluir código       
 
 \definecolor{codegreen}{rgb}{0,0.6,0}           % Colores para el código
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+
 
 \lstdefinestyle{mystyle}{                       % Parametros para setear como se 
     backgroundcolor=\color{backcolour},         % muestra el codigo
@@ -47,6 +49,10 @@
 }
 
 \lstset{style=mystyle}
+
+\setlength{\arrayrulewidth}{0.5mm}              % Grosor de linea de la tabla
+%\setlength{\tabcolsep}{9pt}                    % Ancho de cada celda
+\renewcommand{\arraystretch}{1.3}               % Alto de cada celda
 
 \begin{document}
 
