@@ -1,0 +1,450 @@
+node n1 {
+    type router
+    model router
+    network-config {
+	hostname prov
+	!
+	interface eth1
+	 ip address 10.0.0.1/24
+	!
+	interface eth0
+	 ip address 198.235.150.129/25
+	!
+    }
+    canvas c1
+    iconcoords {350.66666666666663 126.33333333333334}
+    labelcoords {297.66666666666663 133.0}
+    interface-peer {eth0 n2}
+    interface-peer {eth1 n19}
+    services {IPForward}
+}
+
+node n2 {
+    type router
+    model router
+    network-config {
+	hostname edif1
+	!
+	interface eth3
+	 ip address 198.235.151.161/30
+	!
+	interface eth2
+	 ip address 198.235.151.129/28
+	!
+	interface eth1
+	 ip address 198.235.151.193/27
+	!
+	interface eth0
+	 ip address 198.235.150.136/25
+	!
+    }
+    canvas c1
+    iconcoords {344.0 288.0}
+    labelcoords {294.33333333333337 289.3333333333333}
+    interface-peer {eth0 n1}
+    interface-peer {eth1 n4}
+    interface-peer {eth2 n5}
+    interface-peer {eth3 n3}
+    services {IPForward UserDefined}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	cmdup=('ip r add 198.235.151.0/27 via 198.235.151.162', 'ip r add 198.235.151.32/28 via 198.235.151.162', 'ip r add 198.235.151.64/26 via 198.235.151.162', 'ip r add default via 198.235.150.129', )
+	}
+    }
+}
+
+node n3 {
+    type router
+    model router
+    network-config {
+	hostname edif2
+	!
+	interface eth3
+	 ip address 198.235.151.65/26
+	!
+	interface eth2
+	 ip address 198.235.151.1/27
+	!
+	interface eth1
+	 ip address 198.235.151.33/28
+	!
+	interface eth0
+	 ip address 198.235.151.162/30
+	!
+    }
+    canvas c1
+    iconcoords {668.3333333333333 295.6666666666667}
+    labelcoords {616.6666666666667 277.0}
+    interface-peer {eth0 n2}
+    interface-peer {eth1 n6}
+    interface-peer {eth2 n7}
+    interface-peer {eth3 n8}
+    services {IPForward UserDefined}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	cmdup=('ip r add default via 198.235.151.161', )
+	}
+    }
+}
+
+node n4 {
+    type lanswitch
+    network-config {
+	hostname prod
+	!
+    }
+    canvas c1
+    iconcoords {204.33333333333331 386.6666666666667}
+    labelcoords {204.33333333333331 410.6666666666667}
+    interface-peer {e0 n2}
+    interface-peer {e1 n9}
+    interface-peer {e2 n10}
+}
+
+node n5 {
+    type lanswitch
+    network-config {
+	hostname exp
+	!
+    }
+    canvas c1
+    iconcoords {345.0 401.3333333333333}
+    labelcoords {345.0 426.3333333333333}
+    interface-peer {e0 n2}
+    interface-peer {e1 n11}
+    interface-peer {e2 n12}
+}
+
+node n6 {
+    type lanswitch
+    network-config {
+	hostname ger
+	!
+    }
+    canvas c1
+    iconcoords {663.3333333333333 432.3333333333333}
+    labelcoords {695.3333333333333 439.3333333333333}
+    interface-peer {e0 n3}
+    interface-peer {e1 n13}
+    interface-peer {e2 n14}
+}
+
+node n7 {
+    type lanswitch
+    network-config {
+	hostname admin
+	!
+    }
+    canvas c1
+    iconcoords {810.6666666666667 393.3333333333333}
+    labelcoords {810.6666666666667 417.3333333333333}
+    interface-peer {e0 n3}
+    interface-peer {e1 n15}
+    interface-peer {e2 n16}
+}
+
+node n8 {
+    type lanswitch
+    network-config {
+	hostname comedor
+	!
+    }
+    canvas c1
+    iconcoords {765.6666666666667 207.33333333333331}
+    labelcoords {817.6666666666667 217.33333333333331}
+    interface-peer {e0 n3}
+    interface-peer {e1 n17}
+    interface-peer {e2 n18}
+}
+
+node n9 {
+    type router
+    model PC
+    network-config {
+	hostname n9
+	!
+	interface eth0
+	 ip address 198.235.151.194/27
+	!
+    }
+    canvas c1
+    iconcoords {100.0 325.0}
+    labelcoords {103.0 301.0}
+    interface-peer {eth0 n4}
+}
+
+node n10 {
+    type router
+    model PC
+    network-config {
+	hostname n10
+	!
+	interface eth0
+	 ip address 198.235.151.195/27
+	!
+    }
+    canvas c1
+    iconcoords {173.0 476.0}
+    labelcoords {173.0 508.0}
+    interface-peer {eth0 n4}
+}
+
+node n11 {
+    type router
+    model PC
+    network-config {
+	hostname n11
+	!
+	interface eth0
+	 ip address 198.235.151.130/28
+	!
+    }
+    canvas c1
+    iconcoords {294.0 514.0}
+    labelcoords {294.0 546.0}
+    interface-peer {eth0 n5}
+}
+
+node n12 {
+    type router
+    model PC
+    network-config {
+	hostname n12
+	!
+	interface eth0
+	 ip address 198.235.151.131/28
+	!
+    }
+    canvas c1
+    iconcoords {467.0 466.0}
+    labelcoords {467.0 498.0}
+    interface-peer {eth0 n5}
+}
+
+node n13 {
+    type router
+    model PC
+    network-config {
+	hostname n13
+	!
+	interface eth0
+	 ip address 198.235.151.34/28
+	!
+    }
+    canvas c1
+    iconcoords {581.0 489.0}
+    labelcoords {581.0 521.0}
+    interface-peer {eth0 n6}
+}
+
+node n14 {
+    type router
+    model PC
+    network-config {
+	hostname n14
+	!
+	interface eth0
+	 ip address 198.235.151.35/28
+	!
+    }
+    canvas c1
+    iconcoords {709.0 539.0}
+    labelcoords {709.0 571.0}
+    interface-peer {eth0 n6}
+}
+
+node n15 {
+    type router
+    model PC
+    network-config {
+	hostname n15
+	!
+	interface eth0
+	 ip address 198.235.151.2/27
+	!
+    }
+    canvas c1
+    iconcoords {830.0 487.0}
+    labelcoords {830.0 519.0}
+    interface-peer {eth0 n7}
+}
+
+node n16 {
+    type router
+    model PC
+    network-config {
+	hostname n16
+	!
+	interface eth0
+	 ip address 198.235.151.3/27
+	!
+    }
+    canvas c1
+    iconcoords {906.0 342.0}
+    labelcoords {907.0 321.0}
+    interface-peer {eth0 n7}
+}
+
+node n17 {
+    type router
+    model PC
+    network-config {
+	hostname n17
+	!
+	interface eth0
+	 ip address 198.235.151.66/26
+	!
+    }
+    canvas c1
+    iconcoords {716.0 109.0}
+    labelcoords {716.0 141.0}
+    interface-peer {eth0 n8}
+}
+
+node n18 {
+    type router
+    model PC
+    network-config {
+	hostname n18
+	!
+	interface eth0
+	 ip address 198.235.151.67/26
+	!
+    }
+    canvas c1
+    iconcoords {864.0 163.0}
+    labelcoords {864.0 195.0}
+    interface-peer {eth0 n8}
+}
+
+node n19 {
+    type router
+    model host
+    network-config {
+	hostname LEICI
+	!
+	interface eth0
+	 ip address 10.0.0.10/24
+	!
+    }
+    canvas c1
+    iconcoords {454.0 44.0}
+    labelcoords {454.0 76.0}
+    interface-peer {eth0 n1}
+}
+
+link l1 {
+    nodes {n1 n2}
+    bandwidth 0
+}
+
+link l2 {
+    nodes {n2 n4}
+    bandwidth 0
+}
+
+link l3 {
+    nodes {n5 n2}
+    bandwidth 0
+}
+
+link l4 {
+    nodes {n2 n3}
+    bandwidth 0
+}
+
+link l5 {
+    nodes {n3 n6}
+    bandwidth 0
+}
+
+link l6 {
+    nodes {n3 n7}
+    bandwidth 0
+}
+
+link l7 {
+    nodes {n3 n8}
+    bandwidth 0
+}
+
+link l8 {
+    nodes {n19 n1}
+    bandwidth 0
+}
+
+link l9 {
+    nodes {n9 n4}
+    bandwidth 0
+}
+
+link l10 {
+    nodes {n4 n10}
+    bandwidth 0
+}
+
+link l11 {
+    nodes {n11 n5}
+    bandwidth 0
+}
+
+link l12 {
+    nodes {n5 n12}
+    bandwidth 0
+}
+
+link l13 {
+    nodes {n13 n6}
+    bandwidth 0
+}
+
+link l14 {
+    nodes {n6 n14}
+    bandwidth 0
+}
+
+link l15 {
+    nodes {n15 n7}
+    bandwidth 0
+}
+
+link l16 {
+    nodes {n7 n16}
+    bandwidth 0
+}
+
+link l17 {
+    nodes {n8 n17}
+    bandwidth 0
+}
+
+link l18 {
+    nodes {n8 n18}
+    bandwidth 0
+}
+
+canvas c1 {
+    name {Canvas1}
+}
+
+option global {
+    interface_names no
+    ip_addresses yes
+    ipv6_addresses no
+    node_labels yes
+    link_labels yes
+    show_api no
+    background_images no
+    annotations yes
+    grid yes
+    traffic_start 0
+}
+
+option session {
+    enablesdt=1
+}
+
