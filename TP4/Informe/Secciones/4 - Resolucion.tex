@@ -26,20 +26,20 @@ El enunciado también dice que la red que conecta ambos edificios tiene que ser 
 Luego, se calculan las subredes utilizadas. La dirección de red es \texttt{192.235.151.00000000} por lo tanto a continuación se proceden a especificar las subredes a utilizar para el edificio 1, 2 y la red de interconexión.\\
 
 \begin{itemize}
-    \item \textbf{Subred Edificio 1}: \texttt{192.235.151.10000000} 
+    \item \textbf{Subred Edificio 1}: \texttt{198.235.151.10000000} 
     \begin{itemize}
-        \item \textbf{Producción}: \texttt{192.235.151.110|00000}, la dirección IP es \texttt{198.235.151.192/27}.
-        \item \textbf{Expedición}: \texttt{192.235.151.1000|0000}, la dirección IP es \texttt{198.235.151.128/28}.
+        \item \textbf{Producción}: \texttt{198.235.151.110|00000}, la dirección IP es \texttt{198.235.151.192/27}.
+        \item \textbf{Expedición}: \texttt{198.235.151.1000|0000}, la dirección IP es \texttt{198.235.151.128/28}.
     \end{itemize}
-    \item \textbf{Subred Edificio 2}: \texttt{192.235.151.10000000} 
+    \item \textbf{Subred Edificio 2}: \texttt{198.235.151.10000000} 
     \begin{itemize}
-        \item \textbf{Administración}: \texttt{192.235.151. 000|00000}, la dirección IP es \texttt{198.235.151.0/27}.
-        \item \textbf{Gerencia}: \texttt{192.235.151.0010|0000}, la dirección IP es \texttt{198.235.151.32/28}.
-        \item \textbf{Producción}: \texttt{192.235.151. 01|000000}, la dirección IP es \texttt{198.235.151.64/26}.
+        \item \textbf{Administración}: \texttt{198.235.151. 000|00000}, la dirección IP es \texttt{198.235.151.0/27}.
+        \item \textbf{Gerencia}: \texttt{198.235.151.0010|0000}, la dirección IP es \texttt{198.235.151.32/28}.
+        \item \textbf{Producción}: \texttt{198.235.151. 01|000000}, la dirección IP es \texttt{198.235.151.64/26}.
     \end{itemize}
 \end{itemize}
 
-Como el edificio 1 tiene menos conexiones IP asignadas se utilizará este mismo para la red de interconexión. Esta es \texttt{192.235.151.101000|00}, la dirección IP es \texttt{198.235.151.160/30}.\\
+Como el edificio 1 tiene menos conexiones IP asignadas se utilizará este mismo para la red de interconexión. Esta es \texttt{198.235.151.101000|00}, la dirección IP es \texttt{198.235.151.160/30}.\\
 
 Por último, para verificar que ninguna red esta dentro de otra, se verifica el rango de direcciones posible (es decir la dirección máxima y mínima que puede tener un host). Se resume esta información en el siguiente cuadro:\\
 
@@ -51,21 +51,50 @@ Por último, para verificar que ninguna red esta dentro de otra, se verifica el 
         %\hline
         \textbf{Nombre} & \textbf{Dirección de subred} & \textbf{Dirección mínima} & \textbf{Dirección máxima} \\
         \hline
-        Producción & \small\texttt{192.235.151.192/27} & \small\texttt{192.235.151.193} & \small\texttt{192.235.151.223} \\ 
-        %\hline
-        Expedición & \small\texttt{192.235.151.128/28} & \small\texttt{192.235.151.129} & \small\texttt{192.235.151.143} \\ 
-        %\hline
-        Administración & \small\texttt{192.235.151.0/27} & \small\texttt{192.235.151.1} & \small\texttt{192.235.151.31} \\ 
-        %\hline
-        Gerencia & \small\texttt{192.235.151.32/28} & \small\texttt{192.235.151.33} & \small\texttt{192.235.151.47} \\ 
-        %\hline
-        Comedor & \small\texttt{192.235.151.64/26} & \small\texttt{192.235.151.65} & \small\texttt{192.235.151.127} \\ 
-        %\hline
-        Red de interconexión & \small\texttt{192.235.151.160/30} & \small\texttt{192.235.151.161} & \small\texttt{192.235.151.162} \\ 
-        %\hline}
+        Producción & \small\texttt{198.235.151.192/27} & \small\texttt{198.235.151.193} & \small\texttt{198.235.151.223} \\ 
+        Expedición & \small\texttt{198.235.151.128/28} & \small\texttt{198.235.151.129} & \small\texttt{198.235.151.143} \\ 
+        Administración & \small\texttt{198.235.151.0/27} & \small\texttt{198.235.151.1} & \small\texttt{198.235.151.31} \\ 
+        Gerencia & \small\texttt{198.235.151.32/28} & \small\texttt{198.235.151.33} & \small\texttt{198.235.151.47} \\ 
+        Comedor & \small\texttt{198.235.151.64/26} & \small\texttt{198.235.151.65} & \small\texttt{198.235.151.127} \\ 
+        Red de interconexión & \small\texttt{198.235.151.160/30} & \small\texttt{198.235.151.161} & \small\texttt{198.235.151.162} \\ 
     \end{tabular}
-    \caption{Direcciones mínimas y máximas de cada subred}
+    \caption{Direcciones mínimas y máximas de cada subred\\}
     \label{tabla_minmax}
 \end{table}
 
-    Una vez establecidas las subredes y conectadas en el CORE, deben setearse las tablas de ruteo para asegurar la comunicación entre los distintos hosts. El router del edificio 1 debe derivar las requests hacia las redes de gerencia, administración o comedor al router del edificio 2, y por default a la red del proveedor, y el router del edificio 2 debe derivar todas las request por default al router del edificio 1.
+Una vez establecidas las subredes y conectadas en el CORE, deben setearse las tablas de ruteo para asegurar la comunicación entre los distintos hosts. El router del edificio 1 debe derivar las requests hacia las redes de gerencia, administración o comedor al router del edificio 2, y por default a la red del proveedor, y el router del edificio 2 debe derivar todas las request por default al router del edificio 1. Se presentan a continuación ambas tablas:\\
+
+\begin{table}[H]
+    \rowcolors{2}{white}{lightgray}
+    \centering
+    \begin{tabular}{c|c|c}
+        \textbf{Destino} & \textbf{Dirección de destino} & \textbf{Dirección de gateway} \\
+        \hline
+        \small Administración & \small\texttt{198.235.151.0} & \small\texttt{198.235.150.162} \\ 
+        \small Gerencia & \small\texttt{198.235.151.32} & \small\texttt{198.235.150.162} \\ 
+        \small Comedor & \small\texttt{198.235.151.64} & \small\texttt{198.235.150.162} \\
+        \small Expedición & \small\texttt{198.235.151.128} & \small\texttt{0.0.0.0} \\
+        \small Red de interconexión & \small\texttt{198.235.151.160} & \small\texttt{0.0.0.0} \\
+        \small Producción & \small\texttt{198.235.151.192} & \small\texttt{0.0.0.0} \\
+        \small Proveedor & \small\texttt{198.235.150.128} & \small\texttt{0.0.0.0} \\
+        \small Otro & \small\texttt{0.0.0.0} & \small\texttt{198.235.150.129} \\  
+    \end{tabular}
+    \caption{Tabla de ruteo del edificio 1\\}
+    \label{tabla_edif1}
+\end{table}
+
+\begin{table}[H]
+    \rowcolors{2}{white}{lightgray}
+    \centering
+    \begin{tabular}{c|c|c}
+        \textbf{Destino} & \textbf{Dirección de destino} & \textbf{Dirección de gateway} \\
+        \hline 
+        \small Administración & \small\texttt{198.235.151.0} & \small\texttt{0.0.0.0} \\ 
+        \small Gerencia & \small\texttt{198.235.151.32} & \small\texttt{0.0.0.0} \\ 
+        \small Comedor & \small\texttt{198.235.151.64} & \small\texttt{0.0.0.0} \\  
+        \small Red de interconexión & \small\texttt{198.235.151.160} & \small\texttt{0.0.0.0} \\
+        \small Otro & \small\texttt{0.0.0.0} & \small\texttt{198.235.150.161} \\
+    \end{tabular}
+    \caption{Tabla de ruteo del edificio 2\\}
+    \label{tabla_edif2}
+\end{table}
