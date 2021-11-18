@@ -2,7 +2,7 @@
 
 La primera tarea realizada para la resolución fue definir las direcciones que iban a ser utilizadas.\\
 
-En el enunciado, se especifica que del se está conectado a la subred \texttt{198.235.150.128/25}, por lo tanto, se tienen 7 bits para hosts (127 posibles) y la máscara es \texttt{255.255.255.128 = 255.255.255.10000000}. La dirección asignada al router es \texttt{198.235.150.136} con \textit{Default Gateway} \texttt{198.235.150.129}.\\
+En el enunciado, se especifica que del proveedor se está conectado a la subred \texttt{198.235.150.128/25}, por lo tanto, se tienen 7 bits para hosts (127 posibles) y la máscara es \texttt{255.255.255.128 = 255.255.255.10000000}. La dirección asignada al router es \texttt{198.235.150.136} con \textit{Default Gateway} \texttt{198.235.150.129}.\\
 
 Sería un error confundir la dirección asignada al router con el Default Gateway ya que esta última es la conexión hacia el proveedor y si se pone esta conexión hacia el lado del router cuando se quiera enviar un paquete de salida habría que hacer una tabla de ruteo por cada dirección de salida que se quiere tener.\\
 
@@ -66,4 +66,6 @@ Por último, para verificar que ninguna red esta dentro de otra, se verifica el 
     \end{tabular}
     \caption{Direcciones mínimas y máximas de cada subred}
     \label{tabla_minmax}
+
+    Una vez establecidas las subredes y conectadas en el CORE, deben setearse las tablas de ruteo para asegurar la comunicación entre los distintos hosts. El router del edificio 1 debe derivar las requests hacia las redes de gerencia, administración o comedor al router del edificio 2, y por default a la red del proveedor, y el router del edificio 2 debe derivar todas las request por default al router del edificio 1.
 \end{table}
