@@ -62,7 +62,16 @@ Por último, para verificar que ninguna red esta dentro de otra, se verifica el 
     \label{tabla_minmax}
 \end{table}
 
-Una vez establecidas las subredes y conectadas en el CORE, deben setearse las tablas de ruteo para asegurar la comunicación entre los distintos hosts. El router del edificio 1 debe derivar las requests hacia las redes de gerencia, administración o comedor al router del edificio 2, y por default a la red del proveedor, y el router del edificio 2 debe derivar todas las request por default al router del edificio 1. Se presentan a continuación ambas tablas:\\
+Una vez establecidas las subredes, se procede a simular la red completa en el \textit{CORE}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.55]{Imagenes/Red.png}
+    \caption{Red completa implementada en el \textit{CORE}.}
+    \label{diagrama1}
+\end{figure}
+
+ Si bien las conexiones \enquote{físicas} están establecidas, deben setearse las tablas de ruteo para asegurar la comunicación entre los distintos hosts. El router del edificio 1 debe derivar las requests hacia las redes de gerencia, administración o comedor al router del edificio 2, y por default a la red del proveedor, y el router del edificio 2 debe derivar todas las request por default al router del edificio 1. Se presentan a continuación ambas tablas:\\
 
 \begin{table}[H]
     \rowcolors{2}{white}{lightgray}
@@ -98,3 +107,14 @@ Una vez establecidas las subredes y conectadas en el CORE, deben setearse las ta
     \caption{Tabla de ruteo del edificio 2\\}
     \label{tabla_edif2}
 \end{table}
+
+El efecto de no tener configuradas las tablas de ruteo correctamente puede verse utilizando \textit{Wireshark}, un programa que permite capturar los paquetes que se envían por las distintas interfaces de un router. Observando, por ejemplo, la interfaz IF1 del edificio 1 (\textit{eth1}), y utilizando el terminal de un host conectado a esa boca del router (en este caso, el host n9 en 198.235.151.194) para hacer un ping al host n15 (198.235.151.2), al no tener respuesta el router contesta con \enquote{Destination unreachable}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{Imagenes/Wireshark - Sin ruteo.png}
+    \caption{Paquetes interceptados en la interfaz 1 del edificio 1 en \textit{Wireshark}. Sin tablas de ruteo.}
+    \label{diagrama2}
+\end{figure}
+
+En la figura \ref{diagrama2} puede observarse además el funcionamiento del ARP, o Address Resolution Protocol, donde inicialmente el host hace un broadcast preguntando dentro de la subred, a quien corresponde el IP de la puerta de enlace, que en este caso es el router.
