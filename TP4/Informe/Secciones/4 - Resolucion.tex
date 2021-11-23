@@ -108,13 +108,22 @@ Una vez establecidas las subredes, se procede a simular la red completa en el \t
     \label{tabla_edif2}
 \end{table}
 
-El efecto de no tener configuradas las tablas de ruteo correctamente puede verse utilizando \textit{Wireshark}, un programa que permite capturar los paquetes que se envían por las distintas interfaces de un router. Observando, por ejemplo, la interfaz IF1 del edificio 1 (\textit{eth1}), y utilizando el terminal de un host conectado a esa boca del router (en este caso, el host n9 en 198.235.151.194) para hacer un ping al host n15 (198.235.151.2), al no tener respuesta el router contesta con \enquote{Destination unreachable}.
+El efecto de no tener configuradas las tablas de ruteo correctamente puede verse utilizando \textit{Wireshark}, un programa que permite capturar los paquetes que se envían por las distintas interfaces de un router. Observando, por ejemplo, la interfaz IF1 del edificio 1 (\textit{eth1}), y utilizando el terminal de un host conectado a esa boca del router (en este caso, el host n9 en 198.235.151.194) para hacer un ping al host n15 (198.235.151.2), al no tener respuesta el router contesta con \enquote{Destination unreachable}.\\
 
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.5]{Imagenes/Wireshark - Sin ruteo.png}
-    \caption{Paquetes interceptados en la interfaz 1 del edificio 1 en \textit{Wireshark}. Sin tablas de ruteo.}
-    \label{diagrama2}
+    \caption{Paquetes interceptados en la interfaz 1 del edificio 1 en \textit{Wireshark} sin tablas de ruteo implementadas.\\}
+    \label{ws_sin_ruteo}
 \end{figure}
 
-En la figura \ref{diagrama2} puede observarse además el funcionamiento del ARP, o Address Resolution Protocol, donde inicialmente el host hace un broadcast preguntando dentro de la subred, a quien corresponde el IP de la puerta de enlace, que en este caso es el router.
+En la figura \ref{ws_sin_ruteo} puede observarse además el funcionamiento del ARP, o Address Resolution Protocol, donde inicialmente el host hace un broadcast preguntando dentro de la subred, a quien corresponde el IP de la puerta de enlace, que en este caso es el router.\\
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{Imagenes/Wireshark - Rutea2.png}
+    \caption{Paquetes interceptados en la interfaz 1 del edificio 1 en \textit{Wireshark} con tablas de ruteo implementadas.\\}
+    \label{ws_con_ruteo}
+\end{figure}
+
+Como se ve en la figura \ref{ws_con_ruteo}, al agregar las tablas de ruteo a los routers, el ping puede realizar el camino de ida y vuelta a un host conectado en otra subred (ya no esta presente el mensaje de \textit{Destination Unreachable}).

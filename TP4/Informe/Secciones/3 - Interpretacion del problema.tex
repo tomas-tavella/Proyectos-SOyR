@@ -1,15 +1,14 @@
 \section{Interpretación del problema}
-Se debe diseñar la interconexión de las distintas dependencias por medio de subredes separadas, empleando un router por edificio, y cada boca de conexión será la subred de una dependencia, cada una con su switch.
+Se debe diseñar la interconexión de las distintas dependencias por medio de subredes separadas, empleando un router por edificio, y cada boca de conexión será la subred de una dependencia, cada una con su switch.\\
 
-Por ser el edificio 1 (Producción y Expedición) el de menor cantidad de hosts, la red de interconexión se ubicará en ese router.
+Por ser el edificio 1 (Producción y Expedición) el de menor cantidad de hosts, la red de interconexión se ubicará en ese router.\\
 
-Se necesitan 160 hosts en total, 48 en el edificio 1, y 112 en el edificio 2 de acuerdo a lo requerido por cada dependencia, y la ubicación física de las mismas.
+Se necesitan 160 hosts en total, 48 en el edificio 1, y 112 en el edificio 2 de acuerdo a lo requerido por cada dependencia, y la ubicación física de las mismas.\\
 
-Se debe proponer un esquema de conexión que emplee un router en cada uno de los edificios y que utilice una subred diferente con la mínima cantidad posible de direcciones IP para interconectar ambos routers, es por eso que la mascara de esta ultima es /30.
+Se debe proponer un esquema de conexión que emplee un router en cada uno de los edificios y que utilice una subred diferente con la mínima cantidad posible de direcciones IP para interconectar ambos routers, es por eso que la mascara de esta ultima es /30.\\
 
-Luego se asignan números de subred, máscaras y Default Gateway a cada subred (en el enunciado ya se indica la configuración que debe tener el router del primer edificio del lado externo e interno), lo cual implica que se debe verificar que ninguna red este dentro de otra.
+Luego se asignan números de subred, máscaras y Default Gateway a cada subred (en el enunciado ya se indica la configuración que debe tener el router del primer edificio del lado externo e interno), lo cual implica que se debe verificar que ninguna red este dentro de otra.\\
 
-Después se crean las tablas de ruteo en cada router para que los hosts puedan alcanzar internet y se puedan comunicar entre si.
+Después se crean las tablas de ruteo en cada router para que los hosts puedan alcanzar internet y se puedan comunicar entre si.\\
 
-Por ultimo se simula el diseño en CORE.
-
+Por ultimo se simula el diseño en CORE.\\
