@@ -126,4 +126,6 @@ En la figura \ref{ws_sin_ruteo} puede observarse además el funcionamiento del A
     \label{ws_con_ruteo}
 \end{figure}
 
-Como se ve en la figura \ref{ws_con_ruteo}, al agregar las tablas de ruteo a los routers, el ping puede realizar el camino de ida y vuelta a un host conectado en otra subred (ya no esta presente el mensaje de \textit{Destination Unreachable}).
+Como se ve en la figura \ref{ws_con_ruteo}, al agregar las tablas de ruteo a los routers, el ping puede realizar el camino de ida y vuelta a un host conectado en otra subred (ya no esta presente el mensaje de \textit{Destination Unreachable}).\\
+
+Debido a que el CORE no guarda el estado de la simulación, cada vez que ésta se corre es necesario armar las tablas de ruteo manualmente en cada router. Para evitar tener que realizar este trabajo cada vez que se corre la simulación, se empleó un servicio customizable con el cual cuentan los routers, llamado \textit{user specified}. Este servicio permite correr comandos al inicio o apagado de la simulación, con lo cual es posible escribir la lista completa de comandos que generan la tabla de ruteo, y que éstas ya funcionen desde el primer momento que se inicia la simulación.\\

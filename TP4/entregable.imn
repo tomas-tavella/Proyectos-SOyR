@@ -12,8 +12,8 @@ node n1 {
 	!
     }
     canvas c1
-    iconcoords {350.66666666666663 126.33333333333334}
-    labelcoords {297.66666666666663 133.0}
+    iconcoords {345.66666666666663 125.33333333333334}
+    labelcoords {292.66666666666663 132.0}
     interface-peer {eth0 n2}
     interface-peer {eth1 n19}
     services {IPForward}
@@ -39,8 +39,8 @@ node n2 {
 	!
     }
     canvas c1
-    iconcoords {344.0 288.0}
-    labelcoords {294.33333333333337 289.3333333333333}
+    iconcoords {347.0 297.0}
+    labelcoords {297.33333333333337 298.3333333333333}
     interface-peer {eth0 n1}
     interface-peer {eth1 n4}
     interface-peer {eth2 n5}
@@ -112,8 +112,8 @@ node n5 {
 	!
     }
     canvas c1
-    iconcoords {345.0 401.3333333333333}
-    labelcoords {345.0 426.3333333333333}
+    iconcoords {348.0 400.3333333333333}
+    labelcoords {354.0 424.3333333333333}
     interface-peer {e0 n2}
     interface-peer {e1 n11}
     interface-peer {e2 n12}
@@ -126,8 +126,8 @@ node n6 {
 	!
     }
     canvas c1
-    iconcoords {663.3333333333333 432.3333333333333}
-    labelcoords {695.3333333333333 439.3333333333333}
+    iconcoords {668.3333333333333 431.3333333333333}
+    labelcoords {700.3333333333333 438.3333333333333}
     interface-peer {e0 n3}
     interface-peer {e1 n13}
     interface-peer {e2 n14}
@@ -172,8 +172,8 @@ node n9 {
 	!
     }
     canvas c1
-    iconcoords {100.0 325.0}
-    labelcoords {103.0 301.0}
+    iconcoords {64.0 297.0}
+    labelcoords {67.0 273.0}
     interface-peer {eth0 n4}
 }
 
@@ -425,6 +425,107 @@ link l17 {
 link l18 {
     nodes {n8 n18}
     bandwidth 0
+}
+
+annotation a1 {
+    iconcoords {312.0 237.0}
+    type text
+    label {IF0}
+    labelcolor black
+    fontfamily {Arial}
+    fontsize 12
+    canvas c1
+}
+
+annotation a2 {
+    iconcoords {232.0 340.0}
+    type text
+    label {IF1}
+    labelcolor black
+    fontfamily {Arial}
+    fontsize 12
+    canvas c1
+}
+
+annotation a3 {
+    iconcoords {357.0 366.0}
+    type text
+    label {IF2}
+    labelcolor black
+    fontfamily {Arial}
+    fontsize 12
+    canvas c1
+}
+
+annotation a4 {
+    iconcoords {424.0 279.0}
+    type text
+    label {IF3}
+    labelcolor black
+    fontfamily {Arial}
+    fontsize 12
+    canvas c1
+}
+
+annotation a5 {
+    iconcoords {562.0 276.0}
+    type text
+    label {IF0}
+    labelcolor black
+    fontfamily {Arial}
+    fontsize 12
+    canvas c1
+}
+
+annotation a6 {
+    type text
+    iconcoords {676.0 292.0}
+    label {}
+    canvas c1
+}
+
+annotation a7 {
+    iconcoords {639.0 363.0}
+    type text
+    label {IF1}
+    labelcolor black
+    fontfamily {Arial}
+    fontsize 12
+    canvas c1
+}
+
+annotation a8 {
+    iconcoords {731.0 375.0}
+    type text
+    label {IF2}
+    labelcolor black
+    fontfamily {Arial}
+    fontsize 12
+    canvas c1
+}
+
+annotation a9 {
+    iconcoords {692.0 230.0}
+    type text
+    label {IF3}
+    labelcolor black
+    fontfamily {Arial}
+    fontsize 12
+    canvas c1
+}
+
+annotation a10 {
+    type text
+    iconcoords {411.0 -97.0}
+    label {}
+    canvas c1
+}
+
+annotation a11 {
+    type text
+    iconcoords {338.0 119.0}
+    label {}
+    canvas c1
 }
 
 canvas c1 {
