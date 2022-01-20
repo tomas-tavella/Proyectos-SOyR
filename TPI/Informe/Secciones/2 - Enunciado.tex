@@ -1,0 +1,24 @@
+\section{Enunciado}
+Queremos un programa \textbf{\textit{servidor concurrente}} que permita a un cliente que se conecta utilizando el protocolo TCP enviar un archivo para que el servidor lo almacene.\\
+
+\begin{itemize}
+    \item Cuando un cliente se conecta, el servidor enviará el mensaje: ``listo'' y esperará recibir la palabra ``archivo''.
+    \item A continuación el servidor espera un espacio y luego el nombre con que se quiere guardar el archivo (solo letras, números y el carácter ``.'') finalizado con un espacio.
+    \item Luego se quedará esperando un número codificado en \texttt{ascii} que indica el tamaño en bytes del archivo, también finalizado con un espacio.
+    \item A continuación comenzará la recepción de los datos, que serán almacenados en un archivo cuyo nombre es el recibido en primer término, hasta completar la cantidad de bytes correspondiente.
+    \item El servidor debe permitir la recepción de archivos binarios.
+    \item Una vez recibida la totalidad de los datos, el servidor contestará con el siguiente mensaje:
+    \begin{itemize}
+        \item ``Archivo xx completo, tamaño declarado yy bytes, tamaño real zz bytes.''
+        \begin{itemize}
+            \item xx: nombre del archivo.
+            \item yy: tamaño enviado en el mensaje del cliente.
+            \item zz: total de bytes recibidos por el servidor.
+        \end{itemize}
+    \end{itemize}
+    \item Luego el servidor cerrará la conexión con el cliente.
+    \item El servidor debe llevar un archivo de registro de todas las conexiones entrantes, con fecha y hora de inicio y de finalización, tamaño del archivo recibido, cantidad de bytes enviados y cantidad de bytes recibidos en formato \texttt{csv}.
+    \item Defina explícitamente cómo será el manejo de errores.
+    \item Para probar el programa puede utilizar el cliente TCP que se vio como ejemplo, o el programa \texttt{nc}.
+    \item Recuerde verificar que no queden procesos \textit{zombie} cuando finalizan los hijos generados.
+\end{itemize}
