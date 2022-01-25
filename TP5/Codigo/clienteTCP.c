@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
     }
      printf("El IP del servidor es: %s y el port del servidor  es %hu \n",inet_ntoa(server_addr.sin_addr),
             ntohs(server_addr.sin_port));
+  int cnt=0;
   do{  
     /* >>> Paso  #4 <<<
     fgets() lee caracteres desde stdin y los almacena en buf_tx. Número máximo de bytes es 1499 , dejo uno para el NULL
@@ -107,7 +108,24 @@ int main(int argc, char *argv[])
      luego voy a enviar SOLAMENTE los caracteres ingresados SIN el NULL de terminación, para eso cuento los caracteres 
      con strlen() y guardo ese número en bytesaenviar
      */
+    
+    if(cnt==0){
+      bytesrecibidos=recv(client_s, buf_rx, sizeof(buf_rx), 0);
+      buf_rx[bytesrecibidos]=0;  //Me aseguro que termine en NULL 
+      if(!strncmp(buf_rx,"Listo",5)){
+        printf("Se recibio la palabra %s\n", buf_rx);
+        sprintf(buf_tx,"Archivo"); // Mensaje de listo para recibir
+        bytesaenviar =  strlen(buf_tx);
+        bytestx=send(client_s, buf_tx, bytesaenviar, 0);
+      }
+      else{
+        printf("No se recibio la palabra Listo\n");
+      }
+    }
+    
+
     printf("Ingrese mensaje\n");
+
     fgets(buf_tx,1499,stdin);
     bytesaenviar=strlen(buf_tx)+1; //me aseguro que la cantidad de bytes a enviar sea la correcta 
     buf_tx[bytesaenviar]=0;
@@ -121,16 +139,18 @@ int main(int argc, char *argv[])
     /* >>> Paso  #6 <<<
     Quedo a la espera de recibir el mensaje del servidor
     */
-    bytesrecibidos=recv(client_s, buf_rx, sizeof(buf_rx), 0);
+    /*bytesrecibidos=recv(client_s, buf_rx, sizeof(buf_rx), 0);
     buf_rx[bytesrecibidos]=0;  //Me aseguro que termine en NULL 
     
     printf("%s", buf_rx);
-
+*/
     //* >>> Paso  #7 <<<
     // Envio al servidor,  
   
-    bytestx=send(client_s, buf_tx, bytesaenviar,0);   
+    bytestx=send(client_s, buf_tx, bytesaenviar,0);  
+    cnt++;
     } while (strncmp(buf_tx,"FIN",3)!=0); 
+    cnt=0;
 /* >>> Paso 11 <<< 
 En el while pongo como condición de salida que el mensaje enviado no comience con "FIN"
 */
