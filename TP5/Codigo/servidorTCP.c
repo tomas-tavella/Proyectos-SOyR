@@ -8,7 +8,7 @@
 #include <netinet/in.h> 
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <sys/time.h>
+#include <time.h>
 
 
 //----- Defines -------------------------------------------------------------
@@ -21,6 +21,7 @@
 int terminar=0;
 
 void handler(int sig);
+void writeLog(struct tm tiempo_i, struct tm tiempo_f, int status, int tam, int bytes_tx, int bytes_rx);
 
 //===== Main program ========================================================
 int main(int argc, char *argv[]) {
@@ -100,16 +101,14 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void writeLog(struct tm tiempo_i, struct tm tiempo_f, int status, int tam, int bytes_tx, int bytes_rx) {
+void writeLog(struct tm tiempo_i,struct tm tiempo_f, int status, int tam, int bytes_tx, int bytes_rx) {
     FILE *log;
     log = fopen("connect_log.csv","a");
     if (log == 0) {
         printf("Error accediendo al archivo de log.\n");
-        return 0;
+        return;
     }
-    gettimeofday(&tiempo, NULL);
-    tiempo_actual = 1000000*(tiempo.tv_sec - tiempo_i.tv_sec) + (tiempo.tv_usec - tiempo_i.tv_usec);
-    fprintf(log,"%02d/%02d/%d, Inicio: %02d:%02d:%02d, Fin: %02d:%02d:%02d, Estado: %d, Tamaño: %d, Enviado: %d, Recibido: %d");
+    fprintf(log,"%02d/%02d/%d, Inicio: %02d:%02d:%02d, Fin: %02d:%02d:%02d, Estado: %d, Tamaño: %d, Enviado: %d, Recibido: %d",tiempo_i.tm_mday,tiempo_i.tm_mon+1,tiempo_i.tm_year+1900,tiempo_i.tm_hour,tiempo_i.tm_min,tiempo_i.tm_sec,tiempo_f.tm_hour,tiempo_f.tm_min,tiempo_f.tm_sec,status,tam,bytes_tx,bytes_rx);
     fclose(log);
     return;
 }
