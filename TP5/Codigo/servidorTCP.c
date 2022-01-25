@@ -68,25 +68,39 @@ int main(int argc, char *argv[]) {
         tiempo_init = *localtime(&t);
         printf("Nueva conexión desde: %s:%hu\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
         if((pid_n=fork())==0) {
+        int cnt=0;
             do {
                 printf("Proceso hijo %d atendiendo conexión desde: %s\n",getpid(),inet_ntoa(client_addr.sin_addr));
                 close (server_s); // Cerrar socket no usado
-
-                sprintf(buf_tx,"Listo"); // Mensaje de listo para recibir
-                bytesaenviar =  strlen(buf_tx);
-                bytestx=send(connect_s, buf_tx, bytesaenviar, 0);
-                if (bytestx==-1) {
-                    perror ("send");
-                    return 3;
+                if(cnt==0){
+                    sprintf(buf_tx,"Listo"); // Mensaje de listo para recibir
+                    bytesaenviar =  strlen(buf_tx);
+                    bytestx=send(connect_s, buf_tx, bytesaenviar, 0);
+                    if (bytestx==-1) {
+                        perror ("send");
+                        return 3;
+                    }
                 }
-
                 bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
                 if (bytesrecibidos==-1) {
                     perror ("recv");
                     return 3;
                 }
+                if(cnt==0){
+                    if(!strncmp(buf_rx,"Archivo",7)){
+                        printf("Se recibio la palabra %s\n", buf_rx);
+                    }
+                    else{
+                        printf("No se recibio la palabra Archivo\n");
+                    }    
+                }
+                else{
+                    printf("Recibi %d bytes del cliente con texto = '%s' \n", bytesrecibidos, buf_rx);
+                }
+                cnt++;
                 // Verificar que se recibe "archivo" primero, armar string con el nombre, y ver como manejar la recepcion del archivo
             } while (strncmp(buf_rx,"FIN",3)!=0); 
+            cnt=0;
             close(connect_s);
 
             printf("Recepción terminada - Sin errores\n");
