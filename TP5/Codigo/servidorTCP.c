@@ -8,6 +8,7 @@
 #include <netinet/in.h> 
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 
 //----- Defines -------------------------------------------------------------
@@ -24,6 +25,7 @@ void handler(int sig);
 //===== Main program ========================================================
 int main(int argc, char *argv[]) {
 
+    FILE *archivo;
     unsigned int         server_s;        // Descriptor del socket
     unsigned int         connect_s;       // Connection socket descriptor
     struct sockaddr_in   server_addr;     // Estructura con los datos del servidor
@@ -33,8 +35,10 @@ int main(int argc, char *argv[]) {
     char                 buf_tx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     char                 buf_rx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
-    int                  i=0;             //contador de mensajes
     pid_t pid_n;
+    time_t t = time(NULL);
+    struct tm tiempo_init;
+    struct tm tiempo_fin;
 
     signal(SIGHUP,handler);
     server_s = socket(AF_INET, SOCK_STREAM, SOCKET_PROTOCOL);
@@ -60,6 +64,7 @@ int main(int argc, char *argv[]) {
             perror("accept");
             return 2;
         }
+        tiempo_init = *localtime(&t);
         printf("Nueva conexión desde: %s:%hu\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
         if((pid_n=fork())==0) {
             do {
@@ -82,6 +87,9 @@ int main(int argc, char *argv[]) {
                 // Verificar que se recibe "archivo" primero, armar string con el nombre, y ver como manejar la recepcion del archivo
             } while (strncmp(buf_rx,"FIN",3)!=0); 
             close(connect_s);
+
+            printf("Recepción terminada - Sin errores\n");
+            tiempo_fin = *localtime(&t);
             return 0; 
         } else {
             close(connect_s);
@@ -92,10 +100,23 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+void writeLog(struct tm tiempo_i, struct tm tiempo_f, int status, int tam, int bytes_tx, int bytes_rx) {
+    FILE *log;
+    log = fopen("connect_log.csv","a");
+    if (log == 0) {
+        printf("Error accediendo al archivo de log.\n");
+        return 0;
+    }
+    gettimeofday(&tiempo, NULL);
+    tiempo_actual = 1000000*(tiempo.tv_sec - tiempo_i.tv_sec) + (tiempo.tv_usec - tiempo_i.tv_usec);
+    fprintf(log,"%02d/%02d/%d, Inicio: %02d:%02d:%02d, Fin: %02d:%02d:%02d, Estado: %d, Tamaño: %d, Enviado: %d, Recibido: %d");
+    fclose(log);
+    return;
+}
 
 void handler(int sig) {
 	if (sig==SIGHUP) {
 	    terminar=1;
-	    printf("señal HUP recibida, cuando establezca la proxima conexión el servidor terminará\n");
+	    printf("Señal HUP recibida, la proxima conexión es la última\n");
 	}
 }
