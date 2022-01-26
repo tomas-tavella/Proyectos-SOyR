@@ -4,7 +4,7 @@ Se debe crear el programa de un servidor concurrente que utilice el protocolo TC
 
 \begin{enumerate}\bfseries
     \item \textnormal{Una vez que un cliente establezca la conexión con el servidor, este ultimo le enviará el mensaje ``listo'' al cliente, quedando en espera del mensaje de confirmación ``archivo'' por parte del cliente.}
-    \item \textnormal{uego el servidor debe recibir un caracter \textit{espacio}, seguido del nombre para almacenar el archivo (solo caracteres alfanuméricos y un punto ``.'') y un caracter \textit{espacio} al final.}
+    \item \textnormal{Luego el servidor debe recibir un caracter \textit{espacio}, seguido del nombre para almacenar el archivo (solo caracteres alfanuméricos y un punto ``.'') y un caracter \textit{espacio} al final.}
     \item \textnormal{Una vez recibido un nombre valido, el servidor espera la recepción de un numero codificado en \textit{ascii} que indique el tamaño del archivo en bytes, seguido de un caracter \textit{espacio}.}
     \item \textnormal{Ahora, el servidor comienza la recepción de datos, los que almacena en un archivo binario con el nombre obtenido en el paso 2, hasta llegar a la cantidad de bytes obtenidos en el paso 3.}
     \item \textnormal{Como forma de confirmación, una vez terminada la recepción el servidor le enviará al cliente el siguiente mensaje:\\
