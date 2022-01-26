@@ -85,7 +85,9 @@ int main(int argc, char *argv[]) {
             }
             contbytestx += bytestx;
 
+            alarm(10);
             bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0); // Chequear recepción de "archivo"
+            alarm(0);
             if (bytesrecibidos==-1) {
                 perror ("recv");
                 return 3;
