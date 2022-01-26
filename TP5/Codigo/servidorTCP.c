@@ -35,8 +35,7 @@ int main(int argc, char *argv[]) {
     int                  addr_len;        // Tamaño de las estructuras
     char                 buf_tx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     char                 buf_rx[1500];    // Buffer de 1500 bytes para los datos a transmitir
-    int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
-    pid_t pid_n;
+    int                  bytesrecibidos, bytesaenviar, bytestx, contbytestx, contbytesrx;  // Contadores
     time_t t = time(NULL);
     struct tm tiempo_init;
     struct tm tiempo_fin;
@@ -67,44 +66,57 @@ int main(int argc, char *argv[]) {
         }
         tiempo_init = *localtime(&t);
         printf("Nueva conexión desde: %s:%hu\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
-        if((pid_n=fork())==0) {
-        int cnt=0;
-            do {
-                printf("Proceso hijo %d atendiendo conexión desde: %s\n",getpid(),inet_ntoa(client_addr.sin_addr));
-                close (server_s); // Cerrar socket no usado
-                if(cnt==0){
-                    sprintf(buf_tx,"Listo"); // Mensaje de listo para recibir
-                    bytesaenviar =  strlen(buf_tx);
-                    bytestx=send(connect_s, buf_tx, bytesaenviar, 0);
-                    if (bytestx==-1) {
-                        perror ("send");
-                        return 3;
-                    }
-                }
-                bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
-                if (bytesrecibidos==-1) {
-                    perror ("recv");
+        if(fork()==0) {
+            int cnt=0;
+            contbytesrx = 0;
+            contbytestx = 0;
+            printf("Proceso hijo %d atendiendo conexión desde: %s\n",getpid(),inet_ntoa(client_addr.sin_addr));
+            close (server_s); // Cerrar socket no usado
+
+            sprintf(buf_tx,"Listo"); // Mensaje de listo para recibir
+            bytesaenviar =  strlen(buf_tx);
+            bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
+            if (bytestx==-1) {
+                perror ("send");
+                return 3;
+            }
+            contbytestx += bytestx;
+
+            bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0); // Chequear recepción de "archivo"
+            if (bytesrecibidos==-1) {
+                perror ("recv");
+                return 3;
+            }
+            contbytesrx += bytesrecibidos;
+            if(!strncmp(buf_rx,"Archivo",7)){
+                printf("Se recibio la palabra %s\n", buf_rx);
+            } else {
+                printf("Error en la conexión\n");
+                sprintf(buf_tx,"ERROR: No se recibió la palabra 'Archivo'");
+                bytesaenviar = strlen(buf_tx);
+                bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
+                if (bytestx==-1) {
+                    perror ("send");
                     return 3;
                 }
-                if(cnt==0){
-                    if(!strncmp(buf_rx,"Archivo",7)){
-                        printf("Se recibio la palabra %s\n", buf_rx);
-                    }
-                    else{
-                        printf("No se recibio la palabra Archivo\n");
-                    }    
-                }
-                else{
-                    printf("Recibi %d bytes del cliente con texto = '%s' \n", bytesrecibidos, buf_rx);
-                }
+                contbytestx += bytestx;
+                tiempo_fin = *localtime(&t);
+                writeLog(tiempo_init, tiempo_fin, 1, 0, contbytestx, contbytesrx);
+                close(connect_s);
+                return 0;
+            }    
+            do {
+                bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
+                printf("Recibi %d bytes del cliente con texto = '%s' \n", bytesrecibidos, buf_rx);
                 cnt++;
-                // Verificar que se recibe "archivo" primero, armar string con el nombre, y ver como manejar la recepcion del archivo
+                //Armar string con el nombre, y ver como manejar la recepcion del archivo
             } while (strncmp(buf_rx,"FIN",3)!=0); 
             cnt=0;
             close(connect_s);
 
             printf("Recepción terminada - Sin errores\n");
             tiempo_fin = *localtime(&t);
+            //Logear
             return 0; 
         } else {
             close(connect_s);
