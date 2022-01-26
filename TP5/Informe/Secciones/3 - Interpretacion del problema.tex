@@ -2,14 +2,14 @@
 
 Se debe crear el programa de un servidor concurrente que utilice el protocolo TCP, el cual aceptará conexiones de clientes que envían archivos para almacenar en el servidor. El procedimiento a seguir para la esta transferencia es el siguiente:
 
-\begin{enumerate}
-    \item Una vez que un cliente establezca la conexión con el servidor, este ultimo le enviará el mensaje ``listo'' al cliente, quedando en espera del mensaje de confirmación ``archivo'' por parte del cliente.
-    \item Luego el servidor debe recibir un caracter \textit{espacio}, seguido del nombre para almacenar el archivo (solo caracteres alfanuméricos y un punto ``.'') y un caracter \textit{espacio} al final.
-    \item Una vez recibido un nombre valido, el servidor espera la recepción de un numero codificado en \textit{ascii} que indique el tamaño del archivo en bytes, seguido de un caracter \textit{espacio}.
-    \item Ahora, el servidor comienza la recepción de datos, los que almacena en un archivo binario con el nombre obtenido en el paso 2, hasta llegar a la cantidad de bytes obtenidos en el paso 3.
-    \item Como forma de confirmación, una vez terminada la recepción el servidor le enviará al cliente el siguiente mensaje:\\
-     ``Archivo \enquote{\textit{Nombre de archivo}}, tamaño declarado \enquote{\textit{Cantidad de bytes declarada}} bytes, tamaño real \enquote{\textit{Cantidad de bytes recibidos}} bytes.''.
-    \item Finalmente, el servidor cierra la conexión con el cliente.\\ 
+\begin{enumerate}\bfseries
+    \item \textnormal{Una vez que un cliente establezca la conexión con el servidor, este ultimo le enviará el mensaje ``listo'' al cliente, quedando en espera del mensaje de confirmación ``archivo'' por parte del cliente.}
+    \item \textnormal{uego el servidor debe recibir un caracter \textit{espacio}, seguido del nombre para almacenar el archivo (solo caracteres alfanuméricos y un punto ``.'') y un caracter \textit{espacio} al final.}
+    \item \textnormal{Una vez recibido un nombre valido, el servidor espera la recepción de un numero codificado en \textit{ascii} que indique el tamaño del archivo en bytes, seguido de un caracter \textit{espacio}.}
+    \item \textnormal{Ahora, el servidor comienza la recepción de datos, los que almacena en un archivo binario con el nombre obtenido en el paso 2, hasta llegar a la cantidad de bytes obtenidos en el paso 3.}
+    \item \textnormal{Como forma de confirmación, una vez terminada la recepción el servidor le enviará al cliente el siguiente mensaje:\\
+     ``Archivo \enquote{\textit{Nombre de archivo}}, tamaño declarado \enquote{\textit{Cantidad de bytes declarada}} bytes, tamaño real \enquote{\textit{Cantidad de bytes recibidos}} bytes.''.}
+    \item \textnormal{Finalmente, el servidor cierra la conexión con el cliente.}\\ 
 \end{enumerate}
 
 Adicionalmente, el servidor debe mantener un archivo en formato \texttt{csv} que contenga registro de:
@@ -23,4 +23,13 @@ Adicionalmente, el servidor debe mantener un archivo en formato \texttt{csv} que
     \item Cantidad de bytes recibidos.\\
 \end{itemize}
 
-En tanto al manejo de errores, en todos los casos cuando se detecte un error (como por ejemplo, el nombre de archivo no cumple con las condiciones establecidas), se enviará un mensaje de error al cliente indicando el problema, y luego se cerrará la conexión.
+Para el manejo de errores se presentan varios casos de errores distintos: 
+
+\begin{itemize}
+    \item Error en el nombre de archivo y en el mensaje de confirmación ``archivo'': En estos casos, como no se llega a abrir el archivo, simplemente se envía un mensaje de error al cliente y se cierra la conexión.
+    \item Si el archivo enviado es de tamaño superior al declarado, el archivo se trunca al llegar a la cantidad declarada de bytes y se cierra con un código de error, se envía un mensaje de error al cliente y se cierra la conexión.
+    \item Si el archivo enviado es de tamaño inferior al declarado, debe existir un tiempo de \textit{timeout}. Una vez excedido este tiempo, si se recibió una cantidad de bytes menor a la declarada, se cierra el archivo con un código de error, se envía un mensaje de error al cliente y se cierra la conexión.
+    \item Si se cierra la conexión con el cliente prematuramente, se cierra el archivo con un código de error.
+\end{itemize}
+
+Adicionalmente, en todos estos casos el código de error correspondiente se almacena en el registro que lleva el servidor.\\
