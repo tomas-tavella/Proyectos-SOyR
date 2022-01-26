@@ -18,7 +18,8 @@
 #define SOCKET_PROTOCOL 0
 
 /*-----------------Global---------------*/
-time_t t = time(NULL);
+int terminar = 0;
+time_t t;
 struct tm tiempo_init;
 struct tm tiempo_fin;
 int contbytestx, contbytesrx, size, cerrar_archivo;
@@ -41,9 +42,9 @@ int main(int argc, char *argv[]) {
     char                 buf_rx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
     
-
+    t = time(NULL);
     signal(SIGHUP,handler);
-    signal(SIGALARM,watchdog);
+    signal(SIGALRM,watchdog);
     server_s = socket(AF_INET, SOCK_STREAM, SOCKET_PROTOCOL);
     if (server_s==-1) {
         perror("socket");
@@ -160,16 +161,17 @@ void watchdog(int sig) {
     bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
     if (bytestx==-1) {
         perror ("send");
-        return 3;
+        terminar = 1;
     }
     close(connect_s);
     contbytestx += bytestx;
     tiempo_fin = *localtime(&t);
     if (cerrar_archivo == 1) {
-        close(archivo);
+        fclose(archivo);
         writeLog(tiempo_init, tiempo_fin, 2, size, contbytestx, contbytesrx);
     } else {
         writeLog(tiempo_init, tiempo_fin, 2, 0, contbytestx, contbytesrx);
     }
-    return 0;
+    terminar = 1;
+    return;
 }
