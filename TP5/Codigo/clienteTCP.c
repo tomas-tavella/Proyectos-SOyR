@@ -24,6 +24,8 @@ int main(int argc, char *argv[])
   char                 ipserver[16];
   int                  bytesrecibidos,bytesaenviar, bytestx;               // Contadores
   int                  conectado; //variable auxiliar
+  char                 archivo[100];    // Variable con el nombre de archivo que se va a leer
+  FILE                 *fp;
 
   if (argc!=2)
     {
@@ -66,16 +68,35 @@ int main(int argc, char *argv[])
       buf_rx[bytesrecibidos]=0;  //Me aseguro que termine en NULL 
       if(!strncmp(buf_rx,"Listo",5)){
         printf("Se recibio la palabra %s\n", buf_rx);
-        sprintf(buf_tx,"Archivo"); // Mensaje de listo para recibir
+        // Envio la palabra "archivo"
+        sprintf(buf_tx,"Archivo");
         bytesaenviar =  strlen(buf_tx);
         bytestx=send(client_s, buf_tx, bytesaenviar, 0);
       }
       else{
         printf("No se recibio la palabra Listo\n");
+        return 5;
       }
     }
-    
-    printf("Ingrese mensaje\n");
+
+    printf("Ingrese nombre del archivo\n");
+    fgets(archivo,100,stdin);
+
+    fp = fopen(archivo,"rb");
+    if(fp == NULL){
+      perror("openfile");
+      printf("No se pudo abrir el archivo.\n")
+      return 6;
+    }
+
+    while (fp != EOF){
+      fgets(buf_tx,1500,fp);
+      bytesaenviar=strlen(buf_tx);
+      bytestx=send(client_s,buf_tx,bytesaenviar,0);
+      // Lectura del archivo para enviar al servidor
+    }
+
+    fclose(fp);
 
     fgets(buf_tx,1499,stdin);
     bytesaenviar=strlen(buf_tx)+1; //me aseguro que la cantidad de bytes a enviar sea la correcta 
