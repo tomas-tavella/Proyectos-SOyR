@@ -18,29 +18,32 @@
 #define SOCKET_PROTOCOL 0
 
 /*-----------------Global---------------*/
-int terminar=0;
+time_t t = time(NULL);
+struct tm tiempo_init;
+struct tm tiempo_fin;
+int contbytestx, contbytesrx, size, cerrar_archivo;
+FILE *archivo;
+unsigned int connect_s;
 
 void handler(int sig);
+void watchdog(int sig);
 void writeLog(struct tm tiempo_i, struct tm tiempo_f, int status, int tam, int bytes_tx, int bytes_rx);
 
 //===== Main program ========================================================
 int main(int argc, char *argv[]) {
 
-    FILE *archivo;
     unsigned int         server_s;        // Descriptor del socket
-    unsigned int         connect_s;       // Connection socket descriptor
     struct sockaddr_in   server_addr;     // Estructura con los datos del servidor
     struct sockaddr_in   client_addr;     // Estructura con los datos del cliente
     struct in_addr       client_ip_addr;  // Client IP address
     int                  addr_len;        // Tamaño de las estructuras
     char                 buf_tx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     char                 buf_rx[1500];    // Buffer de 1500 bytes para los datos a transmitir
-    int                  bytesrecibidos, bytesaenviar, bytestx, contbytestx, contbytesrx;  // Contadores
-    time_t t = time(NULL);
-    struct tm tiempo_init;
-    struct tm tiempo_fin;
+    int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
+    
 
     signal(SIGHUP,handler);
+    signal(SIGALARM,watchdog);
     server_s = socket(AF_INET, SOCK_STREAM, SOCKET_PROTOCOL);
     if (server_s==-1) {
         perror("socket");
@@ -88,7 +91,7 @@ int main(int argc, char *argv[]) {
                 return 3;
             }
             contbytesrx += bytesrecibidos;
-            if(!strncmp(buf_rx,"Archivo",7)){
+            if (!strncmp(buf_rx,"Archivo",7)) {
                 printf("Se recibio la palabra %s\n", buf_rx);
             } else {
                 printf("Error en la conexión\n");
@@ -104,7 +107,7 @@ int main(int argc, char *argv[]) {
                 writeLog(tiempo_init, tiempo_fin, 1, 0, contbytestx, contbytesrx);
                 close(connect_s);
                 return 0;
-            }    
+            }
             do {
                 bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
                 printf("Recibi %d bytes del cliente con texto = '%s' \n", bytesrecibidos, buf_rx);
@@ -116,8 +119,8 @@ int main(int argc, char *argv[]) {
 
             printf("Recepción terminada - Sin errores\n");
             tiempo_fin = *localtime(&t);
-            //Logear
-            return 0; 
+            writeLog(tiempo_init, tiempo_fin, 0, size, contbytestx, contbytesrx);
+            return 0;
         } else {
             close(connect_s);
         } 
@@ -144,4 +147,27 @@ void handler(int sig) {
 	    terminar=1;
 	    printf("Señal HUP recibida, la proxima conexión es la última\n");
 	}
+}
+
+void watchdog(int sig) {
+    int bytesaenviar,bytestx;
+    char buf_tx[1500];
+    printf("Error en la conexión\n");
+    sprintf(buf_tx,"ERROR: Timeout en la conexión");
+    bytesaenviar = strlen(buf_tx);
+    bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
+    if (bytestx==-1) {
+        perror ("send");
+        return 3;
+    }
+    close(connect_s);
+    contbytestx += bytestx;
+    tiempo_fin = *localtime(&t);
+    if (cerrar_archivo == 1) {
+        close(archivo);
+        writeLog(tiempo_init, tiempo_fin, 2, size, contbytestx, contbytesrx);
+    } else {
+        writeLog(tiempo_init, tiempo_fin, 2, 0, contbytestx, contbytesrx);
+    }
+    return 0;
 }
