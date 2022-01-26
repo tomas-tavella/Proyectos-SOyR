@@ -1,21 +1,26 @@
 \section{Interpretación del problema}
-Para este programa, se debe crear dos espacios de memoria compartida utilizando las funciones de la biblioteca \texttt{<sys/shm.h>}, en los que existirán las dos mitades de un \textit{buffer ping-pong}.\\
 
-Los datos leídos del archivo \texttt{datos.dat} se almacenan en una estructura con los siguientes elementos:
+Se debe crear el programa de un servidor concurrente que utilice el protocolo TCP, el cual aceptará conexiones de clientes que envían archivos para almacenar en el servidor. El procedimiento a seguir para la esta transferencia es el siguiente:
+
+\begin{enumerate}
+    \item Una vez que un cliente establezca la conexión con el servidor, este ultimo le enviará el mensaje ``listo'' al cliente, quedando en espera del mensaje de confirmación ``archivo'' por parte del cliente.
+    \item Luego el servidor debe recibir un caracter \textit{espacio}, seguido del nombre para almacenar el archivo (solo caracteres alfanuméricos y un punto ``.'') y un caracter \textit{espacio} al final.
+    \item Una vez recibido un nombre valido, el servidor espera la recepción de un numero codificado en \textit{ascii} que indique el tamaño del archivo en bytes, seguido de un caracter \textit{espacio}.
+    \item Ahora, el servidor comienza la recepción de datos, los que almacena en un archivo binario con el nombre obtenido en el paso 2, hasta llegar a la cantidad de bytes obtenidos en el paso 3.
+    \item Como forma de confirmación, una vez terminada la recepción el servidor le enviará al cliente el siguiente mensaje:\\
+     ``Archivo \enquote{\textit{Nombre de archivo}}, tamaño declarado \enquote{\textit{Cantidad de bytes declarada}} bytes, tamaño real \enquote{\textit{Cantidad de bytes recibidos}} bytes.''.
+    \item Finalmente, el servidor cierra la conexión con el cliente.\\ 
+\end{enumerate}
+
+Adicionalmente, el servidor debe mantener un archivo en formato \texttt{csv} que contenga registro de:
 
 \begin{itemize}
-    \item Una variable de tipo \texttt{int} que almacena un identificador menor a 50000.
-    \item Una etiqueta con el tiempo en el que fue escrito el dato, con precisión de micro segundos.
-    \item El dato que se leyó del archivo, de tipo \texttt{float}.\\
+    \item Las conexiones entrantes.
+    \item Fecha y hora de comienzo de la conexiones.
+    \item Fecha y hora de finalización de la conexiones.
+    \item Tamaño de los archivos recibidos.
+    \item Cantidad de bytes enviados.
+    \item Cantidad de bytes recibidos.\\
 \end{itemize}
 
-Como no se aclara el tamaño del \textit{buffer} en el enunciado, se elige que este tenga un tamaño total de 100 estructuras de las mencionadas previamente, dividido en dos mitades de 50 estructuras.\\
-
-El proceso productor debe leer datos del archivo \texttt{datos.dat} y almacenar las estructuras en su mitad del \textit{buffer}, mientras que el proceso consumidor debe leerlas en la otra mitad del \textit{buffer} a medida que estén disponibles, para imprimirlas en pantalla y escribirlas en un nuevo archivo \texttt{datos.csv}.\\
-
-Para administrar el \textit{buffer} de manera que no surjan condiciones de carrera y tanto el productor como el consumidor puedan trabajar en secciones críticas sin interrupciones, se van a crear dos programas que utilizan métodos distintos para este fin:\\
-
-\begin{itemize}
-    \item \textbf{Semáforos:} se utilizan los semáforos para sincronizar con las llamadas a sistema contenidas en la biblioteca \texttt{<sys/sem.h>} y memoria compartida mediante \texttt{<sys/ipc.h>}.
-    \item \textbf{Colas de mensajes:} se utilizan las colas de mensajes para sincronizar mediante las llamadas a sistema de la biblioteca \texttt{<sys/msg.h>}.\\
-\end{itemize}
+En tanto al manejo de errores, en todos los casos cuando se detecte un error (como por ejemplo, el nombre de archivo no cumple con las condiciones establecidas), se enviará un mensaje de error al cliente indicando el problema, y luego se cerrará la conexión.
