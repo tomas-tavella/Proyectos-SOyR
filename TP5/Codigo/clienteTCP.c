@@ -1,10 +1,11 @@
-
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include <sys/types.h>    
-#include <sys/socket.h>  
-#include <netinet/in.h> 
+#include <sys/types.h> 
+#include <sys/stat.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 
@@ -26,6 +27,7 @@ int main(int argc, char *argv[])
   int                  conectado; //variable auxiliar
   char                 archivo[100];    // Variable con el nombre de archivo que se va a leer
   FILE                 *fp;
+  off_t                size;
 
   if (argc!=2)
     {
@@ -71,6 +73,9 @@ int main(int argc, char *argv[])
     bytestx=send(client_s, buf_tx, bytesaenviar, 0);
   }else{
     printf("No se recibio la palabra Listo\n");
+    sprintf(buf_tx,"FIN");
+    bytesaenviar =  strlen(buf_tx);
+    bytestx=send(client_s, buf_tx, bytesaenviar, 0);
     return 5;
   }
 
@@ -81,7 +86,19 @@ int main(int argc, char *argv[])
   if(fp == NULL){
     perror("openfile");
     printf("No se pudo abrir el archivo.\n");
+    printf("%s",archivo);
+    sprintf(buf_tx,"FIN");
+    bytesaenviar =  strlen(buf_tx);
+    bytestx=send(client_s, buf_tx, bytesaenviar, 0);
     return 6;
+  } else {  //Obtener tamaño del archivo y enviarlo
+    struct stat st;
+    if (stat(archivo, &st) == 0) {
+        size = st.st_size;
+        sprintf(buf_tx,"%ld",size);
+        bytesaenviar = strlen(buf_tx);
+        bytestx=send(client_s, buf_tx, bytesaenviar, 0);
+    }
   }
 
   while (!feof(fp)){

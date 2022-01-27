@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <signal.h> 
 #include <sys/wait.h>
@@ -58,7 +59,7 @@ int main(int argc, char *argv[]) {
   
     bind(server_s, (struct sockaddr *)&server_addr, sizeof(server_addr));
     printf("Asociado el descriptor %u con el port %u\n", server_s,PORT_NUM);
-  
+    printf("Servidor en proceso %d listo.\n",getpid());
     listen(server_s, NCONCUR);
 
     addr_len = sizeof(client_addr);
@@ -140,7 +141,7 @@ void writeLog(struct tm tiempo_i,struct tm tiempo_f, int status, int tam, int by
         printf("Error accediendo al archivo de log.\n");
         return;
     }
-    fprintf(log,"%02d/%02d/%d, Inicio: %02d:%02d:%02d, Fin: %02d:%02d:%02d, Estado: %d, Tamaño: %d, Enviado: %d, Recibido: %d",tiempo_i.tm_mday,tiempo_i.tm_mon+1,tiempo_i.tm_year+1900,tiempo_i.tm_hour,tiempo_i.tm_min,tiempo_i.tm_sec,tiempo_f.tm_hour,tiempo_f.tm_min,tiempo_f.tm_sec,status,tam,bytes_tx,bytes_rx);
+    fprintf(log,"%02d/%02d/%d, Inicio: %02d:%02d:%02d, Fin: %02d:%02d:%02d, Estado: %d, Tamaño: %d, Enviado: %d, Recibido: %d\n",tiempo_i.tm_mday,tiempo_i.tm_mon+1,tiempo_i.tm_year+1900,tiempo_i.tm_hour,tiempo_i.tm_min,tiempo_i.tm_sec,tiempo_f.tm_hour,tiempo_f.tm_min,tiempo_f.tm_sec,status,tam,bytes_tx,bytes_rx);
     fclose(log);
     return;
 }
