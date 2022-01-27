@@ -80,11 +80,11 @@ int main(int argc, char *argv[])
   fp = fopen(archivo,"rb");
   if(fp == NULL){
     perror("openfile");
-    printf("No se pudo abrir el archivo.\n")
+    printf("No se pudo abrir el archivo.\n");
     return 6;
   }
 
-  while (fp != EOF){
+  while (!feof(fp)){
     // Lectura del archivo para enviar al servidor
     fgets(buf_tx,1500,fp);
     bytesaenviar=strlen(buf_tx);
