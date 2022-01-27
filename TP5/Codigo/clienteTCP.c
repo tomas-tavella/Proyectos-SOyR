@@ -81,7 +81,9 @@ int main(int argc, char *argv[])
 
   printf("Ingrese nombre del archivo\n");
   fgets(archivo,100,stdin);
-
+  for (int i=0;i<100;i++) {
+    if (archivo[i]=='\n') archivo[i]=0;
+  }
   fp = fopen(archivo,"rb");
   if(fp == NULL){
     perror("openfile");
@@ -91,16 +93,21 @@ int main(int argc, char *argv[])
     bytesaenviar =  strlen(buf_tx);
     bytestx=send(client_s, buf_tx, bytesaenviar, 0);
     return 6;
-  } else {  //Obtener tamaño del archivo y enviarlo
+  } else {  //Enviar nombre del archivo, obtener tamaño y enviarlo
+    sprintf(buf_tx,"%s",archivo);
+    bytesaenviar =  strlen(buf_tx);
+    bytestx=send(client_s, buf_tx, bytesaenviar, 0);
     struct stat st;
     if (stat(archivo, &st) == 0) {
         size = st.st_size;
         sprintf(buf_tx,"%ld",size);
         bytesaenviar = strlen(buf_tx);
+        buf_tx[bytesaenviar] = 0;
         bytestx=send(client_s, buf_tx, bytesaenviar, 0);
     }
   }
-
+  printf("Presione enter para enviar los datos.");
+  fgets(archivo,100,stdin);
   while (!feof(fp)){
     // Lectura del archivo para enviar al servidor
     fgets(buf_tx,1500,fp);
