@@ -12,6 +12,7 @@
 //----- Defines -------------------------------------------------------------
 #define  PORT_NUM 1050  // Port number used
 #define SOCKET_PROTOCOL 0
+
 //===== Main program ========================================================
 int main(int argc, char *argv[])
 {
@@ -81,9 +82,11 @@ int main(int argc, char *argv[])
 
   printf("Ingrese nombre del archivo\n");
   fgets(archivo,100,stdin);
+
   for (int i=0;i<100;i++) {
     if (archivo[i]=='\n') archivo[i]=0;
   }
+  printf("El nombre del archivo es: %s\n",archivo);
   fp = fopen(archivo,"rb");
   if(fp == NULL){
     perror("openfile");
@@ -93,18 +96,20 @@ int main(int argc, char *argv[])
     bytesaenviar =  strlen(buf_tx);
     bytestx=send(client_s, buf_tx, bytesaenviar, 0);
     return 6;
-  } else {  //Enviar nombre del archivo, obtener tamaño y enviarlo
-    sprintf(buf_tx,"%s",archivo);
-    bytesaenviar =  strlen(buf_tx);
-    bytestx=send(client_s, buf_tx, bytesaenviar, 0);
+  } else {  //Enviar nombre del archivo, obtener tamaño y enviarlo 
     struct stat st;
     if (stat(archivo, &st) == 0) {
         size = st.st_size;
         sprintf(buf_tx,"%ld",size);
-        bytesaenviar = strlen(buf_tx);
+        /*bytesaenviar = strlen(buf_tx);
         buf_tx[bytesaenviar] = 0;
-        bytestx=send(client_s, buf_tx, bytesaenviar, 0);
+        bytestx=send(client_s, buf_tx, bytesaenviar, 0);*/
     }
+
+    sprintf(buf_tx,"%s %ld",archivo,size);
+    bytesaenviar =  strlen(buf_tx);
+    bytestx=send(client_s, buf_tx, bytesaenviar, 0);
+
   }
   printf("Presione enter para enviar los datos.");
   fgets(archivo,100,stdin);
@@ -114,7 +119,6 @@ int main(int argc, char *argv[])
     bytesaenviar=strlen(buf_tx);
     bytestx=send(client_s,buf_tx,bytesaenviar,0);
   }
-
   fclose(fp);
   close(client_s);
   return 0;

@@ -23,6 +23,7 @@ int terminar = 0;
 time_t t;
 struct tm tiempo_init;
 struct tm tiempo_fin;
+
 int contbytestx, contbytesrx, size, cerrar_archivo;
 FILE *archivo;
 unsigned int connect_s;
@@ -42,7 +43,8 @@ int main(int argc, char *argv[]) {
     char                 buf_tx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     char                 buf_rx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
-    
+    long int             size;
+    char                 archivo[100];    // Variable con el nombre de archivo que se va a leer
     t = time(NULL);
     signal(SIGHUP,handler);
     signal(SIGALRM,watchdog);
@@ -97,6 +99,17 @@ int main(int argc, char *argv[]) {
             contbytesrx += bytesrecibidos;
             if (!strncmp(buf_rx,"Archivo",7)) {
                 printf("Se recibio la palabra %s\n", buf_rx);
+                alarm(10);
+                bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
+                alarm(0);
+                char aux[100];
+                char delimitador[] = " ";
+                char *token = strtok(buf_rx, delimitador);
+                strcpy(archivo,token);
+                token = strtok(NULL, delimitador);
+                strcpy(aux,token);
+                size=atoi(aux);
+                printf("El nombre del archivo del cliente es: %s y tiene un tamaño de %ld bytes\n", archivo, size);
             } else {
                 printf("Error en la conexión\n");
                 sprintf(buf_tx,"ERROR: No se recibió la palabra 'Archivo'");
@@ -113,11 +126,21 @@ int main(int argc, char *argv[]) {
                 return 0;
             }
             do {
+                alarm(10);
                 bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
-                printf("Recibi %d bytes del cliente con texto = '%s' \n", bytesrecibidos, buf_rx);
+                alarm(0);
+                size-=bytesrecibidos;
+                if(size<0){
+                    printf("Llegaron bytes de mas");
+                    return 0;
+                }
+                printf("Recibi %d bytes del cliente con texto = '", bytesrecibidos);
+                for(int i=0;i<bytesrecibidos;i++){
+                    printf("%c",buf_rx[i]);
+                }
+                printf("' \n");
                 cnt++;
-                //Armar string con el nombre, y ver como manejar la recepcion del archivo
-            } while (strncmp(buf_rx,"FIN",3)!=0); 
+            } while (bytesrecibidos!=0); 
             cnt=0;
             close(connect_s);
 
