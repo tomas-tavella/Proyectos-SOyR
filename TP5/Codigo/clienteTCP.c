@@ -58,60 +58,40 @@ int main(int argc, char *argv[])
     perror("connect");
     return 4;
     }
-     printf("El IP del servidor es: %s y el port del servidor  es %hu \n",inet_ntoa(server_addr.sin_addr),
-            ntohs(server_addr.sin_port));
-  int cnt=0;
-  do{  
-    
-    if(cnt==0){
-      bytesrecibidos=recv(client_s, buf_rx, sizeof(buf_rx), 0);
-      buf_rx[bytesrecibidos]=0;  //Me aseguro que termine en NULL 
-      if(!strncmp(buf_rx,"Listo",5)){
-        printf("Se recibio la palabra %s\n", buf_rx);
-        // Envio la palabra "archivo"
-        sprintf(buf_tx,"Archivo");
-        bytesaenviar =  strlen(buf_tx);
-        bytestx=send(client_s, buf_tx, bytesaenviar, 0);
-      }
-      else{
-        printf("No se recibio la palabra Listo\n");
-        return 5;
-      }
-    }
+  printf("El IP del servidor es: %s y el port del servidor  es %hu \n",inet_ntoa(server_addr.sin_addr),
+  ntohs(server_addr.sin_port));
 
-    printf("Ingrese nombre del archivo\n");
-    fgets(archivo,100,stdin);
+  bytesrecibidos=recv(client_s, buf_rx, sizeof(buf_rx), 0);
+  buf_rx[bytesrecibidos]=0;  //Me aseguro que termine en NULL 
+  if(!strncmp(buf_rx,"Listo",5)){
+    printf("Se recibio la palabra %s\n", buf_rx);
+    // Envio la palabra "archivo"
+    sprintf(buf_tx,"Archivo");
+    bytesaenviar =  strlen(buf_tx);
+    bytestx=send(client_s, buf_tx, bytesaenviar, 0);
+  }else{
+    printf("No se recibio la palabra Listo\n");
+    return 5;
+  }
 
-    fp = fopen(archivo,"rb");
-    if(fp == NULL){
-      perror("openfile");
-      printf("No se pudo abrir el archivo.\n")
-      return 6;
-    }
+  printf("Ingrese nombre del archivo\n");
+  fgets(archivo,100,stdin);
 
-    while (fp != EOF){
-      fgets(buf_tx,1500,fp);
-      bytesaenviar=strlen(buf_tx);
-      bytestx=send(client_s,buf_tx,bytesaenviar,0);
-      // Lectura del archivo para enviar al servidor
-    }
+  fp = fopen(archivo,"rb");
+  if(fp == NULL){
+    perror("openfile");
+    printf("No se pudo abrir el archivo.\n")
+    return 6;
+  }
 
-    fclose(fp);
+  while (fp != EOF){
+    // Lectura del archivo para enviar al servidor
+    fgets(buf_tx,1500,fp);
+    bytesaenviar=strlen(buf_tx);
+    bytestx=send(client_s,buf_tx,bytesaenviar,0);
+  }
 
-    fgets(buf_tx,1499,stdin);
-    bytesaenviar=strlen(buf_tx)+1; //me aseguro que la cantidad de bytes a enviar sea la correcta 
-    buf_tx[bytesaenviar]=0;
-
-    printf("******************************\n");
-    printf("      Mensaje Enviado\n");
-    printf("******************************\n");
-    printf("%s\n",buf_tx);  
-  
-    bytestx=send(client_s, buf_tx, bytesaenviar,0);  
-    cnt++;
-  } while (strncmp(buf_tx,"FIN",3)!=0); 
-  cnt=0;
-
+  fclose(fp);
   close(client_s);
   return 0;
 }
