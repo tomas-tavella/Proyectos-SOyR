@@ -102,6 +102,11 @@ int main(int argc, char *argv[]) {
                 alarm(10);
                 bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
                 alarm(0);
+                if (bytesrecibidos==-1) {
+                    perror ("recv");
+                    return 3;
+                }
+                contbytesrx += bytesrecibidos;
                 char aux[100];
                 char delimitador[] = " ";
                 char *token = strtok(buf_rx, delimitador);
@@ -129,7 +134,12 @@ int main(int argc, char *argv[]) {
                 alarm(10);
                 bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
                 alarm(0);
+                if (bytesrecibidos==-1) {
+                   perror ("recv");
+                   return 3;
+                }
                 size-=bytesrecibidos;
+                contbytesrx += bytesrecibidos;
                 if(size<0){
                     printf("Llegaron bytes de mas");
                     return 0;
@@ -145,6 +155,7 @@ int main(int argc, char *argv[]) {
             close(connect_s);
 
             printf("Recepción terminada - Sin errores\n");
+            printf("Archivo %s completo, tamaño declarado %d bytes, tamaño real %d bytes.", archivo, contbytestx, contbytesrx);
             tiempo_fin = *localtime(&t);
             writeLog(tiempo_init, tiempo_fin, 0, size, contbytestx, contbytesrx);
             return 0;
