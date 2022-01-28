@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
         tiempo_init = *localtime(&t);
         printf("Nueva conexión desde: %s:%hu\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
         if(fork()==0) {
-            int cnt=0;
+            int auxsize;
             contbytesrx = 0;
             contbytestx = 0;
             printf("Proceso hijo %d atendiendo conexión desde: %s\n",getpid(),inet_ntoa(client_addr.sin_addr));
@@ -114,10 +114,11 @@ int main(int argc, char *argv[]) {
                 token = strtok(NULL, delimitador);
                 strcpy(aux,token);
                 size=atoi(aux);
-                printf("El nombre del archivo del cliente es: %s y tiene un tamaño de %ld bytes\n", archivo, size);
+                auxsize=size;
+                printf("El nombre del archivo del cliente es: '%s' y tiene un tamaño de %ld bytes.\n", archivo, size);
             } else {
-                printf("Error en la conexión\n");
-                sprintf(buf_tx,"ERROR: No se recibió la palabra 'Archivo'");
+                printf("Error en la conexión.\n");
+                sprintf(buf_tx,"ERROR: No se recibió la palabra 'Archivo'.\n");
                 bytesaenviar = strlen(buf_tx);
                 bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
                 if (bytestx==-1) {
@@ -138,26 +139,30 @@ int main(int argc, char *argv[]) {
                    perror ("recv");
                    return 3;
                 }
-                size-=bytesrecibidos;
+                auxsize-=bytesrecibidos;
                 contbytesrx += bytesrecibidos;
-                if(size<0){
-                    printf("Llegaron bytes de mas");
+                printf("Recibi %d bytes del cliente.\n",bytesrecibidos);
+                if(auxsize<0){
+                    printf("Llegaron bytes de mas, terminando conexión.\n");
+                    sprintf(buf_tx,"ERROR: Sobre-envío de datos.\n");
+                    bytesaenviar = strlen(buf_tx);
+                    bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
+                    contbytestx += bytestx;
+                    tiempo_fin = *localtime(&t);
+                    writeLog(tiempo_init, tiempo_fin, 4, 0, contbytestx, contbytesrx);
                     return 0;
                 }
-                printf("Recibi %d bytes del cliente con texto = '", bytesrecibidos);
-                for(int i=0;i<bytesrecibidos;i++){
-                    printf("%c",buf_rx[i]);
-                }
-                printf("' \n");
-                cnt++;
-            } while (bytesrecibidos!=0); 
-            cnt=0;
-            close(connect_s);
+            } while (auxsize!=0); 
 
             printf("Recepción terminada - Sin errores\n");
-            printf("Archivo %s completo, tamaño declarado %d bytes, tamaño real %d bytes.", archivo, contbytestx, contbytesrx);
+            printf("Archivo %s completo, tamaño declarado %ld bytes, tamaño real %ld bytes.\n", archivo, size, size);
+            sprintf(buf_tx,"Recepción terminada - Sin errores.\n");
+            bytesaenviar = strlen(buf_tx);
+            bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
+            close(connect_s);
+            contbytestx += bytestx;
             tiempo_fin = *localtime(&t);
-            writeLog(tiempo_init, tiempo_fin, 0, size, contbytestx, contbytesrx);
+            writeLog(tiempo_init, tiempo_fin, 4, 0, contbytestx, contbytesrx);
             return 0;
         } else {
             close(connect_s);
@@ -175,7 +180,25 @@ void writeLog(struct tm tiempo_i,struct tm tiempo_f, int status, int tam, int by
         printf("Error accediendo al archivo de log.\n");
         return;
     }
-    fprintf(log,"%02d/%02d/%d, Inicio: %02d:%02d:%02d, Fin: %02d:%02d:%02d, Estado: %d, Tamaño: %d, Enviado: %d, Recibido: %d\n",tiempo_i.tm_mday,tiempo_i.tm_mon+1,tiempo_i.tm_year+1900,tiempo_i.tm_hour,tiempo_i.tm_min,tiempo_i.tm_sec,tiempo_f.tm_hour,tiempo_f.tm_min,tiempo_f.tm_sec,status,tam,bytes_tx,bytes_rx);
+    switch (status) {
+    case 0:
+        fprintf(log,"%02d/%02d/%d, Inicio: %02d:%02d:%02d, Fin: %02d:%02d:%02d, Estado: Sin errores, Tamaño: %d, Enviado: %d, Recibido: %d\n",tiempo_i.tm_mday,tiempo_i.tm_mon+1,tiempo_i.tm_year+1900,tiempo_i.tm_hour,tiempo_i.tm_min,tiempo_i.tm_sec,tiempo_f.tm_hour,tiempo_f.tm_min,tiempo_f.tm_sec,tam,bytes_tx,bytes_rx);
+        break;
+    case 1:
+        fprintf(log,"%02d/%02d/%d, Inicio: %02d:%02d:%02d, Fin: %02d:%02d:%02d, Estado: Instruccion incorrecta, Tamaño: %d, Enviado: %d, Recibido: %d\n",tiempo_i.tm_mday,tiempo_i.tm_mon+1,tiempo_i.tm_year+1900,tiempo_i.tm_hour,tiempo_i.tm_min,tiempo_i.tm_sec,tiempo_f.tm_hour,tiempo_f.tm_min,tiempo_f.tm_sec,tam,bytes_tx,bytes_rx);
+        break;
+    case 2:
+        fprintf(log,"%02d/%02d/%d, Inicio: %02d:%02d:%02d, Fin: %02d:%02d:%02d, Estado: Timeout, Tamaño: %d, Enviado: %d, Recibido: %d\n",tiempo_i.tm_mday,tiempo_i.tm_mon+1,tiempo_i.tm_year+1900,tiempo_i.tm_hour,tiempo_i.tm_min,tiempo_i.tm_sec,tiempo_f.tm_hour,tiempo_f.tm_min,tiempo_f.tm_sec,tam,bytes_tx,bytes_rx);
+        break;
+    case 3:
+        fprintf(log,"%02d/%02d/%d, Inicio: %02d:%02d:%02d, Fin: %02d:%02d:%02d, Estado: Sub-recepción, Tamaño: %d, Enviado: %d, Recibido: %d\n",tiempo_i.tm_mday,tiempo_i.tm_mon+1,tiempo_i.tm_year+1900,tiempo_i.tm_hour,tiempo_i.tm_min,tiempo_i.tm_sec,tiempo_f.tm_hour,tiempo_f.tm_min,tiempo_f.tm_sec,tam,bytes_tx,bytes_rx);
+        break;
+    case 4:
+        fprintf(log,"%02d/%02d/%d, Inicio: %02d:%02d:%02d, Fin: %02d:%02d:%02d, Estado: Sobre-recepción, Tamaño: %d, Enviado: %d, Recibido: %d\n",tiempo_i.tm_mday,tiempo_i.tm_mon+1,tiempo_i.tm_year+1900,tiempo_i.tm_hour,tiempo_i.tm_min,tiempo_i.tm_sec,tiempo_f.tm_hour,tiempo_f.tm_min,tiempo_f.tm_sec,tam,bytes_tx,bytes_rx);
+        break;
+    default:
+        break;
+    }
     fclose(log);
     return;
 }
@@ -183,30 +206,35 @@ void writeLog(struct tm tiempo_i,struct tm tiempo_f, int status, int tam, int by
 void handler(int sig) {
 	if (sig==SIGHUP) {
 	    terminar=1;
-	    printf("Señal HUP recibida, la proxima conexión es la última\n");
+	    printf("Señal HUP recibida, la proxima conexión es la última.\n");
 	}
 }
 
 void watchdog(int sig) {
     int bytesaenviar,bytestx;
     char buf_tx[1500];
-    printf("Error en la conexión\n");
-    sprintf(buf_tx,"ERROR: Timeout en la conexión");
-    bytesaenviar = strlen(buf_tx);
-    bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
     if (bytestx==-1) {
         perror ("send");
         terminar = 1;
     }
-    close(connect_s);
-    contbytestx += bytestx;
     tiempo_fin = *localtime(&t);
     if (cerrar_archivo == 1) {
         fclose(archivo);
-        writeLog(tiempo_init, tiempo_fin, 2, size, contbytestx, contbytesrx);
+        printf("Error en la conexión\n");
+        sprintf(buf_tx,"ERROR: Se enviaron bytes de menos.\n");
+        bytesaenviar = strlen(buf_tx);
+        bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
+        contbytestx += bytestx;
+        writeLog(tiempo_init, tiempo_fin, 3, size, contbytestx, contbytesrx);
     } else {
+        printf("Error en la conexión\n");
+        sprintf(buf_tx,"ERROR: Timeout en la conexión.\n");
+        bytesaenviar = strlen(buf_tx);
+        bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
+        contbytestx += bytestx;
         writeLog(tiempo_init, tiempo_fin, 2, 0, contbytestx, contbytesrx);
     }
+    close(connect_s);
     terminar = 1;
     return;
 }

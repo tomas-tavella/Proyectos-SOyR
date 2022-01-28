@@ -100,12 +100,7 @@ int main(int argc, char *argv[])
     struct stat st;
     if (stat(archivo, &st) == 0) {
         size = st.st_size;
-        sprintf(buf_tx,"%ld",size);
-        /*bytesaenviar = strlen(buf_tx);
-        buf_tx[bytesaenviar] = 0;
-        bytestx=send(client_s, buf_tx, bytesaenviar, 0);*/
     }
-
     sprintf(buf_tx,"%s %ld",archivo,size);
     bytesaenviar =  strlen(buf_tx);
     bytestx=send(client_s, buf_tx, bytesaenviar, 0);
@@ -115,11 +110,14 @@ int main(int argc, char *argv[])
   fgets(archivo,100,stdin);
   while (!feof(fp)){
     // Lectura del archivo para enviar al servidor
-    fgets(buf_tx,1500,fp);
-    bytesaenviar=strlen(buf_tx);
+    bytesaenviar=fread(buf_tx,sizeof(char),sizeof(buf_tx),fp);
     bytestx=send(client_s,buf_tx,bytesaenviar,0);
   }
+
   fclose(fp);
+  bytesrecibidos=recv(client_s, buf_rx, sizeof(buf_rx), 0);
+  buf_rx[bytesrecibidos]=0;  //Me aseguro que termine en NULL
+  printf("%s", buf_rx);
   close(client_s);
   return 0;
 }
