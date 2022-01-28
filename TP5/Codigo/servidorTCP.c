@@ -4,6 +4,7 @@
 #include <signal.h> 
 #include <sys/wait.h>
 
+#include <sys/stat.h>
 #include <sys/types.h>    
 #include <sys/socket.h>  
 #include <netinet/in.h> 
@@ -24,8 +25,9 @@ time_t t;
 struct tm tiempo_init;
 struct tm tiempo_fin;
 
-int contbytestx, contbytesrx, size, cerrar_archivo;
-FILE *archivo;
+int contbytestx, contbytesrx, cerrar_archivo;
+long int size;
+FILE *fp;
 unsigned int connect_s;
 
 void handler(int sig);
@@ -43,7 +45,6 @@ int main(int argc, char *argv[]) {
     char                 buf_tx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     char                 buf_rx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
-    long int             size;
     char                 archivo[100];    // Variable con el nombre de archivo que se va a leer
     t = time(NULL);
     signal(SIGHUP,handler);
@@ -74,7 +75,7 @@ int main(int argc, char *argv[]) {
         tiempo_init = *localtime(&t);
         printf("Nueva conexión desde: %s:%hu\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
         if(fork()==0) {
-            int auxsize;
+            long int auxsize;
             contbytesrx = 0;
             contbytestx = 0;
             printf("Proceso hijo %d atendiendo conexión desde: %s\n",getpid(),inet_ntoa(client_addr.sin_addr));
@@ -116,6 +117,8 @@ int main(int argc, char *argv[]) {
                 size=atoi(aux);
                 auxsize=size;
                 printf("El nombre del archivo del cliente es: '%s' y tiene un tamaño de %ld bytes.\n", archivo, size);
+                fp=fopen(archivo,"wb");
+                cerrar_archivo=1;
             } else {
                 printf("Error en la conexión.\n");
                 sprintf(buf_tx,"ERROR: No se recibió la palabra 'Archivo'.\n");
@@ -139,6 +142,7 @@ int main(int argc, char *argv[]) {
                    perror ("recv");
                    return 3;
                 }
+                fwrite(buf_rx,sizeof(char),bytesrecibidos,fp);
                 auxsize-=bytesrecibidos;
                 contbytesrx += bytesrecibidos;
                 printf("Recibi %d bytes del cliente.\n",bytesrecibidos);
@@ -153,16 +157,20 @@ int main(int argc, char *argv[]) {
                     return 0;
                 }
             } while (auxsize!=0); 
-
+            fclose(fp);
+            struct stat st;
+            if (stat(archivo, &st) == 0) {
+                auxsize = st.st_size;
+            }
             printf("Recepción terminada - Sin errores\n");
-            printf("Archivo %s completo, tamaño declarado %ld bytes, tamaño real %ld bytes.\n", archivo, size, size);
+            printf("Archivo %s completo, tamaño declarado %ld bytes, tamaño real %ld bytes.\n", archivo, size, auxsize);
             sprintf(buf_tx,"Recepción terminada - Sin errores.\n");
             bytesaenviar = strlen(buf_tx);
             bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
             close(connect_s);
             contbytestx += bytestx;
             tiempo_fin = *localtime(&t);
-            writeLog(tiempo_init, tiempo_fin, 4, 0, contbytestx, contbytesrx);
+            writeLog(tiempo_init, tiempo_fin, 0, size, contbytestx, contbytesrx);
             return 0;
         } else {
             close(connect_s);
@@ -219,7 +227,7 @@ void watchdog(int sig) {
     }
     tiempo_fin = *localtime(&t);
     if (cerrar_archivo == 1) {
-        fclose(archivo);
+        fclose(fp);
         printf("Error en la conexión\n");
         sprintf(buf_tx,"ERROR: Se enviaron bytes de menos.\n");
         bytesaenviar = strlen(buf_tx);
