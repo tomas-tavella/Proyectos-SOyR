@@ -12,11 +12,18 @@
 #include <unistd.h>
 #include <time.h>
 
+/* Basado en los requerimientos:
+El proceso padre del server se queda con el player 1, los hijos atienden del 2 al 4
+El padre prepara la memoria compartida y espera a que se conecten los demas
+Los naipes se pueden hacer con un vector de 40 char, int o lo que sea, y si la carta esta repartida ese numero se pone en 1 sino en 0 por ej, se pueden repartir con un rand(40)
+El padre maneja el orden de jugada y quien juega actualmente
+*/
+
 
 //----- Defines -------------------------------------------------------------
-#define  PORT_NUM 1050  // Numero de Port
+#define  PORT_NUM 1234  // Numero de Port
 #define  IP_ADDR "127.0.0.1" // Direccion IP LOCALHOST
-#define NCONCUR 5
+#define NCONCUR 4
 #define SOCKET_PROTOCOL 0
 
 /*-----------------Global---------------*/

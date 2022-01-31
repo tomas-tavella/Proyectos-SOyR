@@ -10,7 +10,7 @@
 #include <unistd.h>
 
 //----- Defines -------------------------------------------------------------
-#define  PORT_NUM 1050  // Port number used
+#define  PORT_NUM 1234  // Port number used
 #define SOCKET_PROTOCOL 0
 
 //===== Main program ========================================================
