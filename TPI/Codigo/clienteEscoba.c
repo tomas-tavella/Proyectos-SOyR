@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <sys/shm.h>
+#include <sys/sem.h>
+#include <sys/ipc.h>
 #include <sys/types.h> 
-#include <sys/stat.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -26,9 +28,6 @@ int main(int argc, char *argv[])
   char                 ipserver[16];
   int                  bytesrecibidos,bytesaenviar, bytestx;               // Contadores
   int                  conectado; //variable auxiliar
-  char                 archivo[100];    // Variable con el nombre de archivo que se va a leer
-  FILE                 *fp;
-  off_t                size;
 
   if (argc!=2)
     {
