@@ -27,7 +27,7 @@ El padre maneja el orden de jugada y quien juega actualmente
 
 /*-----------------Global---------------*/
 int terminar = 0;
-unsigned int connect_s;
+unsigned int connect_s[4];
 
 //===== Main program ========================================================
 int main(int argc, char *argv[]) {
@@ -40,12 +40,14 @@ int main(int argc, char *argv[]) {
     char                 buf_tx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     char                 buf_rx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
+    int                  cant_jug;
 
     server_s = socket(AF_INET, SOCK_STREAM, SOCKET_PROTOCOL);
     if (server_s==-1) {
         perror("socket");
         return 1;
     }
+    printf("Servidor de escoba de 15.\n");
     printf("Creado el descriptor del socket %d\n",server_s);
   
     server_addr.sin_family      = AF_INET;            // Familia TCP/IP
@@ -56,15 +58,36 @@ int main(int argc, char *argv[]) {
     printf("Asociado el descriptor %u con el port %u\n", server_s,PORT_NUM);
     printf("Servidor en proceso %d listo.\n",getpid());
     listen(server_s, NCONCUR);
+    int i = 0;
 
     addr_len = sizeof(client_addr);
     while(!terminar) {   
-        connect_s = accept(server_s, (struct sockaddr *)&client_addr, &addr_len);
-        if (connect_s==-1) {
+        connect_s[i] = accept(server_s, (struct sockaddr *)&client_addr, &addr_len);
+        if (connect_s[i]==-1) {
             perror("accept");
             return 2;
         }
-        printf("Nueva conexión desde: %s:%hu\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+        printf("Nueva conexión desde: %s:%hu , Jugador %d.\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port),i+1);
+        if (i == 0) {
+            sprintf(buf_tx,"Bienvenido a la escoba de 15 MP, por favor ingrese el número de jugadores (2-4): ");
+            bytesaenviar =  strlen(buf_tx);
+            bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);
+            bytesrecibidos=recv(connect_s[i], buf_rx, sizeof(buf_rx), 0); // Recepción del numero de jugadores
+            if (bytesrecibidos==-1) {
+                perror ("recv");
+                return 3;
+            }
+            cant_jug = atoi(buf_rx);
+            if (cant_jug > 4 || cant_jug < 2) {
+                sprintf(buf_tx,"El número de jugadores solicitado es inválido.\n");
+                bytesaenviar =  strlen(buf_tx);
+                bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);
+                close(connect_s[i]);
+            }
+        } else { /* Hacer un fork y atender a los otros jugadores */ }
+
+        /* De acá en adelante sigue siendo código viejo */
+
         if(fork()==0) {
             printf("Proceso hijo %d atendiendo conexión desde: %s\n",getpid(),inet_ntoa(client_addr.sin_addr));
             close (server_s); // Cerrar socket no usado
@@ -77,12 +100,7 @@ int main(int argc, char *argv[]) {
                 return 3;
             }
 
-            bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0); // Chequear recepción de "archivo"
-            if (bytesrecibidos==-1) {
-                perror ("recv");
-                return 3;
-            }
-            contbytesrx += bytesrecibidos;
+            
             if (!strncmp(buf_rx,"Archivo",7)) {
                 printf("Se recibio la palabra %s\n", buf_rx);
                 alarm(10);
@@ -94,18 +112,6 @@ int main(int argc, char *argv[]) {
                 }
             } else {
                 printf("Error en la conexión.\n");
-                sprintf(buf_tx,"ERROR: No se recibió la palabra 'Archivo'.\n");
-                bytesaenviar = strlen(buf_tx);
-                bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
-                if (bytestx==-1) {
-                    perror ("send");
-                    return 3;
-                }
-                contbytestx += bytestx;
-                tiempo_fin = *localtime(&t);
-                writeLog(tiempo_init, tiempo_fin, 1, 0, contbytestx, contbytesrx);
-                close(connect_s);
-                return 0;
             }
             do {
                 bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
