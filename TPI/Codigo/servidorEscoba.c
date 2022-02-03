@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
     char                 buf_rx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
     int                  cant_jug;
+    char                 jugadores[4][50];
 
     server_s = socket(AF_INET, SOCK_STREAM, SOCKET_PROTOCOL);
     if (server_s==-1) {
@@ -84,6 +85,11 @@ int main(int argc, char *argv[]) {
                 bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);
                 close(connect_s[i]);
             }
+            sprintf(buf_tx,"Ingrese su nombre: ");
+            bytesaenviar =  strlen(buf_tx);
+            bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);
+            bytesrecibidos=recv(connect_s[i], buf_rx, sizeof(buf_rx), 0); // Recepción del nombre del jugador
+            strcpy(jugadores[0],buf_rx);
         } else { /* Hacer un fork y atender a los otros jugadores */ }
 
         /* De acá en adelante sigue siendo código viejo */
