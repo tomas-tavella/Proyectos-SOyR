@@ -90,8 +90,27 @@ int main(int argc, char *argv[]) {
             bytesaenviar =  strlen(buf_tx);
             bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);
             bytesrecibidos=recv(connect_s[i], buf_rx, sizeof(buf_rx), 0); // Recepción del nombre del jugador
-            strcpy(jugadores[0],buf_rx);
-        } else { /* Hacer un fork y atender a los otros jugadores */ }
+            strcpy(jugadores[i],buf_rx);
+            printf("El jugador %s creo la partida para %d jugadores\n", jugadores[i], cant_jug);
+            i++;
+        } else if(i<cant_jug) { /* Hacer un fork y atender a los otros jugadores */
+            if(fork()==0){
+                sprintf(buf_tx,"Ingrese su nombre: ");
+                bytesaenviar =  strlen(buf_tx);
+                bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);
+                bytesrecibidos=recv(connect_s[i], buf_rx, sizeof(buf_rx), 0); // Recepción del nombre del jugador
+                strcpy(jugadores[i],buf_rx);
+                printf("El jugador %s es el numero %d\n", jugadores[i], cant_jug);
+            }
+            else{
+                close(connect_s[i]);
+            }
+            i++;
+         }
+         else{
+            printf("La partida esta configurada para %d jugadores y esta completa. Intentelo mas tarde.\n",cant_jug);
+            return 0;
+         }
 
         /* De acá en adelante sigue siendo código viejo */
 
