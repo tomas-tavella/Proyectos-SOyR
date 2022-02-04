@@ -59,18 +59,16 @@ int main(int argc, char *argv[])
     }
   printf("El IP del servidor es: %s y el port del servidor  es %hu \n",inet_ntoa(server_addr.sin_addr),
   ntohs(server_addr.sin_port));
-  while (!strcmp("FIN",buf_rx)) {
+  while (strncmp(buf_tx,"FIN",3)!=0) {
     bytesrecibidos=recv(client_s, buf_rx, sizeof(buf_rx), 0);
     buf_rx[bytesrecibidos]=0;  //Me aseguro que termine en NULL 
     printf("%s", buf_rx);
     fgets(buf_tx,100,stdin);
-
     for (int i=0;i<100;i++) {
       if (buf_tx[i]=='\n') buf_tx[i]=0;
     }
     bytesaenviar =  strlen(buf_tx);
     bytestx=send(client_s, buf_tx, bytesaenviar, 0);
-  
   }
 
   close(client_s);

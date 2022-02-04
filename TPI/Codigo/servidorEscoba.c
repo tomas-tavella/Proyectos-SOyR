@@ -5,7 +5,8 @@
 #include <sys/shm.h>
 #include <sys/sem.h>
 #include <sys/ipc.h>
-#include <sys/types.h>    
+#include <sys/types.h> 
+#include <sys/wait.h> 
 #include <sys/socket.h>  
 #include <netinet/in.h> 
 #include <arpa/inet.h>
@@ -95,55 +96,13 @@ int main(int argc, char *argv[]) {
         /* De acá en adelante sigue siendo código viejo */
 
         if(fork()==0) {
-            printf("Proceso hijo %d atendiendo conexión desde: %s\n",getpid(),inet_ntoa(client_addr.sin_addr));
-            close (server_s); // Cerrar socket no usado
-
-            sprintf(buf_tx,"Listo"); // Mensaje de listo para recibir
-            bytesaenviar =  strlen(buf_tx);
-            bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
-            if (bytestx==-1) {
-                perror ("send");
-                return 3;
-            }
-
-            
-            if (!strncmp(buf_rx,"Archivo",7)) {
-                printf("Se recibio la palabra %s\n", buf_rx);
-                alarm(10);
-                bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
-                alarm(0);
-                if (bytesrecibidos==-1) {
-                    perror ("recv");
-                    return 3;
-                }
-            } else {
-                printf("Error en la conexión.\n");
-            }
             do {
-                bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
-                if (bytesrecibidos==-1) {
-                   perror ("recv");
-                   return 3;
-                }
-                fwrite(buf_rx,sizeof(char),bytesrecibidos,fp);
-                printf("Recibi %d bytes del cliente.\n",bytesrecibidos);
-                if(auxsize<0){
-                    printf("Llegaron bytes de mas, terminando conexión.\n");
-                    sprintf(buf_tx,"ERROR: Sobre-envío de datos.\n");
-                    bytesaenviar = strlen(buf_tx);
-                    bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
-                    return 0;
-                }
-            } while (auxsize!=0); 
-            printf("Recepción terminada - Sin errores\n");
-            printf("Archivo %s completo, tamaño declarado %ld bytes, tamaño real %ld bytes.\n", archivo, size, auxsize);
-            sprintf(buf_tx,"Recepción terminada - Sin errores.\n");
-            bytesaenviar = strlen(buf_tx);
-            bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
-            close(connect_s);
+                
+            } while (1); 
+            
             return 0;
         } else {
-            close(connect_s);
+            
         } 
     }
     wait(NULL);
