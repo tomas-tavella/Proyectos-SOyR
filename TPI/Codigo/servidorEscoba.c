@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
         printf("Nueva conexión desde: %s:%hu , Jugador %d.\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port),i+1);
         if (i == 0) {
             sprintf(buf_tx,"Bienvenido a la escoba de 15 MP, por favor ingrese el número de jugadores (2-4): ");
-            bytesaenviar =  strlen(buf_tx);
+            bytesaenviar = strlen(buf_tx);
             bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);
             bytesrecibidos=recv(connect_s[i], buf_rx, sizeof(buf_rx), 0); // Recepción del numero de jugadores
             if (bytesrecibidos==-1) {
