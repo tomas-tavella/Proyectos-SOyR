@@ -20,17 +20,19 @@ El padre maneja el orden de jugada y quien juega actualmente
 */
 
 
-//----- Defines -------------------------------------------------------------
+//******************************* Defines *******************************//
 #define  PORT_NUM 1234  // Numero de Port
 #define  IP_ADDR "127.0.0.1" // Direccion IP LOCALHOST
 #define NCONCUR 4
 #define SOCKET_PROTOCOL 0
+#define SIETE_ORO 36
 
-/*-----------------Global---------------*/
+//******************************** Global *******************************//
 int terminar = 0;
 unsigned int connect_s[4];
 
-//===== Main program ========================================================
+
+//******************************* Main program *******************************//
 int main(int argc, char *argv[]) {
 
     unsigned int         server_s;        // Descriptor del socket
@@ -43,6 +45,12 @@ int main(int argc, char *argv[]) {
     int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
     int                  cant_jug;
     char                 jugadores[4][50];
+    int                  mazo[40];         //0 - 9 basto, 10 - 19 espada, 20 - 29 copa, 30 - 39 oro
+    int                  cartas_mesa[10];
+    int                  mano[4][3];       // Despues tenemos que cambiarlo para que varie con la cantidad de jugadores
+    int                  cartas_levantadas[4][20];   // Variable que contiene las cartas que cada jugador levanto
+    int                  jugador=0;        // Variable para indicar el turno
+    int                  suma_mano=0;
 
     server_s = socket(AF_INET, SOCK_STREAM, SOCKET_PROTOCOL);
     if (server_s==-1) {
@@ -61,6 +69,8 @@ int main(int argc, char *argv[]) {
     printf("Servidor en proceso %d listo.\n",getpid());
     listen(server_s, NCONCUR);
     int i = 0;
+
+    //******************************* Creacion de la partida y conexion de los jugadores *******************************//
 
     addr_len = sizeof(client_addr);
     while(!terminar) {   
@@ -112,11 +122,73 @@ int main(int argc, char *argv[]) {
             return 0;
          }
 
+        if(i==cant_jug){
+            //printf("La partida esta a punto de comenzar\nJugador 1: %s\nJugador 2: %sJugador 3: %sJugador 4: %s\nLa suerte es techada\n", jugadores[0])
+            printf("La partida esta a punto de comenzar\n");
+            for (int j=0; j<cant_jug; j++){
+                printf("Jugador %d: %s\n",j,jugadores[j]);
+            }
+            printf("La suerte es techada\n");
+        }
+
+        //************************************* Desarrollo del juego *************************************//
+
+        // Reparto de cartas al centro (4 cartas)
+        int numero_aleatorio = (int)(rand() % 40);             
+        for (int j=0; j<cant_jug; j++){ 
+            while(mazo[numero_aleatorio]==1){
+                numero_aleatorio = (int)(rand() % 40);
+            }
+            mazo[numero_aleatorio]=1;
+            cartas_mesa[j]=numero_aleatorio;
+        }
+        int cartas_jugadas = 0;
+        for(int j=0; j<40; j++){
+            cartas_jugadas += cartas_mesa[j];
+        }
+        for(int k=0; k<3; k++){                         //Asignamos que los jugadores no tengan cartas
+            for (int j=0; j<cant_jug; j++){ 
+                mano[j][k] = 40;
+            }
+        }
+        
+        while(cartas_jugadas!=40){            
+            // Reparto de cartas a cada jugador (3 por jugador)
+            for(int k=0; k<3; k++){
+                for (int j=0; j<cant_jug; j++){ 
+                    while(mazo[numero_aleatorio]==1){
+                        numero_aleatorio = (int)(rand() % 40);
+                    }
+                    mazo[numero_aleatorio]=1;
+                    mano[j][k] = numero_aleatorio;
+                }
+            }
+            
+            while(jugador<cant_jug && suma_mano!=120){     // Cuando el jugador descarta una carta, el numero de la carta se reemplaza por 40 en la variable mano
+
+                // Codigo del juego
+
+                // Avisarle al jugador correspondiente las cartas que tiene y las que estan en la mesa
+                
+
+
+                jugador++;
+                if (jugador-1 == cant_jug){
+                    suma_mano = mano[jugador-1][0] + mano[jugador-1][1] + mano[jugador-1][2];
+                    jugador = 0;
+                }
+            }
+
+            cartas_jugadas = 0;
+            for(int j=0; j<40; j++){
+                cartas_jugadas += cartas_mesa[j];
+            }
+        }
         /* De acá en adelante sigue siendo código viejo */
 
         if(fork()==0) {
             do {
-                
+    
             } while (1); 
             
             return 0;
