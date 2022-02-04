@@ -27,10 +27,20 @@ El padre maneja el orden de jugada y quien juega actualmente
 #define SOCKET_PROTOCOL 0
 #define SIETE_ORO 36
 
+#define SEND_RECV() {\
+    bytesaenviar = strlen(buf_tx);\
+    bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);\
+    bytesrecibidos=recv(connect_s[i], buf_rx, sizeof(buf_rx), 0);\
+}
+
+#define SEND() {\
+    bytesaenviar = strlen(buf_tx);\
+    bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);\
+}
+
 //******************************** Global *******************************//
 int terminar = 0;
 unsigned int connect_s[4];
-
 
 //******************************* Main program *******************************//
 int main(int argc, char *argv[]) {
@@ -43,7 +53,7 @@ int main(int argc, char *argv[]) {
     char                 buf_tx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     char                 buf_rx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
-    int                  cant_jug;
+    int                  cant_jug = 5;
     char                 jugadores[4][50];
     int                  mazo[40];         //0 - 9 basto, 10 - 19 espada, 20 - 29 copa, 30 - 39 oro
     int                  cartas_mesa[10];
@@ -73,7 +83,7 @@ int main(int argc, char *argv[]) {
     //******************************* Creacion de la partida y conexion de los jugadores *******************************//
 
     addr_len = sizeof(client_addr);
-    while(!terminar) {   
+    while(i<cant_jug) {   
         connect_s[i] = accept(server_s, (struct sockaddr *)&client_addr, &addr_len);
         if (connect_s[i]==-1) {
             perror("accept");
@@ -82,9 +92,7 @@ int main(int argc, char *argv[]) {
         printf("Nueva conexión desde: %s:%hu , Jugador %d.\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port),i+1);
         if (i == 0) {
             sprintf(buf_tx,"Bienvenido a la escoba de 15 MP, por favor ingrese el número de jugadores (2-4): ");
-            bytesaenviar = strlen(buf_tx);
-            bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);
-            bytesrecibidos=recv(connect_s[i], buf_rx, sizeof(buf_rx), 0); // Recepción del numero de jugadores
+            SEND_RECV();
             if (bytesrecibidos==-1) {
                 perror ("recv");
                 return 3;
@@ -92,45 +100,36 @@ int main(int argc, char *argv[]) {
             cant_jug = atoi(buf_rx);
             if (cant_jug > 4 || cant_jug < 2) {
                 sprintf(buf_tx,"El número de jugadores solicitado es inválido.\n");
-                bytesaenviar =  strlen(buf_tx);
-                bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);
+                SEND();
                 close(connect_s[i]);
             }
             sprintf(buf_tx,"Ingrese su nombre: ");
-            bytesaenviar =  strlen(buf_tx);
-            bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);
-            bytesrecibidos=recv(connect_s[i], buf_rx, sizeof(buf_rx), 0); // Recepción del nombre del jugador
+            SEND_RECV();
             strcpy(jugadores[i],buf_rx);
             printf("El jugador %s creo la partida para %d jugadores\n", jugadores[i], cant_jug);
-            i++;
-        } else if(i<cant_jug) { /* Hacer un fork y atender a los otros jugadores */
+            //i++;
+        } else if(i<cant_jug ) { /* Hacer un fork y atender a los otros jugadores */
             if(fork()==0){
                 sprintf(buf_tx,"Ingrese su nombre: ");
-                bytesaenviar =  strlen(buf_tx);
-                bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);
-                bytesrecibidos=recv(connect_s[i], buf_rx, sizeof(buf_rx), 0); // Recepción del nombre del jugador
-                strcpy(jugadores[i],buf_rx);
-                printf("El jugador %s es el numero %d\n", jugadores[i], cant_jug);
+                SEND_RECV();
+                strncpy(jugadores[i],buf_rx,bytesrecibidos);
+                printf("El jugador %s es el numero %d\n", jugadores[i], i+1);
             }
             else{
                 close(connect_s[i]);
             }
-            i++;
-         }
-         else{
-            printf("La partida esta configurada para %d jugadores y esta completa. Intentelo mas tarde.\n",cant_jug);
-            return 0;
-         }
-
+            wait(NULL);
+        }
+        i++;
         if(i==cant_jug){
             //printf("La partida esta a punto de comenzar\nJugador 1: %s\nJugador 2: %sJugador 3: %sJugador 4: %s\nLa suerte es techada\n", jugadores[0])
             printf("La partida esta a punto de comenzar\n");
             for (int j=0; j<cant_jug; j++){
-                printf("Jugador %d: %s\n",j,jugadores[j]);
+                printf("Jugador %d: %s\n",j+1,jugadores[j]);
             }
             printf("La suerte es techada\n");
         }
-
+    }
         //************************************* Desarrollo del juego *************************************//
 
         // Reparto de cartas al centro (4 cartas)
@@ -170,8 +169,6 @@ int main(int argc, char *argv[]) {
 
                 // Avisarle al jugador correspondiente las cartas que tiene y las que estan en la mesa
                 
-
-
                 jugador++;
                 if (jugador-1 == cant_jug){
                     suma_mano = mano[jugador-1][0] + mano[jugador-1][1] + mano[jugador-1][2];
@@ -195,7 +192,6 @@ int main(int argc, char *argv[]) {
         } else {
             
         } 
-    }
     wait(NULL);
     close(server_s);
     return 0;
