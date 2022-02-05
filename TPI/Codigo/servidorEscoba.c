@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
     char                 buf_tx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     char                 buf_rx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
-    int                  cant_jug = 5;
+    int                  cant_jug;
     char                 jugadores[4][50];
     int                  mazo[40];         //0 - 9 basto, 10 - 19 espada, 20 - 29 copa, 30 - 39 oro
     int                  cartas_mesa[10];
@@ -143,11 +143,11 @@ int main(int argc, char *argv[]) {
         }
         int cartas_jugadas = 0;
         for(int j=0; j<40; j++){
-            cartas_jugadas += cartas_mesa[j];
+            cartas_jugadas += mazo[j];
         }
         for(int k=0; k<3; k++){                         //Asignamos que los jugadores no tengan cartas
             for (int j=0; j<cant_jug; j++){ 
-                mano[j][k] = 40;
+                mano[j][k] = 40;         // ?
             }
         }
         
@@ -162,6 +162,7 @@ int main(int argc, char *argv[]) {
                     mano[j][k] = numero_aleatorio;
                 }
             }
+            // Si es la primera mano repartir en la mesa
             
             while(jugador<cant_jug && suma_mano!=120){     // Cuando el jugador descarta una carta, el numero de la carta se reemplaza por 40 en la variable mano
 
