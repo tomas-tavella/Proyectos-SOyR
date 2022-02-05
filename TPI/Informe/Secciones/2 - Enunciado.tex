@@ -1,24 +1,31 @@
 \section{Enunciado}
-Queremos un programa \textbf{\textit{servidor concurrente}} que permita a un cliente que se conecta utilizando el protocolo TCP enviar un archivo para que el servidor lo almacene.\\
 
-\begin{itemize}
-    \item Cuando un cliente se conecta, el servidor enviará el mensaje: ``listo'' y esperará recibir la palabra ``archivo''.
-    \item A continuación el servidor espera un espacio y luego el nombre con que se quiere guardar el archivo (solo letras, números y el carácter ``.'') finalizado con un espacio.
-    \item Luego se quedará esperando un número codificado en \texttt{ascii} que indica el tamaño en bytes del archivo, también finalizado con un espacio.
-    \item A continuación comenzará la recepción de los datos, que serán almacenados en un archivo cuyo nombre es el recibido en primer término, hasta completar la cantidad de bytes correspondiente.
-    \item El servidor debe permitir la recepción de archivos binarios.
-    \item Una vez recibida la totalidad de los datos, el servidor contestará con el siguiente mensaje:
-    \begin{itemize}
-        \item ``Archivo xx completo, tamaño declarado yy bytes, tamaño real zz bytes.''
-        \begin{itemize}
-            \item xx: nombre del archivo.
-            \item yy: tamaño enviado en el mensaje del cliente.
-            \item zz: total de bytes recibidos por el servidor.
-        \end{itemize}
-    \end{itemize}
-    \item Luego el servidor cerrará la conexión con el cliente.
-    \item El servidor debe llevar un archivo de registro de todas las conexiones entrantes, con fecha y hora de inicio y de finalización, tamaño del archivo recibido, cantidad de bytes enviados y cantidad de bytes recibidos en formato \texttt{csv}.
-    \item Defina explícitamente cómo será el manejo de errores.
-    \item Para probar el programa puede utilizar el cliente TCP que se vio como ejemplo, o el programa \texttt{nc}.
-    \item Recuerde verificar que no queden procesos \textit{zombie} cuando finalizan los hijos generados.
-\end{itemize}
+Se desea realizar un servidor TCP que permita jugar una partida del tradicional juego de cartas ``Escoba de 15'', desde un cliente \texttt{telnet}.\\
+
+El servidor debe esperar conexiones entrantes desde el port 1234 y deberá incorporar, como mínimo, las siguientes capacidades:\\
+
+\begin{enumerate}[label=\alph*)]\bfseries
+    \item \textnormal{Permitir jugar una partida entre 2, 3 o 4 jugadores.}
+    \item \textnormal{Cuando se conecte el primer jugador, se deberá ofrecer la posibilidad de seleccionar si la partida aceptará 2, 3 o 4 jugadores.}
+    \item \textnormal{Una vez seleccionada la cantidad de jugadores, deberá crear e inicializar los recursos necesarios y esperar que se presenten el resto de los jugadores.}
+    \item \textnormal{Una vez que se hayan conectado el resto de los jugadores, se repartirán las cartas y se avisará al primer jugador conectado que es el que inicia la partida (``mano''). El orden de participación del resto de los jugadores deberá ser el mismo que el orden de conexión.}
+    \item \textnormal{El servidor enviará a cada jugador conectado la información sobre cuales naipes le tocaron en el reparto y además cuales son los naipes que están sobre la mesa.}
+    \item \textnormal{El servidor habilitará al jugador que tiene el turno de juego a enviar su jugada, una vez recibida la reenviará a todos los jugadores.}
+    \item \textnormal{Luego informará a cada jugador cuáles son los naipes que tiene en su poder, cuáles son los naipes que quedan en la mesa y quién tiene el próximo turno.}
+    \item \textnormal{Si un jugador intenta enviar su jugada cunado no le toque el turno, el servidor ignorará el intento.}
+    \item \textnormal{El juego finaliza cuando no hay más cartas para repartir.}
+    \item \textnormal{Cuando finaliza el juego, el servidor informa a todos los jugadores, las cartas recolectadas por cada jugador y la cantidad de escobas para poder realizar un recuento manual de puntaje.}\\
+\end{enumerate}
+
+La descripción anterior es general, y puede implementarse de la manera que se desee, teniendo en cuenta que los clientes \texttt{telnet} o \texttt{nc} mostraran en pantalla solamente lo que reciban sin realizare ningún formateo. Se sugiere que la información a los clientes sea enviada en formato de texto.\\
+
+\subsection{Manejo de errores}
+
+Si un jugador intenta levantar un conjunto de cartas que se exceden de 15, se anula la jugada y se le indica que la comience de nuevo.
+Si intenta levantar dos veces la misma carta, le indica que no es válido y le pide que levante otra carta.\\
+
+\subsection{Otras consideraciones}
+
+Este juego tiene muchas variantes, pero en este caso se trata de utilizar las reglas mas sencillas. Tener en cuenta que el interés de la cátedra es que apliquen los conocimientos sobre TCP/IP y comunicaciones entre procesos.\\
+
+El servidor debe ser un servidor concurrente, donde a medida que se conectan los distintos jugadores. se crea un hijo para atender a cada jugador. Los hijos deben comunicarse entre sí, mediante mecanismos de IPC como memoria compartida, colas de mensajes o semáforos.
