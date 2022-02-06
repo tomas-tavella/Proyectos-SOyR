@@ -38,6 +38,8 @@ El padre maneja el orden de jugada y quien juega actualmente
     bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);\
 }
 
+void traducirCarta(char * carta, int num);
+
 //******************************** Global *******************************//
 int terminar = 0;
 unsigned int connect_s[4];
@@ -131,23 +133,12 @@ int main(int argc, char *argv[]) {
         }
     }
         //************************************* Desarrollo del juego *************************************//
-
-        // Reparto de cartas al centro (4 cartas)
-        int numero_aleatorio = (int)(rand() % 40);             
-        for (int j=0; j<cant_jug; j++){ 
-            while(mazo[numero_aleatorio]==1){
-                numero_aleatorio = (int)(rand() % 40);
-            }
-            mazo[numero_aleatorio]=1;
-            cartas_mesa[j]=numero_aleatorio;
-        }
+        int numero_aleatorio = (int)(rand() % 40);      // Esto devuelve un número entre 0 y 39       
         int cartas_jugadas = 0;
-        for(int j=0; j<40; j++){
-            cartas_jugadas += mazo[j];
-        }
+        int primera_mano = 1;
         for(int k=0; k<3; k++){                         //Asignamos que los jugadores no tengan cartas
             for (int j=0; j<cant_jug; j++){ 
-                mano[j][k] = 40;         // ?
+                mano[j][k] = 40;
             }
         }
         
@@ -163,6 +154,19 @@ int main(int argc, char *argv[]) {
                 }
             }
             // Si es la primera mano repartir en la mesa
+            if (primera_mano == 1) {
+                primera_mano = 0;
+                for (int j=0; j<4; j++){ 
+                    while(mazo[numero_aleatorio]==1){
+                        numero_aleatorio = (int)(rand() % 40);
+                    }
+                    mazo[numero_aleatorio]=1;
+                    cartas_mesa[j]=numero_aleatorio;
+                }
+            }
+            for(int j=0; j<40; j++){                    // Contar cuantas cartas hay repartidas         
+                cartas_jugadas += mazo[j];
+            }
             
             while(jugador<cant_jug && suma_mano!=120){     // Cuando el jugador descarta una carta, el numero de la carta se reemplaza por 40 en la variable mano
 
@@ -178,9 +182,9 @@ int main(int argc, char *argv[]) {
             }
 
             cartas_jugadas = 0;
-            for(int j=0; j<40; j++){
+            /* for(int j=0; j<40; j++){
                 cartas_jugadas += cartas_mesa[j];
-            }
+            } */
         }
         /* De acá en adelante sigue siendo código viejo */
 
@@ -196,4 +200,61 @@ int main(int argc, char *argv[]) {
     wait(NULL);
     close(server_s);
     return 0;
+}
+
+void traducirCarta (char * carta, int num) {
+    //Función para traducir el número en el nombre completo de la carta
+    int aux = num % 10;
+    switch (aux) {
+        case 0:
+            sprintf(carta,"Uno de ");
+            break;
+        case 1:
+            sprintf(carta,"Dos de ");
+            break;
+        case 2:
+            sprintf(carta,"Tres de ");
+            break;
+        case 3:
+            sprintf(carta,"Cuatro de ");
+            break;
+        case 4:
+            sprintf(carta,"Cinco de ");
+            break;
+        case 5:
+            sprintf(carta,"Seis de ");
+            break;
+        case 6:
+            sprintf(carta,"Siete de ");
+            break;
+        case 7:
+            sprintf(carta,"Sota de ");
+            break;
+        case 8:
+            sprintf(carta,"Caballo de ");
+            break;
+        case 9:
+            sprintf(carta,"Rey de ");
+            break;
+        default:
+            break;
+    }
+    aux = num / 10;
+    switch (aux) {
+    case 0:
+        strcat(carta,"bastos");
+        break;
+    case 1:
+        strcat(carta,"espadas");
+        break;
+    case 2:
+        strcat(carta,"copas");
+        break;
+    case 3:
+        strcat(carta,"oros");
+        break;
+    default:
+        break;
+    }
+    return;
 }
