@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     char                 buf_tx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     char                 buf_rx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
-    int                  cant_jug;
+    int                  cant_jug = 1;
     char                 jugadores[4][50];
     int                  mazo[40];         //0 - 9 basto, 10 - 19 espada, 20 - 29 copa, 30 - 39 oro
     int                  cartas_mesa[10];
@@ -109,22 +109,15 @@ int main(int argc, char *argv[]) {
             SEND_RECV();
             strcpy(jugadores[i],buf_rx);
             printf("El jugador %s creo la partida para %d jugadores\n", jugadores[i], cant_jug);
-            //i++;
         } else if(i<cant_jug ) { /* Hacer un fork y atender a los otros jugadores */
-            if(fork()==0){
-                sprintf(buf_tx,"Ingrese su nombre: ");
-                SEND_RECV();
-                strncpy(jugadores[i],buf_rx,bytesrecibidos);
-                printf("El jugador %s es el numero %d\n", jugadores[i], i+1);
-            }
-            else{
-                close(connect_s[i]);
-            }
+            sprintf(buf_tx,"Bienvenido a la escoba de 15 MP, ingrese su nombre: ");
+            SEND_RECV();
+            strncpy(jugadores[i],buf_rx,bytesrecibidos);
+            printf("El jugador %s es el numero %d\n", jugadores[i], i+1);
             wait(NULL);
         }
         i++;
         if(i==cant_jug){
-            //printf("La partida esta a punto de comenzar\nJugador 1: %s\nJugador 2: %sJugador 3: %sJugador 4: %s\nLa suerte es techada\n", jugadores[0])
             printf("La partida esta a punto de comenzar\n");
             for (int j=0; j<cant_jug; j++){
                 printf("Jugador %d: %s\n",j+1,jugadores[j]);
@@ -132,72 +125,62 @@ int main(int argc, char *argv[]) {
             printf("La suerte es techada\n");
         }
     }
-        //************************************* Desarrollo del juego *************************************//
-        int numero_aleatorio = (int)(rand() % 40);      // Esto devuelve un número entre 0 y 39       
-        int cartas_jugadas = 0;
-        int primera_mano = 1;
-        for(int k=0; k<3; k++){                         //Asignamos que los jugadores no tengan cartas
-            for (int j=0; j<cant_jug; j++){ 
-                mano[j][k] = 40;
-            }
+    //************************************* Desarrollo del juego *************************************//
+    int numero_aleatorio = (int)(rand() % 40);      // Esto devuelve un número entre 0 y 39       
+    int cartas_jugadas = 0;
+    int primera_mano = 1;
+    for(int k=0; k<3; k++){                         //Asignamos que los jugadores no tengan cartas
+        for (int j=0; j<cant_jug; j++){ 
+            mano[j][k] = 40;
         }
+    }
         
-        while(cartas_jugadas!=40){            
-            // Reparto de cartas a cada jugador (3 por jugador)
-            for(int k=0; k<3; k++){
-                for (int j=0; j<cant_jug; j++){ 
-                    while(mazo[numero_aleatorio]==1){
-                        numero_aleatorio = (int)(rand() % 40);
-                    }
-                    mazo[numero_aleatorio]=1;
-                    mano[j][k] = numero_aleatorio;
+    while(cartas_jugadas!=40){            
+        // Reparto de cartas a cada jugador (3 por jugador)
+        for(int k=0; k<3; k++){
+            for (int j=0; j<cant_jug; j++){ 
+                while(mazo[numero_aleatorio]==1){
+                    numero_aleatorio = (int)(rand() % 40);
                 }
+                mazo[numero_aleatorio]=1;
+                mano[j][k] = numero_aleatorio;
             }
-            // Si es la primera mano repartir en la mesa
-            if (primera_mano == 1) {
-                primera_mano = 0;
-                for (int j=0; j<4; j++){ 
-                    while(mazo[numero_aleatorio]==1){
-                        numero_aleatorio = (int)(rand() % 40);
-                    }
-                    mazo[numero_aleatorio]=1;
-                    cartas_mesa[j]=numero_aleatorio;
-                }
-            }
-            for(int j=0; j<40; j++){                    // Contar cuantas cartas hay repartidas         
-                cartas_jugadas += mazo[j];
-            }
-            
-            while(jugador<cant_jug && suma_mano!=120){     // Cuando el jugador descarta una carta, el numero de la carta se reemplaza por 40 en la variable mano
-
-                // Codigo del juego
-
-                // Avisarle al jugador correspondiente las cartas que tiene y las que estan en la mesa
-                
-                jugador++;
-                if (jugador-1 == cant_jug){
-                    suma_mano = mano[jugador-1][0] + mano[jugador-1][1] + mano[jugador-1][2];
-                    jugador = 0;
-                }
-            }
-
-            cartas_jugadas = 0;
-            /* for(int j=0; j<40; j++){
-                cartas_jugadas += cartas_mesa[j];
-            } */
         }
-        /* De acá en adelante sigue siendo código viejo */
+        // Si es la primera mano repartir en la mesa
+        if (primera_mano == 1) {
+            primera_mano = 0;
+            for (int j=0; j<4; j++){ 
+                while(mazo[numero_aleatorio]==1){
+                    numero_aleatorio = (int)(rand() % 40);
+                }
+                mazo[numero_aleatorio]=1;
+                cartas_mesa[j]=numero_aleatorio;
+            }
+        }
+        for(int j=0; j<40; j++){                    // Contar cuantas cartas hay repartidas         
+            cartas_jugadas += mazo[j];
+        }
+            
+        while(jugador<cant_jug && suma_mano!=120){     // Cuando el jugador descarta una carta, el numero de la carta se reemplaza por 40 en la variable mano
 
-        if(fork()==0) {
-            do {
-    
-            } while (1); 
-            
-            return 0;
-        } else {
-            
-        } 
+            // Codigo del juego
+
+            // Avisarle al jugador correspondiente las cartas que tiene y las que estan en la mesa
+                
+            jugador++;
+            if (jugador-1 == cant_jug){
+                suma_mano = mano[jugador-1][0] + mano[jugador-1][1] + mano[jugador-1][2];
+                jugador = 0;
+            }
+        }
+
+        cartas_jugadas = 0;
+        /* for(int j=0; j<40; j++){
+            cartas_jugadas += cartas_mesa[j];
+        } */
+    }
     wait(NULL);
+    for (i=0;i<cant_jug;i++) close(connect_s[i]);
     close(server_s);
     return 0;
 }
