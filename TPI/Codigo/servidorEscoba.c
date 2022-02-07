@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     char                 buf_tx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     char                 buf_rx[1500];    // Buffer de 1500 bytes para los datos a transmitir
     int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
-    int                  cant_jug = 1;
+    int                  cant_jug;
     char                 jugadores[4][50];
     int                  mazo[40];         //0 - 9 basto, 10 - 19 espada, 20 - 29 copa, 30 - 39 oro
     int                  cartas_mesa[10];
@@ -107,14 +107,30 @@ int main(int argc, char *argv[]) {
             for (j=0;j<strlen(buf_rx);j++) if (buf_rx[j] == '\n') buf_rx[j] == '\0';
             strcpy(jugadores[i],buf_rx);
             printf("El jugador %s creo la partida para %d jugadores\n", jugadores[i], cant_jug);
+<<<<<<< HEAD
         } else if(i<cant_jug ) {
             sprintf(buf_tx,"Bienvenido a la escoba de 15 MP, ingrese su nombre: ");
             SEND_RECV();
             strncpy(jugadores[i],buf_rx,bytesrecibidos);
             printf("El jugador %s es el numero %d\n", jugadores[i], i+1);
+=======
+            //i++;
+        } else if(i<cant_jug ) { /* Hacer un fork y atender a los otros jugadores */
+            if(fork()==0){
+                sprintf(buf_tx,"Ingrese su nombre: ");
+                SEND_RECV();
+                strncpy(jugadores[i],buf_rx,bytesrecibidos);
+                printf("El jugador %s es el numero %d\n", jugadores[i], i+1);
+            }
+            else{
+                close(connect_s[i]);
+            }
+            wait(NULL);
+>>>>>>> parent of dd76475... Agregado mega cheat de simplificacion (Un proceso atiende a todos los clientes, no son necesarios los hijos)
         }
         i++;
         if(i==cant_jug){
+            //printf("La partida esta a punto de comenzar\nJugador 1: %s\nJugador 2: %sJugador 3: %sJugador 4: %s\nLa suerte es techada\n", jugadores[0])
             printf("La partida esta a punto de comenzar\n");
             for (j=0; j<cant_jug; j++){
                 printf("Jugador %d: %s\n",j+1,jugadores[j]);
@@ -122,6 +138,7 @@ int main(int argc, char *argv[]) {
             printf("La suerte es techada\n");
         }
     }
+<<<<<<< HEAD
 <<<<<<< HEAD
     //************************************* Desarrollo del juego *************************************//
     int numero_aleatorio = (int)(rand() % 40);      // Esto devuelve un número entre 0 y 39       
@@ -151,19 +168,39 @@ int main(int argc, char *argv[]) {
                 mano[j][k] = 40;         // ?
             }
 >>>>>>> parent of f250f9c (Agregada funcion para traducir de numero del array a nombre de la carta)
+=======
+        //************************************* Desarrollo del juego *************************************//
+        int numero_aleatorio = (int)(rand() % 40);      // Esto devuelve un número entre 0 y 39       
+        int cartas_jugadas = 0;
+        int primera_mano = 1;
+        for(int k=0; k<3; k++){                         //Asignamos que los jugadores no tengan cartas
+            for (int j=0; j<cant_jug; j++){ 
+                mano[j][k] = 40;
+            }
+>>>>>>> parent of dd76475... Agregado mega cheat de simplificacion (Un proceso atiende a todos los clientes, no son necesarios los hijos)
         }
-    }
         
+<<<<<<< HEAD
     while(cartas_jugadas!=40){            
         // Reparto de cartas a cada jugador (3 por jugador)
         for(k=0; k<3; k++){
             for (j=0; j<cant_jug; j++){ 
                 while(mazo[numero_aleatorio]==1){
                     numero_aleatorio = (int)(rand() % 40);
+=======
+        while(cartas_jugadas!=40){            
+            // Reparto de cartas a cada jugador (3 por jugador)
+            for(int k=0; k<3; k++){
+                for (int j=0; j<cant_jug; j++){ 
+                    while(mazo[numero_aleatorio]==1){
+                        numero_aleatorio = (int)(rand() % 40);
+                    }
+                    mazo[numero_aleatorio]=1;
+                    mano[j][k] = numero_aleatorio;
+>>>>>>> parent of dd76475... Agregado mega cheat de simplificacion (Un proceso atiende a todos los clientes, no son necesarios los hijos)
                 }
-                mazo[numero_aleatorio]=1;
-                mano[j][k] = numero_aleatorio;
             }
+<<<<<<< HEAD
 <<<<<<< HEAD
         }
         // Si es la primera mano repartir en la mesa
@@ -172,10 +209,20 @@ int main(int argc, char *argv[]) {
             for (j=0; j<4; j++){ 
                 while(mazo[numero_aleatorio]==1){
                     numero_aleatorio = (int)(rand() % 40);
+=======
+            // Si es la primera mano repartir en la mesa
+            if (primera_mano == 1) {
+                primera_mano = 0;
+                for (int j=0; j<4; j++){ 
+                    while(mazo[numero_aleatorio]==1){
+                        numero_aleatorio = (int)(rand() % 40);
+                    }
+                    mazo[numero_aleatorio]=1;
+                    cartas_mesa[j]=numero_aleatorio;
+>>>>>>> parent of dd76475... Agregado mega cheat de simplificacion (Un proceso atiende a todos los clientes, no son necesarios los hijos)
                 }
-                mazo[numero_aleatorio]=1;
-                cartas_mesa[j]=numero_aleatorio;
             }
+<<<<<<< HEAD
         }
         for(j=0; j<40; j++){                    // Contar cuantas cartas hay repartidas         
             cartas_jugadas += mazo[j];
@@ -209,16 +256,25 @@ int main(int argc, char *argv[]) {
 >>>>>>> parent of f250f9c (Agregada funcion para traducir de numero del array a nombre de la carta)
 
         while(jugador<cant_jug && suma_mano!=120){     // Cuando el jugador descarta una carta, el numero de la carta se reemplaza por 40 en la variable mano
-
-            // Codigo del juego
-
-            // Avisarle al jugador correspondiente las cartas que tiene y las que estan en la mesa
-                
-            jugador++;
-            if (jugador-1 == cant_jug){
-                suma_mano = mano[jugador-1][0] + mano[jugador-1][1] + mano[jugador-1][2];
-                jugador = 0;
+=======
+            for(int j=0; j<40; j++){                    // Contar cuantas cartas hay repartidas         
+                cartas_jugadas += mazo[j];
             }
+            
+            while(jugador<cant_jug && suma_mano!=120){     // Cuando el jugador descarta una carta, el numero de la carta se reemplaza por 40 en la variable mano
+>>>>>>> parent of dd76475... Agregado mega cheat de simplificacion (Un proceso atiende a todos los clientes, no son necesarios los hijos)
+
+                // Codigo del juego
+
+                // Avisarle al jugador correspondiente las cartas que tiene y las que estan en la mesa
+                
+                jugador++;
+                if (jugador-1 == cant_jug){
+                    suma_mano = mano[jugador-1][0] + mano[jugador-1][1] + mano[jugador-1][2];
+                    jugador = 0;
+                }
+            }
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 
@@ -227,15 +283,34 @@ int main(int argc, char *argv[]) {
                 cartas_jugadas += cartas_mesa[j];
             }
 >>>>>>> parent of f250f9c (Agregada funcion para traducir de numero del array a nombre de la carta)
-        }
+=======
 
+            cartas_jugadas = 0;
+            /* for(int j=0; j<40; j++){
+                cartas_jugadas += cartas_mesa[j];
+            } */
+>>>>>>> parent of dd76475... Agregado mega cheat de simplificacion (Un proceso atiende a todos los clientes, no son necesarios los hijos)
+        }
+        /* De acá en adelante sigue siendo código viejo */
+
+<<<<<<< HEAD
         /* for(int j=0; j<40; j++){
             cartas_jugadas += cartas_mesa[j];
         } */
     }
     /* Mostrar puntajes */
+=======
+        if(fork()==0) {
+            do {
+    
+            } while (1); 
+            
+            return 0;
+        } else {
+            
+        } 
+>>>>>>> parent of dd76475... Agregado mega cheat de simplificacion (Un proceso atiende a todos los clientes, no son necesarios los hijos)
     wait(NULL);
-    for (i=0;i<cant_jug;i++) close(connect_s[i]);
     close(server_s);
     return 0;
 <<<<<<< HEAD
