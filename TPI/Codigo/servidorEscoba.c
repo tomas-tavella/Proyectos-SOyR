@@ -36,8 +36,6 @@ El padre maneja el orden de jugada y quien juega actualmente
     bytestx = send(connect_s[i], buf_tx, bytesaenviar, 0);\
 }
 
-void traducirCarta(char * carta, int num);
-
 //******************************** Global *******************************//
 int terminar = 0;
 unsigned int connect_s[4];
@@ -124,6 +122,7 @@ int main(int argc, char *argv[]) {
             printf("La suerte es techada\n");
         }
     }
+<<<<<<< HEAD
     //************************************* Desarrollo del juego *************************************//
     int numero_aleatorio = (int)(rand() % 40);      // Esto devuelve un número entre 0 y 39       
     int cartas_jugadas = 0;
@@ -131,6 +130,27 @@ int main(int argc, char *argv[]) {
     for(k=0; k<3; k++){                         //Asignamos que los jugadores no tengan cartas
         for (j=0; j<cant_jug; j++){ 
             mano[j][k] = 40;
+=======
+        //************************************* Desarrollo del juego *************************************//
+
+        // Reparto de cartas al centro (4 cartas)
+        int numero_aleatorio = (int)(rand() % 40);             
+        for (int j=0; j<cant_jug; j++){ 
+            while(mazo[numero_aleatorio]==1){
+                numero_aleatorio = (int)(rand() % 40);
+            }
+            mazo[numero_aleatorio]=1;
+            cartas_mesa[j]=numero_aleatorio;
+        }
+        int cartas_jugadas = 0;
+        for(int j=0; j<40; j++){
+            cartas_jugadas += mazo[j];
+        }
+        for(int k=0; k<3; k++){                         //Asignamos que los jugadores no tengan cartas
+            for (int j=0; j<cant_jug; j++){ 
+                mano[j][k] = 40;         // ?
+            }
+>>>>>>> parent of f250f9c (Agregada funcion para traducir de numero del array a nombre de la carta)
         }
     }
         
@@ -144,6 +164,7 @@ int main(int argc, char *argv[]) {
                 mazo[numero_aleatorio]=1;
                 mano[j][k] = numero_aleatorio;
             }
+<<<<<<< HEAD
         }
         // Si es la primera mano repartir en la mesa
         if (primera_mano == 1) {
@@ -181,6 +202,11 @@ int main(int argc, char *argv[]) {
         }
         
         while(1);
+=======
+            // Si es la primera mano repartir en la mesa
+            
+            while(jugador<cant_jug && suma_mano!=120){     // Cuando el jugador descarta una carta, el numero de la carta se reemplaza por 40 en la variable mano
+>>>>>>> parent of f250f9c (Agregada funcion para traducir de numero del array a nombre de la carta)
 
         while(jugador<cant_jug && suma_mano!=120){     // Cuando el jugador descarta una carta, el numero de la carta se reemplaza por 40 en la variable mano
 
@@ -193,6 +219,14 @@ int main(int argc, char *argv[]) {
                 suma_mano = mano[jugador-1][0] + mano[jugador-1][1] + mano[jugador-1][2];
                 jugador = 0;
             }
+<<<<<<< HEAD
+=======
+
+            cartas_jugadas = 0;
+            for(int j=0; j<40; j++){
+                cartas_jugadas += cartas_mesa[j];
+            }
+>>>>>>> parent of f250f9c (Agregada funcion para traducir de numero del array a nombre de la carta)
         }
 
         /* for(int j=0; j<40; j++){
@@ -204,6 +238,7 @@ int main(int argc, char *argv[]) {
     for (i=0;i<cant_jug;i++) close(connect_s[i]);
     close(server_s);
     return 0;
+<<<<<<< HEAD
 }
 
 void traducirCarta (char * carta, int num) {
@@ -261,4 +296,6 @@ void traducirCarta (char * carta, int num) {
         break;
     }
     return;
+=======
+>>>>>>> parent of f250f9c (Agregada funcion para traducir de numero del array a nombre de la carta)
 }
