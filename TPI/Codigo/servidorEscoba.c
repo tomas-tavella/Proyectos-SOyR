@@ -2,15 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <sys/shm.h>
-#include <sys/sem.h>
-#include <sys/ipc.h>
 #include <sys/types.h> 
 #include <sys/wait.h> 
 #include <sys/socket.h>  
 #include <netinet/in.h> 
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <time.h>
 
 /* Basado en los requerimientos:
 El proceso padre del server se queda con el player 1, los hijos atienden del 2 al 4
@@ -69,6 +67,7 @@ int main(int argc, char *argv[]) {
         perror("socket");
         return 1;
     }
+    srand(time(0));
     printf("Servidor de escoba de 15.\n");
     printf("Creado el descriptor del socket %d\n",server_s);
   
@@ -80,7 +79,7 @@ int main(int argc, char *argv[]) {
     printf("Asociado el descriptor %u con el port %u\n", server_s,PORT_NUM);
     printf("Servidor en proceso %d listo.\n",getpid());
     listen(server_s, NCONCUR);
-    int i = 0;
+    volatile int i = 0, j = 0, k = 0;
 
     //******************************* Creacion de la partida y conexion de los jugadores *******************************//
 
@@ -107,19 +106,19 @@ int main(int argc, char *argv[]) {
             }
             sprintf(buf_tx,"Ingrese su nombre: ");
             SEND_RECV();
+            for (j=0;j<strlen(buf_rx);j++) if (buf_rx[j] == '\n') buf_rx[j] == '\0';
             strcpy(jugadores[i],buf_rx);
             printf("El jugador %s creo la partida para %d jugadores\n", jugadores[i], cant_jug);
-        } else if(i<cant_jug ) { /* Hacer un fork y atender a los otros jugadores */
+        } else if(i<cant_jug ) {
             sprintf(buf_tx,"Bienvenido a la escoba de 15 MP, ingrese su nombre: ");
             SEND_RECV();
             strncpy(jugadores[i],buf_rx,bytesrecibidos);
             printf("El jugador %s es el numero %d\n", jugadores[i], i+1);
-            wait(NULL);
         }
         i++;
         if(i==cant_jug){
             printf("La partida esta a punto de comenzar\n");
-            for (int j=0; j<cant_jug; j++){
+            for (j=0; j<cant_jug; j++){
                 printf("Jugador %d: %s\n",j+1,jugadores[j]);
             }
             printf("La suerte es techada\n");
@@ -129,16 +128,16 @@ int main(int argc, char *argv[]) {
     int numero_aleatorio = (int)(rand() % 40);      // Esto devuelve un número entre 0 y 39       
     int cartas_jugadas = 0;
     int primera_mano = 1;
-    for(int k=0; k<3; k++){                         //Asignamos que los jugadores no tengan cartas
-        for (int j=0; j<cant_jug; j++){ 
+    for(k=0; k<3; k++){                         //Asignamos que los jugadores no tengan cartas
+        for (j=0; j<cant_jug; j++){ 
             mano[j][k] = 40;
         }
     }
         
     while(cartas_jugadas!=40){            
         // Reparto de cartas a cada jugador (3 por jugador)
-        for(int k=0; k<3; k++){
-            for (int j=0; j<cant_jug; j++){ 
+        for(k=0; k<3; k++){
+            for (j=0; j<cant_jug; j++){ 
                 while(mazo[numero_aleatorio]==1){
                     numero_aleatorio = (int)(rand() % 40);
                 }
@@ -149,7 +148,7 @@ int main(int argc, char *argv[]) {
         // Si es la primera mano repartir en la mesa
         if (primera_mano == 1) {
             primera_mano = 0;
-            for (int j=0; j<4; j++){ 
+            for (j=0; j<4; j++){ 
                 while(mazo[numero_aleatorio]==1){
                     numero_aleatorio = (int)(rand() % 40);
                 }
@@ -157,10 +156,32 @@ int main(int argc, char *argv[]) {
                 cartas_mesa[j]=numero_aleatorio;
             }
         }
-        for(int j=0; j<40; j++){                    // Contar cuantas cartas hay repartidas         
+        for(j=0; j<40; j++){                    // Contar cuantas cartas hay repartidas         
             cartas_jugadas += mazo[j];
         }
-            
+
+        for(i=0;i<cant_jug;i++) {
+            sprintf(buf_tx,"Tus cartas son: ");
+            for (j=0;j<3;j++) {
+                traducirCarta(buf_tx,mano[i][j]);
+                strcat(buf_tx,", ");
+            }
+            strcat(buf_tx,"\n");
+            SEND();
+        }
+
+        sprintf(buf_tx,"Las cartas sobre la mesa son: ");
+        for (j=0;j<4;j++) {
+            traducirCarta(buf_tx,cartas_mesa[j]);
+            strcat(buf_tx,", ");
+        }
+        strcat(buf_tx,"\n");
+        for(i=0;i<cant_jug;i++) {
+            SEND();
+        }
+        
+        while(1);
+
         while(jugador<cant_jug && suma_mano!=120){     // Cuando el jugador descarta una carta, el numero de la carta se reemplaza por 40 en la variable mano
 
             // Codigo del juego
@@ -174,11 +195,11 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        cartas_jugadas = 0;
         /* for(int j=0; j<40; j++){
             cartas_jugadas += cartas_mesa[j];
         } */
     }
+    /* Mostrar puntajes */
     wait(NULL);
     for (i=0;i<cant_jug;i++) close(connect_s[i]);
     close(server_s);
@@ -190,34 +211,34 @@ void traducirCarta (char * carta, int num) {
     int aux = num % 10;
     switch (aux) {
         case 0:
-            sprintf(carta,"Uno de ");
+            strcat(carta,"Uno de ");
             break;
         case 1:
-            sprintf(carta,"Dos de ");
+            strcat(carta,"Dos de ");
             break;
         case 2:
-            sprintf(carta,"Tres de ");
+            strcat(carta,"Tres de ");
             break;
         case 3:
-            sprintf(carta,"Cuatro de ");
+            strcat(carta,"Cuatro de ");
             break;
         case 4:
-            sprintf(carta,"Cinco de ");
+            strcat(carta,"Cinco de ");
             break;
         case 5:
-            sprintf(carta,"Seis de ");
+            strcat(carta,"Seis de ");
             break;
         case 6:
-            sprintf(carta,"Siete de ");
+            strcat(carta,"Siete de ");
             break;
         case 7:
-            sprintf(carta,"Sota de ");
+            strcat(carta,"Sota de ");
             break;
         case 8:
-            sprintf(carta,"Caballo de ");
+            strcat(carta,"Caballo de ");
             break;
         case 9:
-            sprintf(carta,"Rey de ");
+            strcat(carta,"Rey de ");
             break;
         default:
             break;
