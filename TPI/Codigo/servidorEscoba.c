@@ -43,6 +43,13 @@ se puede repartir las cartas y demas.
     bytestx = send(connect_s, buf_tx, bytesaenviar, 0);\
 }
 
+typedef struct jugador_t {
+    char nombre[50];
+    int mano[3];
+    int cartas_levantadas[40];
+    int escobas;
+}
+
 //******************************** Global *******************************//
 int terminar = 0;
 unsigned int connect_s;
@@ -60,10 +67,7 @@ int main(int argc, char *argv[]) {
     char                 buf_tx[1500],buf_rx[1500];
     int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
     int                  cant_jug=1;
-    char                 jugadores[4][50];
     int                  mazo[40];         //0 - 9 basto, 10 - 19 espada, 20 - 29 copa, 30 - 39 oro
-    int                  cartas_mesa[10];
-    int                  mano[4][3];       // Despues tenemos que cambiarlo para que varie con la cantidad de jugadores
     int                  cartas_levantadas[4][20];   // Variable que contiene las cartas que cada jugador levanto
     int                  turno=0;        // Variable para indicar el turno
     int                  suma_mano=0;
@@ -71,12 +75,13 @@ int main(int argc, char *argv[]) {
     key_t                clave1, clave2;
     int                  IDmem1, IDmem2;
 
-    //int *mano = NULL; //Va a ser un array de 12, para recorrerlo usar mano[jugador*3+i], con i de 0 a 2, jug 1 es de 0 a 2, jug 2 de 3 a 5, y asi hasta 9 a 11 para el 4to -JP (despues decomentar)
-    //int *cartas_mesa = NULL; (despues descomentar)
+    int *cartas_mesa = NULL;
+    struct jugador_t *jugadores;
+    pid_t pid_padre = getpid();
 
     /*************************************** Obtención de la memoria compartida ***************************************/
     //(No agregué colas de msj todavia por si no las necesitamos -JP)
-    /*clave1 = ftok(PATH,NUMERO);
+    clave1 = ftok(PATH,NUMERO);
     if (clave1 == (key_t) -1){
 		printf("No se pudo obtener una clave\n");
 		exit(1);
@@ -88,28 +93,28 @@ int main(int argc, char *argv[]) {
 	}
 
     // Llamar al sistema para obtener la memoria compartida
-    IDmem1 = shmget(clave1, 12*sizeof(int), 0666 | IPC_CREAT);
+    IDmem1 = shmget(clave1, 10*sizeof(int), 0666 | IPC_CREAT); // Hasta 10 cartas en la mesa a la vez? Parece razonable, se puede cambiar -JP
     if(IDmem1 == -1){
 		printf("No se pudo obtener un ID de memoria compartida\n");
 		exit(2);
 	}
-    IDmem2 = shmget(clave2, 10*sizeof(int), 0666 | IPC_CREAT); // Hasta 10 cartas en la mesa a la vez? Parece razonable, se puede cambiar -JP
+    IDmem2 = shmget(clave2, 4*sizeof(jugador_t)), 0666 | IPC_CREAT);
     if(IDmem2 == -1){
 		printf("No se pudo obtener un ID de memoria compartida\n");
 		exit(2);
 	}
 
     // Adosar el proceso a los espacios de memoria mediante un puntero
-    mano = (int *) shmat(IDmem1, (const void *)0,0);
-    if (mano == NULL){
-		printf("No se pudo asociar el puntero a la memoria compartida\n");
-		exit(3);
-	}
-    cartas_mesa = (int *) shmat(IDmem2, (const void *)0,0);
+    cartas_mesa = (int *) shmat(IDmem1, (const void *)0,0);
     if (cartas_mesa == NULL){
 		printf("No se pudo asociar el puntero a la memoria compartida\n");
 		exit(3);
-	}*/
+	}
+    jugadores = (jugador_t *) shmat(IDmem2, (const void *)0,0);
+    if (jugadores == NULL){
+		printf("No se pudo asociar el puntero a la memoria compartida\n");
+		exit(3);
+	}
 
     /************************************** Creación del socket para el servidor **************************************/
 
@@ -154,16 +159,19 @@ int main(int argc, char *argv[]) {
                 SEND();
                 close(connect_s);
             }
-            if (fork()==0) { // Cada hijo se queda con su cliente, 
+            if (fork()==0) { // Cada hijo se queda con su cliente,
+                close(server_s);
                 sprintf(buf_tx,"Jugador %d de %d. Ingrese su nombre: ",turno+1,cant_jug);
                 SEND_RECV();
                 for (j=0;j<strlen(buf_rx);j++) if (buf_rx[j] == '\n') buf_rx[j] == '\0';
-                strcpy(jugadores[turno],buf_rx);
+                strcpy(jugadores[turno].nombre,buf_rx);
+                break;
             } else {
                 turno++;
                 close(connect_s);
             }
         }
+        
     } /* A partir de acá hay que revisar */
 
     //************************************* Desarrollo del juego *************************************//
@@ -171,22 +179,7 @@ int main(int argc, char *argv[]) {
     int cartas_jugadas = 0;
     int primera_mano = 1;
 
-    for(k=0; k<3; k++){                         //Asignamos que los jugadores no tengan cartas
-        for (j=0; j<cant_jug; j++){ 
-            mano[j][k] = 40;
-        }
-    }
     //************************************* Desarrollo del juego *************************************//
-    /*// Reparto de cartas al centro (4 cartas)
-    int numero_aleatorio = (int)(rand() % 40);             
-    for (int j=0; j<cant_jug; j++){ 
-        while(mazo[numero_aleatorio]==1){
-            numero_aleatorio = (int)(rand() % 40);
-        }
-        mazo[numero_aleatorio]=1;
-        cartas_mesa[j]=numero_aleatorio;
-    }*/
-    //int cartas_jugadas = 0;
     for(int j=0; j<40; j++){
         cartas_jugadas += mazo[j];
     }
