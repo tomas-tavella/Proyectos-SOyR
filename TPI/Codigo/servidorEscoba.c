@@ -48,7 +48,7 @@ typedef struct jugador_t {
     int mano[3];
     int cartas_levantadas[40];
     int escobas;
-}
+}jugador_t;
 
 //******************************** Global *******************************//
 int terminar = 0;
@@ -71,6 +71,7 @@ int main(int argc, char *argv[]) {
     int                  cartas_levantadas[4][20];   // Variable que contiene las cartas que cada jugador levanto
     int                  turno=0;        // Variable para indicar el turno
     int                  suma_mano=0;
+    int                  mano[4][3];
     int                  i,j,k;
     key_t                clave1, clave2;
     int                  IDmem1, IDmem2;
@@ -83,38 +84,38 @@ int main(int argc, char *argv[]) {
     //(No agregué colas de msj todavia por si no las necesitamos -JP)
     clave1 = ftok(PATH,NUMERO);
     if (clave1 == (key_t) -1){
-		printf("No se pudo obtener una clave\n");
-		exit(1);
-	}
+        printf("No se pudo obtener una clave\n");
+        exit(1);
+    }
     clave2 = ftok(PATH,NUMERO+1);
     if (clave2 == (key_t) -1){
-		printf("No se pudo obtener una clave\n");
-		exit(1);
-	}
+        printf("No se pudo obtener una clave\n");
+        exit(1);
+    }
 
     // Llamar al sistema para obtener la memoria compartida
     IDmem1 = shmget(clave1, 10*sizeof(int), 0666 | IPC_CREAT); // Hasta 10 cartas en la mesa a la vez? Parece razonable, se puede cambiar -JP
     if(IDmem1 == -1){
-		printf("No se pudo obtener un ID de memoria compartida\n");
-		exit(2);
-	}
-    IDmem2 = shmget(clave2, 4*sizeof(jugador_t)), 0666 | IPC_CREAT);
+        printf("No se pudo obtener un ID de memoria compartida\n");
+        exit(2);
+    }
+    IDmem2 = shmget(clave2, 4*sizeof(jugador_t), 0666 | IPC_CREAT);
     if(IDmem2 == -1){
-		printf("No se pudo obtener un ID de memoria compartida\n");
-		exit(2);
-	}
+        printf("No se pudo obtener un ID de memoria compartida\n");
+        exit(2);
+    }
 
     // Adosar el proceso a los espacios de memoria mediante un puntero
     cartas_mesa = (int *) shmat(IDmem1, (const void *)0,0);
     if (cartas_mesa == NULL){
-		printf("No se pudo asociar el puntero a la memoria compartida\n");
-		exit(3);
-	}
+        printf("No se pudo asociar el puntero a la memoria compartida\n");
+        exit(3);
+    }
     jugadores = (jugador_t *) shmat(IDmem2, (const void *)0,0);
     if (jugadores == NULL){
-		printf("No se pudo asociar el puntero a la memoria compartida\n");
-		exit(3);
-	}
+        printf("No se pudo asociar el puntero a la memoria compartida\n");
+        exit(3);
+    }
 
     /************************************** Creación del socket para el servidor **************************************/
 
