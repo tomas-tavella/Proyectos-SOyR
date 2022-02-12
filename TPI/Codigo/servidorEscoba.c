@@ -56,28 +56,28 @@ unsigned int connect_s;
 
 void traducirCarta (char * carta, int num);
 
+void handler(int sig);
+
 //******************************* Main program *******************************//
 int main(int argc, char *argv[]) {
 
     unsigned int         server_s;        // Descriptor del socket
-    struct sockaddr_in   server_addr;     // Estructura con los datos del servidor
-    struct sockaddr_in   client_addr;     // Estructura con los datos del cliente
+    struct sockaddr_in   server_addr, client_addr;     // Estructuras con los datos del servidor y clientes
     struct in_addr       client_ip_addr;  // Client IP address
     int                  addr_len;        // Tamaño de las estructuras
     char                 buf_tx[1500],buf_rx[1500];
     int                  bytesrecibidos, bytesaenviar, bytestx;  // Contadores
     int                  cant_jug=1;
     int                  mazo[40];         //0 - 9 basto, 10 - 19 espada, 20 - 29 copa, 30 - 39 oro
-    int                  cartas_levantadas[4][20];   // Variable que contiene las cartas que cada jugador levanto
     int                  turno=0;        // Variable para indicar el turno
     int                  suma_mano=0;
-    int                  mano[4][3];
     int                  i,j,k;
     key_t                clave1, clave2;
     int                  IDmem1, IDmem2;
+    pid_t                clientes[4];
 
     int *cartas_mesa = NULL;
-    struct jugador_t *jugadores;
+    struct jugador_t *jugadores = NULL;
     pid_t pid_padre = getpid();
 
     /*************************************** Obtención de la memoria compartida ***************************************/
@@ -125,6 +125,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     srand(time(0));
+    signal(SIGHUP,handler);
     printf("Servidor de escoba de 15.\n");
     printf("Creado el descriptor del socket %d\n",server_s);
   
@@ -148,71 +149,90 @@ int main(int argc, char *argv[]) {
                 return 2;
             }
             printf("Nueva conexión desde: %s:%hu , Jugador %d.\n",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port),turno+1);
-            sprintf(buf_tx,"Bienvenido a la escoba de 15 MP, por favor ingrese el número de jugadores (2-4): ");
-            SEND_RECV();
-            if (bytesrecibidos==-1) {
-                perror ("recv");
-                return 3;
+            if (turno==0) {
+                sprintf(buf_tx,"Bienvenido a la escoba de 15 MP, por favor ingrese el número de jugadores (2-4): ");
+                SEND_RECV();
+                if (bytesrecibidos==-1) {
+                    perror ("recv");
+                    return 3;
+                }
+                cant_jug = atoi(buf_rx);
+                if (cant_jug > 4 || cant_jug < 2) {
+                    sprintf(buf_tx,"El número de jugadores solicitado es inválido.\n");
+                    SEND();
+                    close(connect_s);
+                }
             }
-            cant_jug = atoi(buf_rx);
-            if (cant_jug > 4 || cant_jug < 2) {
-                sprintf(buf_tx,"El número de jugadores solicitado es inválido.\n");
-                SEND();
-                close(connect_s);
-            }
-            if (fork()==0) { // Cada hijo se queda con su cliente,
-                close(server_s);
+            if ((clientes[turno]=fork())==0) { // Cada hijo se queda con su cliente
                 sprintf(buf_tx,"Jugador %d de %d. Ingrese su nombre: ",turno+1,cant_jug);
                 SEND_RECV();
                 for (j=0;j<strlen(buf_rx);j++) if (buf_rx[j] == '\n') buf_rx[j] == '\0';
                 strcpy(jugadores[turno].nombre,buf_rx);
+                close(server_s);
+                sprintf(buf_tx,"Esperando a los demás jugadores.");
+                pause();
                 break;
             } else {
                 turno++;
                 close(connect_s);
             }
         }
-        
+        if (getppid()!=pid_padre) {     //Estamos en el padre, repartir cartas y desbloquear hijos
+            int numero_aleatorio = (int)(rand() % 40);
+            int primera_mano = 1, cartas_jugadas = 0;
+            while(cartas_jugadas!=40){            
+                // Reparto de cartas a cada jugador (3 por jugador)
+                for(k=0; k<3; k++){
+                    for (j=0; j<cant_jug; j++){ 
+                        while(mazo[numero_aleatorio]==1){
+                            numero_aleatorio = (int)(rand() % 40);
+                        }
+                        mazo[numero_aleatorio]=1;
+                        jugadores[j].mano[k] = numero_aleatorio;
+                    }
+                }
+                // Si es la primera mano repartir en la mesa
+                if (primera_mano == 1){
+                    primera_mano = 0;
+                    for (j=0; j<4; j++){ 
+                        while(mazo[numero_aleatorio]==1){
+                            numero_aleatorio = (int)(rand() % 40);
+                        }
+                        mazo[numero_aleatorio]=1;
+                        cartas_mesa[j]=numero_aleatorio;
+                    }
+                }
+                // Contar cuantas cartas hay repartidas
+                for(j=0; j<40; j++){
+                    cartas_jugadas += mazo[j];
+                }
+                //Avisar a los hijos que se repartieron las cartas y pueden arrancar
+                for (j=0; j<cant_jug; j++) {
+                    kill(clientes[j],SIGHUP);
+                }
+            }
+        } else {                        //Estamos en el hijo
+            sprintf(buf_tx,"Las cartas sobre la mesa son: ");
+            for (j=0;j<3;j++) {
+                traducirCarta(buf_tx,cartas_mesa[j]);
+                strcat(buf_tx,", ");
+            }
+            traducirCarta(buf_tx,cartas_mesa[3]);
+            strcat(buf_tx,".\n");
+            SEND();
+            sprintf(buf_tx,"Tus cartas son: ");
+            for (j=0;j<2;j++) {
+                traducirCarta(buf_tx,jugadores[turno].mano[j]);
+                strcat(buf_tx,", ");
+            }
+            traducirCarta(buf_tx,jugadores[turno].mano[2]);
+            strcat(buf_tx,".\n");
+            SEND();
+        }
     } /* A partir de acá hay que revisar */
 
-    //************************************* Desarrollo del juego *************************************//
-    int numero_aleatorio = (int)(rand() % 40);      // Esto devuelve un número entre 0 y 39       
-    int cartas_jugadas = 0;
-    int primera_mano = 1;
 
-    //************************************* Desarrollo del juego *************************************//
-    for(int j=0; j<40; j++){
-        cartas_jugadas += mazo[j];
-    }
-
-    while(cartas_jugadas!=40){            
-        // Reparto de cartas a cada jugador (3 por jugador)
-        for(int k=0; k<3; k++){
-            for (int j=0; j<cant_jug; j++){ 
-                while(mazo[numero_aleatorio]==1){
-                    numero_aleatorio = (int)(rand() % 40);
-                }
-                mazo[numero_aleatorio]=1;
-                mano[j][k] = numero_aleatorio;
-            }
-        }
-    }
-
-    // Si es la primera mano repartir en la mesa
-    if (primera_mano == 1){
-        primera_mano = 0;
-        for (int j=0; j<4; j++){ 
-            while(mazo[numero_aleatorio]==1){
-                numero_aleatorio = (int)(rand() % 40);
-            }
-            mazo[numero_aleatorio]=1;
-            cartas_mesa[j]=numero_aleatorio;
-        }
-    }
-    for(j=0; j<40; j++){                    // Contar cuantas cartas hay repartidas         
-        cartas_jugadas += mazo[j];
-    }
-    for(int i=0;i<cant_jug;i++) {
+    /* for(int i=0;i<cant_jug;i++) {
         sprintf(buf_tx,"Tus cartas son: ");
         for (j=0;j<3;j++) {
             traducirCarta(buf_tx,mano[i][j]);
@@ -231,7 +251,6 @@ int main(int argc, char *argv[]) {
         SEND();
     }
     while(1);
-        // Si es la primera mano repartir en la mesa
         
     while(turno<cant_jug && suma_mano!=120){     // Cuando el jugador descarta una carta, el numero de la carta se reemplaza por 40 en la variable mano
         // Codigo del juego
@@ -249,26 +268,12 @@ int main(int argc, char *argv[]) {
     cartas_jugadas = 0;
     for(int j=0; j<40; j++){
         cartas_jugadas += cartas_mesa[j];
-    }
+    } */
 
         /* De acá en adelante sigue siendo código viejo */
-
-
-        /* for(int j=0; j<40; j++){
-            cartas_jugadas += cartas_mesa[j];
-        } */
     
     /* Mostrar puntajes */
 
-        if(fork()==0) {
-            do {
-    
-            } while (1); 
-            
-            return 0;
-        } else {
-            
-        } 
     wait(NULL);
     close(server_s);
     return 0;
@@ -330,6 +335,7 @@ void traducirCarta (char * carta, int num) {
         break;
     }
     return;
-//=======
-//>>>>>>> parent of f250f9c (Agregada funcion para traducir de numero del array a nombre de la carta)
+}
+
+void handler(int sig) {
 }
