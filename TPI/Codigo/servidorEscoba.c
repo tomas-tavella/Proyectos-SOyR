@@ -1,4 +1,4 @@
-include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -264,79 +264,92 @@ int main(int argc, char *argv[]) {
             SEND();
             *contador+=1;
             pause();
-            sprintf(buf_tx,"¿Levanta o descarta una carta? (L) (D)\n");
-            SEND_RECV();
-            while (buf_rx[0] != 'L' && buf_rx[0] != 'D'){
-                sprintf(buf_tx,"Ingrese una opción válida: \n");
-                bytesaenviar = strlen(buf_tx);
-                bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
-                bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
-            }
-            suma_mano=0;
-            for(int k=0;k<3;k++){                   //Cuenta las cartas que tiene el jugador en la mano y dependiendo de eso se envia un mensaje determinado
-                if(jugadores[turno].mano[k]!=40){ 
-                    suma_mano++;
-                }
-            }
-            if(suma_mano==3){
-                sprintf(buf_tx,"Tu carta a, b, c\n");
-            }
-            if(suma_mano==2){
-                sprintf(buf_tx,"Tu carta a, b\n");
-            }
-            if(suma_mano==1){
-                sprintf(buf_tx,"Tu carta a\n");
-            }
-            SEND_RECV();
-            while (!(buf_rx[0] >= 'a' && buf_rx[0] <= ('a' + suma_mano-1))){
-                sprintf(buf_tx,"Ingrese una opción válida: \n");
-                bytesaenviar = strlen(buf_tx);
-                bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
-                bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
-            }
             suma_mesa=0;
             for(int k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
                 if(cartas_mesa[k]!=40){
                     suma_mesa++;
                 }
             }
-            if(suma_mesa==10){
-                sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g,h,i,j)\n");
+            if(suma_mesa!=0){
+                sprintf(buf_tx,"¿Levanta o descarta una carta? (L) (D)\n");
+                SEND_RECV();
+                while (buf_rx[0] != 'L' && buf_rx[0] != 'D'){
+                    sprintf(buf_tx,"Ingrese una opción válida: \n");
+                    bytesaenviar = strlen(buf_tx);
+                    bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
+                    bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
+                }
             }
-            if(suma_mano==9){
-                sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g,h,i)\n");
+            else{
+                sprintf(buf_tx,"No quedan mas cartas sobre la mesa, tenes que descartar\n");
+                SEND();
+                strcpy(buf_rx,"D");
             }
-            if(suma_mano==8){
-                sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g,h)\n");
-            }
-            if(suma_mano==7){
-                sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g)\n");
-            }
-            if(suma_mano==6){
-                sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f)\n");
-            }
-            if(suma_mano==5){
-                sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e)\n");
-            }
-            if(suma_mano==4){
-                sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d)\n");
-            }
-            if(suma_mano==3){
-                sprintf(buf_tx,"Carta sobre la mesa? (a,b,c)\n");
-            }
-            if(suma_mano==2){
-                sprintf(buf_tx,"Carta sobre la mesa? (a,b)\n");
-            }
-            if(suma_mano==1){
-                sprintf(buf_tx,"Carta sobre la mesa? (a)\n");
-            }
-            SEND_RECV();
-            while (!(buf_rx[0] >= 'a' && buf_rx[0] <= ('a' + suma_mesa-1))){
-                sprintf(buf_tx,"Ingrese una opción válida: \n");
-                bytesaenviar = strlen(buf_tx);
-                bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
-                bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
-            }
+                suma_mano=0;
+                for(int k=0;k<3;k++){                   //Cuenta las cartas que tiene el jugador en la mano y dependiendo de eso se envia un mensaje determinado
+                    if(jugadores[turno].mano[k]!=40){ 
+                        suma_mano++;
+                    }
+                }
+                if(suma_mano==3){
+                    sprintf(buf_tx,"Tu carta a, b, c\n");
+                }
+                if(suma_mano==2){
+                    sprintf(buf_tx,"Tu carta a, b\n");
+                }
+                if(suma_mano==1){
+                    sprintf(buf_tx,"Tu carta a\n");
+                }
+                SEND_RECV();
+                while (!(buf_rx[0] >= 'a' && buf_rx[0] <= ('a' + suma_mano-1))){
+                    sprintf(buf_tx,"Ingrese una opción válida: \n");
+                    bytesaenviar = strlen(buf_tx);
+                    bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
+                    bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
+                }
+                suma_mesa=0;
+                for(int k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
+                    if(cartas_mesa[k]!=40){
+                        suma_mesa++;
+                    }
+                }
+                if(suma_mesa==10){
+                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g,h,i,j)\n");
+                }
+                if(suma_mano==9){
+                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g,h,i)\n");
+                }
+                if(suma_mano==8){
+                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g,h)\n");
+                }
+                if(suma_mano==7){
+                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g)\n");
+                }
+                if(suma_mano==6){
+                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f)\n");
+                }
+                if(suma_mano==5){
+                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e)\n");
+                }
+                if(suma_mano==4){
+                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d)\n");
+                }
+                if(suma_mano==3){
+                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c)\n");
+                }
+                if(suma_mano==2){
+                    sprintf(buf_tx,"Carta sobre la mesa? (a,b)\n");
+                }
+                if(suma_mano==1){
+                    sprintf(buf_tx,"Carta sobre la mesa? (a)\n");
+                }
+                SEND_RECV();
+                while (!(buf_rx[0] >= 'a' && buf_rx[0] <= ('a' + suma_mesa-1))){
+                    sprintf(buf_tx,"Ingrese una opción válida: \n");
+                    bytesaenviar = strlen(buf_tx);
+                    bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
+                    bytesrecibidos=recv(connect_s, buf_rx, sizeof(buf_rx), 0);
+                }
             *contador+=1;
             while(1); //Esto solo esta para las pruebas, despues lo tenemos que sacar
         }
