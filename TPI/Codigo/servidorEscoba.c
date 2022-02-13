@@ -291,15 +291,21 @@ int main(int argc, char *argv[]) {
                         suma_mano++;
                     }
                 }
-                if(suma_mano==3){
-                    sprintf(buf_tx,"Tu carta a, b, c\n");
+
+                switch (suma_mesa) {
+                    case 1:
+                        sprintf(buf_tx,"Tu carta (a)\n");
+                        break;
+                    case 2:
+                        sprintf(buf_tx,"Tu carta (a,b)\n");
+                        break;
+                    case 3:
+                        sprintf(buf_tx,"Tu carta (a,b,c)\n");
+                        break;
+                    default:
+                        break;
                 }
-                if(suma_mano==2){
-                    sprintf(buf_tx,"Tu carta a, b\n");
-                }
-                if(suma_mano==1){
-                    sprintf(buf_tx,"Tu carta a\n");
-                }
+
                 SEND_RECV();
                 while (!(buf_rx[0] >= 'a' && buf_rx[0] <= ('a' + suma_mano-1))){
                     sprintf(buf_tx,"Ingrese una opción válida: \n");
@@ -313,36 +319,42 @@ int main(int argc, char *argv[]) {
                         suma_mesa++;
                     }
                 }
-                if(suma_mesa==10){
-                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g,h,i,j)\n");
+
+                switch (suma_mesa) {
+                    case 1:
+                        sprintf(buf_tx,"Carta sobre la mesa? (a)\n");
+                        break;
+                    case 2:
+                        sprintf(buf_tx,"Carta sobre la mesa? (a,b)\n");
+                        break;
+                    case 3:
+                        sprintf(buf_tx,"Carta sobre la mesa? (a,b,c)\n");
+                        break;
+                    case 4:
+                        sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d)\n");
+                        break;
+                    case 5:
+                        sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e)\n");
+                        break;
+                    case 6:
+                        sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f)\n");
+                        break;
+                    case 7:
+                        sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g)\n");
+                        break;
+                    case 8:
+                        sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g,h)\n");
+                        break;
+                    case 9:
+                        sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g,h,i)\n");
+                        break;
+                    case 10:
+                        sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g,h,i,j)\n");
+                        break;
+                    default:
+                        break;
                 }
-                if(suma_mano==9){
-                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g,h,i)\n");
-                }
-                if(suma_mano==8){
-                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g,h)\n");
-                }
-                if(suma_mano==7){
-                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f,g)\n");
-                }
-                if(suma_mano==6){
-                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e,f)\n");
-                }
-                if(suma_mano==5){
-                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d,e)\n");
-                }
-                if(suma_mano==4){
-                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c,d)\n");
-                }
-                if(suma_mano==3){
-                    sprintf(buf_tx,"Carta sobre la mesa? (a,b,c)\n");
-                }
-                if(suma_mano==2){
-                    sprintf(buf_tx,"Carta sobre la mesa? (a,b)\n");
-                }
-                if(suma_mano==1){
-                    sprintf(buf_tx,"Carta sobre la mesa? (a)\n");
-                }
+                
                 SEND_RECV();
                 while (!(buf_rx[0] >= 'a' && buf_rx[0] <= ('a' + suma_mesa-1))){
                     sprintf(buf_tx,"Ingrese una opción válida: \n");
@@ -404,7 +416,38 @@ int main(int argc, char *argv[]) {
 }
 
 void traducirCarta (char * carta, int num) {
-    //Función para traducir el número en el nombre completo de la carta
+    //Funccase 0:
+            strcat(carta,"Uno de ");
+            break;
+        case 1:
+            strcat(carta,"Dos de ");
+            break;
+        case 2:
+            strcat(carta,"Tres de ");
+            break;
+        case 3:
+            strcat(carta,"Cuatro de ");
+            break;
+        case 4:
+            strcat(carta,"Cinco de ");
+            break;
+        case 5:
+            strcat(carta,"Seis de ");
+            break;
+        case 6:
+            strcat(carta,"Siete de ");
+            break;
+        case 7:
+            strcat(carta,"Sota de ");
+            break;
+        case 8:
+            strcat(carta,"Caballo de ");
+            break;
+        case 9:
+            strcat(carta,"Rey de ");
+            break;
+        default:
+            break;ión para traducir el número en el nombre completo de la carta
     int aux = num % 10;
     switch (aux) {
         case 0:
