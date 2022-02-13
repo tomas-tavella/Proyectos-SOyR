@@ -234,19 +234,7 @@ int main(int argc, char *argv[]) {
                 *contador=0;
                 int auxiliar=0;
                 while(*contador!=turno){                    //Despierto a los hijos de a 1 para que todos jueguen 
-                    if(auxiliar==0 && *contador==0){
-                        kill(clientes[*contador],SIGHUP);
-                        auxiliar++;
-                    }
-                    if(auxiliar==1 && *contador==1){
-                        kill(clientes[*contador],SIGHUP);
-                        auxiliar++;
-                    }
-                    if(auxiliar==2 && *contador==2){
-                        kill(clientes[*contador],SIGHUP);
-                        auxiliar++;
-                    }
-                    if(auxiliar==3 && *contador==3){
+                    if(auxiliar==*contador){
                         kill(clientes[*contador],SIGHUP);
                         auxiliar++;
                     }
@@ -274,7 +262,7 @@ int main(int argc, char *argv[]) {
             sprintf(buf_tx,"¿Levanta o descarta una carta? [L] [D]\n");
             SEND_RECV();
             *contador+=1;
-            while(1);
+            while(1); //Esto solo esta para las pruebas, despues lo tenemos que sacar
         }
     } /* A partir de acá hay que revisar */
 
