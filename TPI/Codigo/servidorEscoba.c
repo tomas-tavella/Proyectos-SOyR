@@ -292,7 +292,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                switch (suma_mesa) {
+                switch (suma_mano) {
                     case 1:
                         sprintf(buf_tx,"Tu carta (a)\n");
                         break;
