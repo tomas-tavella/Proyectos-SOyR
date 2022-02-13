@@ -72,12 +72,13 @@ int main(int argc, char *argv[]) {
     int                  turno=0;        // Variable para indicar el turno
     int                  suma_mano=0;
     int                  i,j,k;
-    key_t                clave1, clave2;
-    int                  IDmem1, IDmem2;
+    key_t                clave1, clave2, clave3;
+    int                  IDmem1, IDmem2, IDmem3;
     pid_t                clientes[4];
 
     int *cartas_mesa = NULL;
     struct jugador_t *jugadores = NULL;
+    int *contador = NULL;
     pid_t pid_padre = getpid();
 
     /*************************************** Obtención de la memoria compartida ***************************************/
@@ -89,6 +90,11 @@ int main(int argc, char *argv[]) {
     }
     clave2 = ftok(PATH,NUMERO+1);
     if (clave2 == (key_t) -1){
+        printf("No se pudo obtener una clave\n");
+        exit(1);
+    }
+    clave3 = ftok(PATH,NUMERO+2);
+    if (clave3 == (key_t) -1){
         printf("No se pudo obtener una clave\n");
         exit(1);
     }
@@ -104,6 +110,11 @@ int main(int argc, char *argv[]) {
         printf("No se pudo obtener un ID de memoria compartida\n");
         exit(2);
     }
+    IDmem3 = shmget(clave3, sizeof(int), 0666 | IPC_CREAT); 
+    if(IDmem3 == -1){
+        printf("No se pudo obtener un ID de memoria compartida\n");
+        exit(2);
+    }
 
     // Adosar el proceso a los espacios de memoria mediante un puntero
     cartas_mesa = (int *) shmat(IDmem1, (const void *)0,0);
@@ -113,6 +124,11 @@ int main(int argc, char *argv[]) {
     }
     jugadores = (jugador_t *) shmat(IDmem2, (const void *)0,0);
     if (jugadores == NULL){
+        printf("No se pudo asociar el puntero a la memoria compartida\n");
+        exit(3);
+    }
+    contador = (int *) shmat(IDmem3, (const void *)0,0);
+    if (contador == NULL){
         printf("No se pudo asociar el puntero a la memoria compartida\n");
         exit(3);
     }
@@ -139,7 +155,7 @@ int main(int argc, char *argv[]) {
     listen(server_s, NCONCUR);
 
     /******************************* Creacion de la partida y conexion de los jugadores *******************************/
-
+    *contador=0;
     addr_len = sizeof(client_addr);
     while(!terminar) { // Loop general, cuando termina una partida vuelve acá para iniciar otra
         while(turno!=cant_jug) {      // Loop de conexión de jugadores
@@ -170,6 +186,8 @@ int main(int argc, char *argv[]) {
                 strcpy(jugadores[turno].nombre,buf_rx);
                 close(server_s);
                 sprintf(buf_tx,"Esperando a los demás jugadores.");
+                SEND();
+                *contador+=1;
                 pause();
                 break;
             } else {
@@ -206,6 +224,9 @@ int main(int argc, char *argv[]) {
                 for(j=0; j<40; j++){
                     cartas_jugadas += mazo[j];
                 }
+                while(*contador!=turno){
+                    
+                }
                 //Avisar a los hijos que se repartieron las cartas y pueden arrancar
                 for (j=0; j<cant_jug; j++) {
                     kill(clientes[j],SIGHUP);
@@ -228,6 +249,7 @@ int main(int argc, char *argv[]) {
             traducirCarta(buf_tx,jugadores[turno].mano[2]);
             strcat(buf_tx,".\n");
             SEND();
+            while(1);
         }
     } /* A partir de acá hay que revisar */
 
@@ -264,7 +286,6 @@ int main(int argc, char *argv[]) {
             turno = 0;
         }
     }
-
     cartas_jugadas = 0;
     for(int j=0; j<40; j++){
         cartas_jugadas += cartas_mesa[j];
