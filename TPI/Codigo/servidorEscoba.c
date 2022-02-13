@@ -185,9 +185,9 @@ int main(int argc, char *argv[]) {
                 for (j=0;j<strlen(buf_rx);j++) if (buf_rx[j] == '\n') buf_rx[j] == '\0';
                 strcpy(jugadores[turno].nombre,buf_rx);
                 close(server_s);
-                sprintf(buf_tx,"Esperando a los demás jugadores.");
+                sprintf(buf_tx,"Esperando a los demás jugadores.\n");
                 SEND();
-                *contador+=1;
+                *contador+=1;   //Variable para verificar que los hijos estan listos
                 pause();
                 break;
             } else {
@@ -224,12 +224,32 @@ int main(int argc, char *argv[]) {
                 for(j=0; j<40; j++){
                     cartas_jugadas += mazo[j];
                 }
-                while(*contador!=turno){
-                    
-                }
+                while(*contador!=turno){}    //Espero a que los hijos esten listos para despertarlos y reseteo la variable contador
+                *contador=0;
                 //Avisar a los hijos que se repartieron las cartas y pueden arrancar
                 for (j=0; j<cant_jug; j++) {
                     kill(clientes[j],SIGHUP);
+                }
+                while(*contador!=turno){}   //Espero a que los hijos esten listos para despertarlos y reseteo la variable contador
+                *contador=0;
+                int auxiliar=0;
+                while(*contador!=turno){                    //Despierto a los hijos de a 1 para que todos jueguen 
+                    if(auxiliar==0 && *contador==0){
+                        kill(clientes[*contador],SIGHUP);
+                        auxiliar++;
+                    }
+                    if(auxiliar==1 && *contador==1){
+                        kill(clientes[*contador],SIGHUP);
+                        auxiliar++;
+                    }
+                    if(auxiliar==2 && *contador==2){
+                        kill(clientes[*contador],SIGHUP);
+                        auxiliar++;
+                    }
+                    if(auxiliar==3 && *contador==3){
+                        kill(clientes[*contador],SIGHUP);
+                        auxiliar++;
+                    }
                 }
             }
         } else {                        //Estamos en el hijo
@@ -249,6 +269,11 @@ int main(int argc, char *argv[]) {
             traducirCarta(buf_tx,jugadores[turno].mano[2]);
             strcat(buf_tx,".\n");
             SEND();
+            *contador+=1;
+            pause();
+            sprintf(buf_tx,"¿Levanta o descarta una carta? [L] [D]\n");
+            SEND_RECV();
+            *contador+=1;
             while(1);
         }
     } /* A partir de acá hay que revisar */
