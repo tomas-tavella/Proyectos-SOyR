@@ -233,6 +233,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
                 // Contar cuantas cartas hay repartidas
+                cartas_jugadas=0;
                 for(j=0; j<40; j++){
                     cartas_jugadas += mazo[j];
                 }
@@ -245,7 +246,7 @@ int main(int argc, char *argv[]) {
                 while(*sync!=turno){}   //Espero a que los hijos esten listos para despertarlos y reseteo la variable sync
                 *sync=0;
                 int auxiliar=0;
-                //for(int k=0;k<3;k++){
+                for(int k=0;k<3;k++){
                     while(*sync!=turno){                    //Despierto a los hijos de a 1 para que todos jueguen 
                         if(auxiliar==*sync){
                             kill(clientes[*sync],SIGHUP);
@@ -253,59 +254,45 @@ int main(int argc, char *argv[]) {
                         }
                     }
                     *sync=0;
-                //}
-                auxiliar=0;    
-                while(*sync!=turno){                    //Despierto a los hijos de a 1 para que todos jueguen 
-                        if(auxiliar==*sync){
-                            kill(clientes[*sync],SIGHUP);
-                            auxiliar++;
-                        }
+                    auxiliar=0;
                 }
-                *sync=0;
-                
             }
         } else {                        //Estamos en el hijo
             sprintf(buf_tx,"Las cartas sobre la mesa son: ");
-                suma_mesa=0;
-                for(int k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
-                    if(cartas_mesa[k]!=40){
-                        suma_mesa++;
-                    }
+            suma_mesa=0;
+            for(int k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
+                if(cartas_mesa[k]!=40){
+                    suma_mesa++;
                 }
-                for (j=0;j<suma_mesa-1;j++) {
-                    traducirCarta(buf_tx,cartas_mesa[j]);
-                    strcat(buf_tx,", ");
+            }
+            for (j=0;j<suma_mesa-1;j++) {
+                traducirCarta(buf_tx,cartas_mesa[j]);
+                strcat(buf_tx,", ");
+            }
+            traducirCarta(buf_tx,cartas_mesa[suma_mesa-1]);
+            strcat(buf_tx,".\n");
+            SEND();
+            sprintf(buf_tx,"Tus cartas son: ");
+            suma_mano=0;
+            for(int k=0;k<3;k++){                   //Cuenta las cartas que tiene el jugador en la mano y dependiendo de eso se envia un mensaje determinado
+                if(jugadores[turno].mano[k]!=40){ 
+                    suma_mano++;
                 }
-                traducirCarta(buf_tx,cartas_mesa[suma_mesa-1]);
-                strcat(buf_tx,".\n");
-                SEND();
-                sprintf(buf_tx,"Tus cartas son: ");
-                suma_mano=0;
-                for(int k=0;k<3;k++){                   //Cuenta las cartas que tiene el jugador en la mano y dependiendo de eso se envia un mensaje determinado
-                    if(jugadores[turno].mano[k]!=40){ 
-                        suma_mano++;
-                    }
-                }    
-                for (j=0;j<suma_mano-1;j++) {
-                    traducirCarta(buf_tx,jugadores[turno].mano[j]);
-                    strcat(buf_tx,", ");
-                }
-                traducirCarta(buf_tx,jugadores[turno].mano[suma_mano-1]);
-                strcat(buf_tx,".\n");
-                SEND();
-                *sync+=1;
-                pause();
-                suma_mesa=0;
-                for(int k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
-                    if(cartas_mesa[k]!=40){
-                        suma_mesa++;
-                    }
-                }
+            }    
+            for (j=0;j<suma_mano-1;j++) {
+                traducirCarta(buf_tx,jugadores[turno].mano[j]);
+                strcat(buf_tx,", ");
+            }
+            traducirCarta(buf_tx,jugadores[turno].mano[suma_mano-1]);
+            strcat(buf_tx,".\n");
+            SEND();
+            *sync+=1;
+            pause();
             while(1){ //While hasta que se termine el juego, ponemos while(1) para probar
                 do{
                     sprintf(buf_tx,"Las cartas sobre la mesa son: ");
                     suma_mesa=0;
-                    for(int k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
+                    for(k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
                         if(cartas_mesa[k]!=40){
                             suma_mesa++;
                         }
@@ -370,12 +357,9 @@ int main(int argc, char *argv[]) {
                                 int eleccion_mesa[9];
                                 int suma_jugada = 0;
                                 int jugada_preliminar[10];    //Variable auxiliar para la jugada preliminar del jugador
-                                jugada_preliminar[0]=jugadores[turno].mano[buf_rx[0]-'a'];
-                                for(int k=1;k<10;k++){
-                                    jugada_preliminar[k]=40;
-                                }
+                                jugada_preliminar[0]=buf_rx[0]-'a';
                                 suma_mesa=0;
-                                for(int k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
+                                for(k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
                                     if(cartas_mesa[k]!=40){
                                         suma_mesa++;
                                     }
@@ -386,19 +370,17 @@ int main(int argc, char *argv[]) {
                                     sprintf(buf_tx,"Ingrese una opción válida: \n");
                                     SEND_RECV();
                                 }
-                                jugada_preliminar[1]=cartas_mesa[buf_rx[0]-'a'];
+                                jugada_preliminar[1]=buf_rx[0]-'a';
                                 eleccion_mesa[0] = buf_rx[0];                   // Se guarda que cartas de la mesa ya fueron elegidas
-                                suma_jugada = 0;
-                                for(int k=0; k<j; k++){
-                                    suma_jugada += (jugada_preliminar[k]%10 + 1);
-                                }
+                                suma_jugada = jugadores[turno].mano[jugada_preliminar[0]]%10 + cartas_mesa[jugada_preliminar[1]]%10 + 2;
                                 sprintf(buf_tx,"%d\n",suma_jugada); //Envio al cliente la suma (ES AUXILIAR)
                                 SEND();
                                 j=2;
+                                jugada_preliminar[j] = 40;
                                 while(suma_jugada<15 && suma_mesa!=0){
                                     
                                     suma_mesa=0;
-                                    for(int k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
+                                    for(k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
                                         if(cartas_mesa[k]!=40){
                                             suma_mesa++;
                                         }
@@ -415,17 +397,14 @@ int main(int argc, char *argv[]) {
                                         sprintf(buf_tx,"Ingrese una opción válida: \n");
                                         SEND_RECV();
                                     }
-                                    jugada_preliminar[j]=cartas_mesa[buf_rx[0]-'a']; //jugada_preliminar[1] + 'a';
+                                    jugada_preliminar[j]=buf_rx[0]-'a';
                                     eleccion_mesa[j-1] = buf_rx[0];                 // Se guarda que cartas de la mesa ya fueron elegidas
-                                    suma_jugada = 0;
-                                    for(int k=0; k<j+1; k++){
-                                        suma_jugada += (jugada_preliminar[k]%10 + 1);
-                                    }
+                                    suma_jugada += (cartas_mesa[jugada_preliminar[j]]%10 + 1);
                                     sprintf(buf_tx,"%d\n",suma_jugada); //Envio al cliente la suma (ES AUXILIAR)
                                     SEND();
 
                                     suma_mesa=0;
-                                    for(int k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
+                                    for(k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
                                         if(cartas_mesa[k]!=40){
                                             suma_mesa++;
                                         }
@@ -434,12 +413,12 @@ int main(int argc, char *argv[]) {
                                 }
 
                                 if(suma_jugada==15){
-                                    jugadores[turno].mano[jugada_preliminar[0]+'a'] = 40;
-                                    for(int k=1; k<j-1; k++){
-                                        cartas_mesa[jugada_preliminar[k]+'a'] = 40;
+                                    jugadores[turno].mano[jugada_preliminar[0]] = 40;
+                                    for(k=1; k<j; k++){
+                                        cartas_mesa[jugada_preliminar[k]] = 40;
                                     }
-                                    qsort(jugadores[turno].mano,sizeof(jugadores[turno].mano),sizeof(int),cmpfunc);     // Funcion para ordenar la mano de menor a mayor (los espacios vacios quedan al final)
-                                    qsort(cartas_mesa,sizeof(cartas_mesa),sizeof(int),cmpfunc);     // Funcion para ordenar la mano de menor a mayor (los espacios vacios quedan al final)
+                                    qsort(jugadores[turno].mano,(size_t) 3,sizeof(int),cmpfunc);     // Funcion para ordenar la mano de menor a mayor (los espacios vacios quedan al final)
+                                    qsort(cartas_mesa,(size_t) 10,sizeof(int),cmpfunc);     // Funcion para ordenar la mano de menor a mayor (los espacios vacios quedan al final)
                                     no_valido=0;
                                 }else{
                                     strcpy(buf_tx,"Las cartas elegidas no suman 15.\n");
@@ -466,8 +445,8 @@ int main(int argc, char *argv[]) {
                                 cartas_mesa[j]=jugadores[turno].mano[buf_rx[0]-'a'];
                                 suma_mesa++;
                                 jugadores[turno].mano[buf_rx[0]-'a'] = 40;
-                                qsort(jugadores[turno].mano,sizeof(jugadores[turno].mano),sizeof(int),cmpfunc);     // Funcion para ordenar la mano de menor a mayor (los espacios vacios quedan al final)
-                                qsort(cartas_mesa,sizeof(cartas_mesa),sizeof(int),cmpfunc);     // Funcion para ordenar la mano de menor a mayor (los espacios vacios quedan al final)
+                                qsort(jugadores[turno].mano,(size_t) 3,sizeof(int),cmpfunc);     // Funcion para ordenar la mano de menor a mayor (los espacios vacios quedan al final)
+                                qsort(cartas_mesa,(size_t) 10,sizeof(int),cmpfunc);     // Funcion para ordenar la mano de menor a mayor (los espacios vacios quedan al final)
                                 no_valido=0;
                                 break;
                                 
