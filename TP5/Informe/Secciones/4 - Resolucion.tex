@@ -1,3 +1,142 @@
 \section{Resolución}
 
-Placeholder text.
+Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolución del problema planteado:
+\begin{itemize}
+    \item \texttt{<sys/types.h>}: biblioteca de \textit{System V} para la definicion de tipos de variables.
+    \item \texttt{<sys/stat.h>}: biblioteca de \textit{System V} para la comunicación entre procesos.
+    \item \texttt{<sys/socket.h>}: biblioteca de \textit{System V} para utilizar sockets.
+    \item \texttt{<netinet/in.h>}: 
+    \item \texttt{<arpa/inet.h>}: 
+    \item \texttt{<unistd.h>}: 
+    \item \texttt{<sys/time.h>}: biblioteca para obtener el tiempo de la \textit{timestamp}.
+\end{itemize}
+
+Para la simplificación del codigo se crearon 2 macros, SEND() y SEND_RECV() las cuales son utilizadas para enviar un mensaje al cliente y para enviar y recibir un mensaje del cliente respectivamente.\\
+Al ser un servidor concurrente, un proceso hijo dentro del servidor toma a cada cliente y dentro de este se hace la copia del archivo.\\
+Los buffers de transmisión y recepción son de 1500 bytes, es por eso que se envia esta cantidad de bytes desde el archivo que se quiere copiar hasta llegar al end of file del mismo.\\
+
+\subsubsection{Pseudocódigo}
+
+\begin{lstlisting}[language=C]          % No usar tildes en el pseudocódigo y dejar una linea vacía al principio y al final
+
+    Servidor:
+    INICIO
+        Declarar y asignar variables, macros y estructuras;
+        Se crea el descriptor del socket;
+        Mientras(No se termine de leer el archivo){
+            Acepta la conexion de un cliente (en el caso de no poder conectarlo imprime error);
+            Toma el tiempo inicial;
+            Imprime los datos del cliente conectado;
+            Si(Estoy en el hijo){
+                Declarar y asignar variables;
+                Imprimen los datos del hijo;
+                Cierra el socket que no es usado;
+                Envia el mensaje "Listo" (en el caso de no poder enviarlo imprime error);
+                Aumenta la variable de bytes enviados;                
+                Recibe el mensaje "Archivo" (en el caso de no poder recibirlo imprime error);
+                Aumenta la variable de bytes recibidos;
+                Si(Se recibe el mensaje "Archivo"){
+                    Imprime que se recibio la palabra archivo;
+                    Recibe el nombre del archivo y los bytes que contiene (en el caso de no poder recibirlo imprime error);
+                    Aumenta la variable de bytes recibidos;
+                    Imprime el nombre del archivo;
+                    Crea el archivo para escritura en binario;
+                }
+                Sino{
+                    Imprime error;
+                    Envia el mensaje de error (en el caso de no poder enviarlo imprime error);
+                    Aumenta la variable de bytes enviados;
+                    Toma el tiempo final;
+                    Escribe en el archivo de registro;
+                    Cierra la conexion con el cliente;
+                    Termina el programa;
+                }
+                Hacer{
+                    Recibe un buffer con la informacion contenida en el archivo y lo escribe en el nuevo archivo (en el caso de no poder recibirlo imprime error);
+                    Decrementa la variable que contiene los bytes del archivo;
+                    Aumenta la variable de bytes recibidos;
+                    Imprime la cantidad de bytes recibidos del cliente;
+                    Si(La variable que contiene los bytes del archivo es menor a 0){
+                        Imprime que llegaron bytes de mas;
+                        Envia el mensaje de error (en el caso de no poder enviarlo imprime error);
+                        Aumenta la variable de bytes enviados;
+                        Toma el tiempo final;
+                        Escribe en el archivo de registro;
+                        Cierra la conexion con el cliente;
+                        Termina el programa;
+                    }
+                }Mientras(No se llegue al final del archivo)
+                Cierra el archivo;
+                Imprime que la recepcion finalizo sin errores
+                Envia el mensaje al cliente;
+                Aumenta la variable de bytes enviados;
+                Cierra la conexion con el cliente;
+                Toma el tiempo final;
+                Escribe en el archivo de registro;
+                Termina el programa;
+            }
+            Cierra la conexion con el cliente;
+        }
+        Espera que el hijo termine se ejecucion;
+        Cierra la conexion con el cliente;
+        Termina el programa;
+    FIN
+
+    Cliente:
+    INICIO
+    Declarar y asignar variables, macros y estructuras;
+    Si el segundo argumento no del formato www.xxx.yyy.zzz imprime error;
+    Se crea el descriptor del socket;
+    Se conecta con el servidor (en caso de no poder conectarse imprime error);
+    Imprime la informacion del servidor;
+    Recibe el mensaje "Listo" (en el caso de no poder recibirlo imprime error);
+    Aumenta la variable de bytes recibidos;
+    Si(Se recibe el mensaje "Listo"){
+        Imprime que se recibio la palabra listo;
+        Envia el mensaje "Archivo" (en el caso de no poder enviarlo imprime error);
+    }
+    Sino{
+        Imprime error;
+        Envia el mensaje de error (en el caso de no poder enviarlo imprime error);
+        Termina el programa;
+    }
+    Espera a que se ingrese el nombre del archivo;
+    Imprime el nombre del archivo y lo abre;
+    Si(No puede abrirse el archivo){
+        Imprime error;
+        Envia el mensaje de error (en el caso de no poder enviarlo imprime error);
+        Termina el programa;
+    }
+    Sino{
+        Obtiene el tamano del archivo;
+        Envia el nombre del archivo y el tamano (en el caso de no poder enviarlo imprime error);
+    }
+    Espera a que se presione enter para enviar los datos;
+    Mientras(No se llegue al end of file){
+        Se lee parte del archivo y se envian esos datos;
+    }
+    Se cierra el archivo;
+    Se recibe que se termino la recepcion;
+    Se cierra al cliente;
+    Termina el programa
+}
+
+\end{lstlisting}
+
+\subsection{Compilación y ejecución de los programas}
+
+Con el código completo, para compilar los programas a un archivo binario ejecutable se llama al comando \texttt{gcc} (\textit{GNU C Compiler}):
+
+\begin{center}
+    \texttt{\$ gcc servidorTCP.c -o servidorTCP}\\
+    \texttt{\$ gcc clienteTCP.c -o clienteTCP}\\
+\end{center}
+
+Con lo que se obtienen dos archivos binarios ejecutables, los cuales, estando situados en la carpeta en la que se encuentran, se ejecutan desde la terminal de la siguiente manera:
+
+\begin{center}
+    \texttt{\$ ./servidor}\\
+    \texttt{\$ ./cliente 127.0.0.1}\\
+\end{center}
+
+Es importante ejecutar el servidor antes que el cliente.
