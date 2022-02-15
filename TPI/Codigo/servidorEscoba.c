@@ -280,25 +280,31 @@ int main(int argc, char *argv[]) {
                 }
                 printf("Arrancamos.\n");
                 //Avisar a los hijos que se repartieron las cartas y pueden arrancar
-                mensaje.tipo=1;
                 mensaje.op='A';
                 mensaje.turno=0;
                 for (j=0; j<cant_jug; j++) {
+                    mensaje.tipo=j+1;
                     msgsnd(PaH,(struct msgbuf *)&mensaje,(size_t) 5,0);
                 }
                 for (i=0; i<3; i++){
                     for (j=0; j<cant_jug; j++) {
                         mensaje.turno=j;
                         mensaje.op='T';
-                        for (k=0; k<cant_jug; k++) msgsnd(PaH,(struct msgbuf *)&mensaje,(size_t) 5,0);
+                        for (k=0; k<cant_jug; k++) {
+                            mensaje.tipo=k+1;
+                            msgsnd(PaH,(struct msgbuf *)&mensaje,(size_t) 5,0);
+                        }
                         msgrcv(HaP,(struct msgbuf *)&mensaje,(size_t) 5,1,0);
-                        for (k=0; k<cant_jug; k++) msgsnd(PaH,(struct msgbuf *)&mensaje,(size_t) 5,0);
+                        for (k=0; k<cant_jug; k++) {
+                            mensaje.tipo=k+1;
+                            msgsnd(PaH,(struct msgbuf *)&mensaje,(size_t) 5,0);
+                        }
                     }
                 }
             }
         } else {                        //Estamos en el hijo, esperar operacion en mensaje
             do {
-                msgrcv(PaH,(struct msgbuf *)&mensaje,(size_t) 5,0,0);
+                msgrcv(PaH,(struct msgbuf *)&mensaje,(size_t) 5,turno+1,0);
                 printf("%d: Recibí %c.\n",getpid(),mensaje.op);
                 switch (mensaje.op){
                     case 'A':
@@ -505,12 +511,12 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'L':
                         sprintf(buf_tx,"%s levantó ",jugadores[mensaje.turno].nombre);
-                        for (j=0; j<jugada->cant_cartas-1; j++) {
+                        /* for (j=0; j<jugada->cant_cartas-1; j++) {
                             traducirCarta(buf_tx,jugada->cartas[j]);
                             strcat(buf_tx,", ");
                         }
                         traducirCarta(buf_tx,jugada->cartas[jugada->cant_cartas-1]);
-                        strcat(buf_tx,".\n");
+                        strcat(buf_tx,".\n"); */
                         SEND();
                         break;
                     case 'D':
