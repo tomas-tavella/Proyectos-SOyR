@@ -214,12 +214,11 @@ int main(int argc, char *argv[]) {
                     perror ("recv");
                     return 3;
                 }
-                cant_jug = atoi(buf_rx);
-                if (cant_jug > 4 || cant_jug < 2) {
-                    sprintf(buf_tx,"El número de jugadores solicitado es inválido.\n");
-                    SEND();
-                    close(connect_s);
+                while(!(buf_rx[0] >= '2' && buf_rx[0] <= '4')){
+                    sprintf(buf_tx,"Ingrese una opción válida: \n");
+                    SEND_RECV();
                 }
+                cant_jug = atoi(buf_rx);
             }
             if ((clientes[turno]=fork())==0) { // Cada hijo se queda con su cliente
                 sprintf(buf_tx,"Jugador %d de %d. Ingrese su nombre: ",turno+1,cant_jug);
