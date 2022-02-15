@@ -47,8 +47,8 @@ typedef struct jugador_t{
     char nombre[50];
     int mano[3];
     int cartas_levantadas[40];
+    int cant_cartas;
     int escobas;
-    int id;
 }jugador_t;
 
 typedef struct jugada_t{
@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
                 SEND_RECV();
                 for (j=0;j<strlen(buf_rx);j++) if (buf_rx[j] == '\n') buf_rx[j] == '\0';
                 strcpy(jugadores[turno].nombre,buf_rx);
-                jugadores[turno].id=turno;
+                jugadores[turno].cant_cartas=0;
                 close(server_s);
                 sprintf(buf_tx,"Esperando a los demás jugadores.\n");
                 SEND();
@@ -280,15 +280,14 @@ int main(int argc, char *argv[]) {
                 }
                 printf("Arrancamos.\n");
                 //Avisar a los hijos que se repartieron las cartas y pueden arrancar
-                mensaje.op='A';
-                mensaje.turno=0;
-                for (j=0; j<cant_jug; j++) {
-                    mensaje.tipo=j+1;
-                    msgsnd(PaH,(struct msgbuf *)&mensaje,(size_t) 5,0);
-                }
                 for (i=0; i<3; i++){
                     for (j=0; j<cant_jug; j++) {
                         mensaje.turno=j;
+                        mensaje.op='A';
+                        for (k=0; k<cant_jug; k++) {
+                            mensaje.tipo=k+1;
+                            msgsnd(PaH,(struct msgbuf *)&mensaje,(size_t) 5,0);
+                        }
                         mensaje.op='T';
                         for (k=0; k<cant_jug; k++) {
                             mensaje.tipo=k+1;
@@ -345,24 +344,26 @@ int main(int argc, char *argv[]) {
                         }
                         break;
                     case 'T':
-                        if (mensaje.turno==jugadores[turno].id) {
+                        if (mensaje.turno==turno) {
                             do{
                                 int eleccion_mesa[9];
                                 int suma_jugada = 0;
-                                sprintf(buf_tx,"Las cartas sobre la mesa son: ");
                                 suma_mesa=0;
                                 for(k=0;k<10;k++){
                                     if(cartas_mesa[k]!=40){
                                         suma_mesa++;
                                     }
                                 }
-                                for (j=0;j<suma_mesa-1;j++) {
-                                    traducirCarta(buf_tx,cartas_mesa[j]);
-                                    strcat(buf_tx,", ");
+                                if (suma_mesa!=0) {
+                                    sprintf(buf_tx,"Las cartas sobre la mesa son: ");
+                                    for (j=0;j<suma_mesa-1;j++) {
+                                        traducirCarta(buf_tx,cartas_mesa[j]);
+                                        strcat(buf_tx,", ");
+                                    }
+                                    traducirCarta(buf_tx,cartas_mesa[suma_mesa-1]);
+                                    strcat(buf_tx,".\n");
+                                    SEND();
                                 }
-                                traducirCarta(buf_tx,cartas_mesa[suma_mesa-1]);
-                                strcat(buf_tx,".\n");
-                                SEND();
                                 sprintf(buf_tx,"Tus cartas son: ");
                                 suma_mano=0;
                                 for(int k=0;k<3;k++){
@@ -458,7 +459,7 @@ int main(int argc, char *argv[]) {
                                             SEND();
 
                                             suma_mesa=0;
-                                            for(k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
+                                            for(k=0;k<10;k++){
                                                 if(cartas_mesa[k]!=40){
                                                     suma_mesa++;
                                                 }
@@ -467,22 +468,26 @@ int main(int argc, char *argv[]) {
                                         }
 
                                         if(suma_jugada==15){
+                                            jugadores[turno].cartas_levantadas[jugadores[turno].cant_cartas]=jugadores[turno].mano[jugada->posiciones[0]];
+                                            jugadores[turno].cant_cartas++;
                                             jugadores[turno].mano[jugada->posiciones[0]] = 40;
                                             for(k=1; k<j; k++){
+                                                jugadores[turno].cartas_levantadas[jugadores[turno].cant_cartas]=cartas_mesa[jugada->posiciones[k]];
+                                                jugadores[turno].cant_cartas++;
                                                 cartas_mesa[jugada->posiciones[k]] = 40;
                                             }
                                             qsort(jugadores[turno].mano,(size_t) 3,sizeof(int),cmpfunc);     // Funcion para ordenar la mano de menor a mayor (los espacios vacios quedan al final)
                                             qsort(cartas_mesa,(size_t) 10,sizeof(int),cmpfunc);     // Funcion para ordenar la mano de menor a mayor (los espacios vacios quedan al final)
                                             no_valido=0;
+                                            for (i=0; i<9; i++) eleccion_mesa[i]=0;
                                             mensaje.op='L';
                                             mensaje.turno=turno;
                                             mensaje.tipo=1;
                                             msgsnd(HaP,(struct msgbuf *)&mensaje,(size_t) 5,0);
-                                            printf("Enviada jugada\n");
                                         }else{
                                             strcpy(buf_tx,"Las cartas elegidas no suman 15.\n");
                                             SEND();
-                                            for (i=0; i<9; i++) eleccion_mesa[0]=0;
+                                            for (i=0; i<9; i++) eleccion_mesa[i]=0;
                                             no_valido = 1;
                                         }
                                         break;
@@ -494,6 +499,7 @@ int main(int argc, char *argv[]) {
                                         }
                                         cartas_mesa[j]=jugadores[turno].mano[buf_rx[0]-'a'];
                                         suma_mesa++;
+                                        jugada->cartas[0]=jugadores[turno].mano[buf_rx[0]-'a'];
                                         jugadores[turno].mano[buf_rx[0]-'a'] = 40;
                                         qsort(jugadores[turno].mano,(size_t) 3,sizeof(int),cmpfunc);     // Funcion para ordenar la mano de menor a mayor (los espacios vacios quedan al final)
                                         no_valido=0;
@@ -511,12 +517,13 @@ int main(int argc, char *argv[]) {
                         break;
                     case 'L':
                         sprintf(buf_tx,"%s levantó ",jugadores[mensaje.turno].nombre);
-                        /* for (j=0; j<jugada->cant_cartas-1; j++) {
+                        j=0;
+                        while (jugada->cartas[j]!=40) {
                             traducirCarta(buf_tx,jugada->cartas[j]);
                             strcat(buf_tx,", ");
+                            j++;
                         }
-                        traducirCarta(buf_tx,jugada->cartas[jugada->cant_cartas-1]);
-                        strcat(buf_tx,".\n"); */
+                        strcat(buf_tx,"\n");
                         SEND();
                         break;
                     case 'D':
