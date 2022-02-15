@@ -226,6 +226,7 @@ int main(int argc, char *argv[]) {
                 for (j=0;j<strlen(buf_rx);j++) if (buf_rx[j] == '\n') buf_rx[j] == '\0';
                 strcpy(jugadores[turno].nombre,buf_rx);
                 jugadores[turno].cant_cartas=0;
+                jugadores[turno].escobas=0;
                 close(server_s);
                 sprintf(buf_tx,"Esperando a los demás jugadores.\n");
                 SEND();
@@ -486,6 +487,10 @@ int main(int argc, char *argv[]) {
                                             qsort(cartas_mesa,(size_t) 10,sizeof(int),cmpfunc);     // Funcion para ordenar la mano de menor a mayor (los espacios vacios quedan al final)
                                             no_valido=0;
                                             for (i=0; i<9; i++) eleccion_mesa[i]=0;
+                                            if (suma_mesa==0) {
+                                                jugadores[turno].escobas++;
+                                                jugada->op='E';
+                                            }
                                             mensaje.op='L';
                                             mensaje.turno=turno;
                                             mensaje.tipo=1;
@@ -513,7 +518,6 @@ int main(int argc, char *argv[]) {
                                         mensaje.turno=turno;
                                         mensaje.tipo=1;
                                         msgsnd(HaP,(struct msgbuf *)&mensaje,(size_t) 5,0);
-                                        printf("Enviada jugada\n");
                                         break;
                                     default:
                                         break;
@@ -529,6 +533,7 @@ int main(int argc, char *argv[]) {
                             strcat(buf_tx,", ");
                             j++;
                         }
+                        if (jugada->op=='E') strcat(buf_tx,"y es ESCOBA!");
                         strcat(buf_tx,"\n");
                         SEND();
                         break;
