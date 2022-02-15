@@ -5,15 +5,17 @@ Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolu
     \item \texttt{<sys/types.h>}: biblioteca de \textit{System V} para la definicion de tipos de variables.
     \item \texttt{<sys/stat.h>}: biblioteca de \textit{System V} para la comunicación entre procesos.
     \item \texttt{<sys/socket.h>}: biblioteca de \textit{System V} para utilizar sockets.
-    \item \texttt{<netinet/in.h>}: 
-    \item \texttt{<arpa/inet.h>}: 
+    \item \texttt{<netinet/in.h>}: biblioteca que contiene varias definiciones útiles de macros y tipos de datos para manejo de sockets de red.
+    \item \texttt{<arpa/inet.h>}: biblioteca que contiene definiciones de varias funciones útiles para el manejo de direcciones IP.
     \item \texttt{<unistd.h>}: 
     \item \texttt{<sys/time.h>}: biblioteca para obtener el tiempo de la \textit{timestamp}.
 \end{itemize}
 
-Para la simplificación del codigo se crearon 2 macros, SEND() y SEND_RECV() las cuales son utilizadas para enviar un mensaje al cliente y para enviar y recibir un mensaje del cliente respectivamente.\\
+Para la simplificación del código se crearon 2 macros, \texttt{SEND()} y \texttt{SEND\_RECV()} las cuales son utilizadas para enviar un mensaje al cliente y para enviar y recibir un mensaje del cliente respectivamente.\\
+
 Al ser un servidor concurrente, un proceso hijo dentro del servidor toma a cada cliente y dentro de este se hace la copia del archivo.\\
-Los buffers de transmisión y recepción son de 1500 bytes, es por eso que se envia esta cantidad de bytes desde el archivo que se quiere copiar hasta llegar al end of file del mismo.\\
+
+Los buffers de transmisión y recepción son de 1500 bytes, es por eso que se envia esta cantidad de bytes desde el archivo que se quiere copiar hasta llegar al \textit{end of file} del mismo.\\
 
 \subsubsection{Pseudocódigo}
 
