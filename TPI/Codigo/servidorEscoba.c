@@ -32,6 +32,12 @@ se puede repartir las cartas y demas.
 #define NUMERO 30      
 #define PATH "/dev/null"
 
+#define ROJO "\033[1;31m"
+#define VERDE "\033[1;32m"
+#define AMARILLO "\033[1;33m"
+#define CYAN "\033[1;36m"
+#define BLANCO "\033[0m"
+
 #define SEND_RECV() {\
     bytesaenviar = strlen(buf_tx);\
     bytestx = send(connect_s, buf_tx, bytesaenviar, 0);\
@@ -448,7 +454,7 @@ int main(int argc, char *argv[]) {
                                             }
                                             carta_mesa(buf_tx,suma_mesa);
                                             SEND_RECV();
-                                            while (                             //ESTE WHILE NO FUNCIONA DEL TODO
+                                            while ( 
                                                 (!(buf_rx[0] >= 'a' && buf_rx[0] <= ('a' + suma_mesa-1)))
                                                 || buf_rx[0]==eleccion_mesa[0] || buf_rx[0]==eleccion_mesa[1]
                                                 || buf_rx[0]==eleccion_mesa[2] || buf_rx[0]==eleccion_mesa[3]
@@ -533,6 +539,9 @@ int main(int argc, char *argv[]) {
                             strcat(buf_tx,", ");
                             j++;
                         }
+                        char *coma_final;                   // Reemplazo la ultima coma por punto
+                        coma_final = strrchr(buf_tx,',');
+                        strcpy(coma_final,".");
                         if (jugada->op=='E') strcat(buf_tx,"y es ESCOBA!");
                         strcat(buf_tx,"\n");
                         SEND();
@@ -553,7 +562,25 @@ int main(int argc, char *argv[]) {
                 
 void traducirCarta (char * carta, int num) {
     //Función para traducir el número en el nombre completo de la carta
-    int aux = num % 10;
+    int aux = num / 10;
+    switch (aux) {
+        case 0:     // Bastos
+            strcat(carta,VERDE);
+            break;
+        case 1:     // Espadas
+            strcat(carta,CYAN);
+            break;
+        case 2:     // Copas
+            strcat(carta,ROJO);
+            break;
+        case 3:     // Oros
+            strcat(carta,AMARILLO);
+            break;
+        default:
+            break;
+    }    
+    
+    aux = num % 10;
     switch (aux) {
         case 0:
             strcat(carta,"Uno de ");
@@ -605,6 +632,9 @@ void traducirCarta (char * carta, int num) {
     default:
         break;
     }
+
+    strcat(carta,BLANCO);
+
     return;
 }
 
