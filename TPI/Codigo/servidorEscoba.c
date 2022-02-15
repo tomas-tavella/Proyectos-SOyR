@@ -307,23 +307,28 @@ int main(int argc, char *argv[]) {
                 printf("%d: Recibí %c.\n",getpid(),mensaje.op);
                 switch (mensaje.op){
                     case 'A':
-                        sprintf(buf_tx,"Las cartas sobre la mesa son: ");
                         suma_mesa=0;
-                        for(k=0;k<10;k++){                   //Cuenta las cartas que hay en mesa y dependiendo de eso se envia un mensaje determinado
+                        for(k=0;k<10;k++){
                             if(cartas_mesa[k]!=40){
                                 suma_mesa++;
                             }
                         }
-                        for (j=0;j<suma_mesa-1;j++) {
-                            traducirCarta(buf_tx,cartas_mesa[j]);
-                            strcat(buf_tx,", ");
+                        if (suma_mesa!=0) {
+                            sprintf(buf_tx,"\nLas cartas sobre la mesa son: ");
+                            for (j=0;j<suma_mesa-1;j++) {
+                                traducirCarta(buf_tx,cartas_mesa[j]);
+                                strcat(buf_tx,", ");
+                            }
+                            traducirCarta(buf_tx,cartas_mesa[suma_mesa-1]);
+                            strcat(buf_tx,".\n");
+                            SEND();
+                        } else {
+                            sprintf(buf_tx,"\nNo quedan cartas sobre la mesa.\n");
+                            SEND();
                         }
-                        traducirCarta(buf_tx,cartas_mesa[suma_mesa-1]);
-                        strcat(buf_tx,".\n");
-                        SEND();
                         sprintf(buf_tx,"Tus cartas son: ");
                         suma_mano=0;
-                        for(int k=0;k<3;k++){                   //Cuenta las cartas que tiene el jugador en la mano y dependiendo de eso se envia un mensaje determinado
+                        for(int k=0;k<3;k++){
                             if(jugadores[turno].mano[k]!=40){ 
                                 suma_mano++;
                             }
@@ -333,7 +338,7 @@ int main(int argc, char *argv[]) {
                             strcat(buf_tx,", ");
                         }
                         traducirCarta(buf_tx,jugadores[turno].mano[suma_mano-1]);
-                        strcat(buf_tx,".\n");
+                        strcat(buf_tx,".\n\n");
                         SEND();
                         if (mensaje.turno!=turno) {                       
                             sprintf(buf_tx,"Espero la jugada de %s",jugadores[mensaje.turno].nombre);
@@ -355,7 +360,7 @@ int main(int argc, char *argv[]) {
                                     }
                                 }
                                 if (suma_mesa!=0) {
-                                    sprintf(buf_tx,"Las cartas sobre la mesa son: ");
+                                    sprintf(buf_tx,"\nLas cartas sobre la mesa son: ");
                                     for (j=0;j<suma_mesa-1;j++) {
                                         traducirCarta(buf_tx,cartas_mesa[j]);
                                         strcat(buf_tx,", ");
@@ -376,7 +381,7 @@ int main(int argc, char *argv[]) {
                                     strcat(buf_tx,", ");
                                 }
                                 traducirCarta(buf_tx,jugadores[turno].mano[suma_mano-1]);
-                                strcat(buf_tx,".\n");
+                                strcat(buf_tx,".\n\n");
                                 SEND();
                     
                                 if(suma_mesa!=0){   
@@ -393,11 +398,13 @@ int main(int argc, char *argv[]) {
                                 }
                                 jugada->op = buf_rx[0];
                                 suma_mano=0;
-                                for(int k=0;k<3;k++){                   //Cuenta las cartas que tiene el jugador en la mano y dependiendo de eso se envia un mensaje determinado
+                                for(k=0;k<3;k++){                   //Cuenta las cartas que tiene el jugador en la mano y dependiendo de eso se envia un mensaje determinado
                                     if(jugadores[turno].mano[k]!=40){ 
                                         suma_mano++;
                                     }
                                 }
+
+                                for (k=0;k<10;k++) jugada->cartas[k]=40;
 
                                 carta_mano(buf_tx,suma_mano);
                                 SEND_RECV();
