@@ -29,7 +29,8 @@ se puede repartir las cartas y demas.
 #define NCONCUR 4
 #define SOCKET_PROTOCOL 0
 
-#define NUMERO 30      
+#define NUMERO 30
+#define MAX_CARTAS_MESA 40      
 #define PATH "/dev/null"
 
 #define ROJO "\033[1;31m"
@@ -105,6 +106,8 @@ int main(int argc, char *argv[]) {
     int                  no_valido;
     int                  ultimoLevante = 4;
     mensaje_t            mensaje;
+    int                  ronda = 1;
+    char                 letras_seleccion ='a';
 
     int *cartas_mesa = NULL;
     struct jugador_t *jugadores = NULL;
@@ -289,7 +292,8 @@ int main(int argc, char *argv[]) {
                 for(j=0; j<40; j++){
                     cartas_jugadas += mazo[j];
                 }
-                printf("Arrancamos.\n",cartas_jugadas);
+                printf("Arrancamos. Ronda %d.\n",ronda);
+                ronda++;
                 //Avisar a los hijos que se repartieron las cartas y pueden arrancar
                 for (i=0; i<3; i++){
                     for (j=0; j<cant_jug; j++) {
@@ -357,10 +361,18 @@ int main(int argc, char *argv[]) {
                         }
                         if (suma_mesa!=0) {
                             sprintf(buf_tx,"\nLas cartas sobre la mesa son: ");
+                            letras_seleccion='a';
                             for (j=0;j<suma_mesa-1;j++) {
+                                strcat(buf_tx,"\033[1m(");
+                                strcat(buf_tx,&letras_seleccion);
+                                strcat(buf_tx,")\033[0m ");
                                 traducirCarta(buf_tx,cartas_mesa[j]);
                                 strcat(buf_tx,", ");
+                                letras_seleccion++;
                             }
+                            strcat(buf_tx,"\033[1m(");
+                            strcat(buf_tx,&letras_seleccion);
+                            strcat(buf_tx,")\033[0m ");
                             traducirCarta(buf_tx,cartas_mesa[suma_mesa-1]);
                             strcat(buf_tx,".\n");
                             SEND();
@@ -378,10 +390,18 @@ int main(int argc, char *argv[]) {
                                     suma_mano++;
                                 }
                             }
+                            letras_seleccion='a';
                             for (j=0;j<suma_mano-1;j++) {
-                            traducirCarta(buf_tx,jugadores[turno].mano[j]);
-                            strcat(buf_tx,", ");
+                                strcat(buf_tx,"\033[1m(");
+                                strcat(buf_tx,&letras_seleccion);
+                                strcat(buf_tx,")\033[0m ");
+                                traducirCarta(buf_tx,jugadores[turno].mano[j]);
+                                strcat(buf_tx,", ");
+                                letras_seleccion++;
                             }
+                            strcat(buf_tx,"\033[1m(");
+                                strcat(buf_tx,&letras_seleccion);
+                                strcat(buf_tx,")\033[0m ");
                             traducirCarta(buf_tx,jugadores[turno].mano[suma_mano-1]);   
                         } 
                         strcat(buf_tx,".\n\n");
@@ -407,10 +427,18 @@ int main(int argc, char *argv[]) {
                                 }
                                 if (suma_mesa!=0) {
                                     sprintf(buf_tx,"\nLas cartas sobre la mesa son: ");
+                                    letras_seleccion = 'a';
                                     for (j=0;j<suma_mesa-1;j++) {
+                                        strcat(buf_tx,"\033[1m(");
+                                        strcat(buf_tx,&letras_seleccion);
+                                        strcat(buf_tx,")\033[0m ");
                                         traducirCarta(buf_tx,cartas_mesa[j]);
                                         strcat(buf_tx,", ");
+                                        letras_seleccion++;
                                     }
+                                    strcat(buf_tx,"\033[1m(");
+                                    strcat(buf_tx,&letras_seleccion);
+                                    strcat(buf_tx,")\033[0m ");
                                     traducirCarta(buf_tx,cartas_mesa[suma_mesa-1]);
                                     strcat(buf_tx,".\n");
                                     SEND();
@@ -426,10 +454,18 @@ int main(int argc, char *argv[]) {
                                             suma_mano++;
                                         }
                                     }
+                                    letras_seleccion = 'a';
                                     for (j=0;j<suma_mano-1;j++) {
-                                    traducirCarta(buf_tx,jugadores[turno].mano[j]);
-                                    strcat(buf_tx,", ");
+                                        strcat(buf_tx,"\033[1m(");
+                                        strcat(buf_tx,&letras_seleccion);
+                                        strcat(buf_tx,")\033[0m ");
+                                        traducirCarta(buf_tx,jugadores[turno].mano[j]);
+                                        strcat(buf_tx,", ");
+                                        letras_seleccion++;
                                     }
+                                    strcat(buf_tx,"\033[1m(");
+                                    strcat(buf_tx,&letras_seleccion);
+                                    strcat(buf_tx,")\033[0m ");
                                     traducirCarta(buf_tx,jugadores[turno].mano[suma_mano-1]);   
                                 }
                                 strcat(buf_tx,".\n\n");
@@ -485,7 +521,7 @@ int main(int argc, char *argv[]) {
                                         jugada->cartas[1]=cartas_mesa[buf_rx[0]-'a'];
                                         eleccion_mesa[0] = buf_rx[0];                   // Se guarda que cartas de la mesa ya fueron elegidas
                                         suma_jugada = jugadores[turno].mano[jugada->posiciones[0]]%10 + cartas_mesa[jugada->posiciones[1]]%10 + 2;
-                                        sprintf(buf_tx,"%d\n",suma_jugada); //Envio al cliente la suma (ES AUXILIAR)
+                                        sprintf(buf_tx,"Las cartas elegidas suman %d.\n",suma_jugada); 
                                         SEND();
                                         j=2;
                                         jugada->cartas[j] = 40;
@@ -514,7 +550,7 @@ int main(int argc, char *argv[]) {
                                             jugada->cartas[j]=cartas_mesa[buf_rx[0]-'a'];
                                             eleccion_mesa[j-1] = buf_rx[0];                 // Se guarda que cartas de la mesa ya fueron elegidas
                                             suma_jugada += (cartas_mesa[jugada->posiciones[j]]%10 + 1);
-                                            sprintf(buf_tx,"%d\n",suma_jugada); //Envio al cliente la suma (ES AUXILIAR)
+                                            sprintf(buf_tx,"Las cartas elegidas suman %d.\n",suma_jugada);
                                             SEND();
 
                                             suma_mesa=0;
@@ -596,7 +632,7 @@ int main(int argc, char *argv[]) {
                         char *coma_final;                   // Reemplazo la ultima coma por punto
                         coma_final = strrchr(buf_tx,',');
                         strcpy(coma_final,".");
-                        if (jugada->op=='E') strcat(buf_tx,"y es ESCOBA!");
+                        if (jugada->op=='E') strcat(buf_tx," ESCOBA!");
                         strcat(buf_tx,"\n");
                         SEND();
                         break;
