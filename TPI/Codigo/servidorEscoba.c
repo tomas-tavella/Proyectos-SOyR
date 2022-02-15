@@ -37,6 +37,7 @@ se puede repartir las cartas y demas.
 #define AMARILLO "\033[1;33m"
 #define CYAN "\033[1;36m"
 #define BLANCO "\033[0m"
+#define BOLD "\033[1m"
 
 #define SEND_RECV() {\
     bytesaenviar = strlen(buf_tx);\
@@ -97,17 +98,21 @@ int main(int argc, char *argv[]) {
     int                  mazo[40];         //0 - 9 basto, 10 - 19 espada, 20 - 29 copa, 30 - 39 oro
     int                  turno=0;        // Variable para indicar el turno
     int                  suma_mano=0, suma_mesa=0;
-    int                  i,j,k;
+    int                  i,j,k,l;
     key_t                clave1, clave2, clave3, clave4, clave5;
     int                  IDmem1, IDmem2, IDmem3, HaP, PaH;
     pid_t                clientes[4];
     int                  no_valido;
+    int                  ultimoLevante = 4;
     mensaje_t            mensaje;
 
     int *cartas_mesa = NULL;
     struct jugador_t *jugadores = NULL;
     struct jugada_t *jugada = NULL;
     pid_t pid_padre = getpid();
+
+    for (i=0;i<=39;i++) mazo[i]=0;      // Inicializo mazo en 0
+    i = 0;
 
     /*************************************** Obtención de la memoria compartida ***************************************/
 
@@ -229,7 +234,7 @@ int main(int argc, char *argv[]) {
             if ((clientes[turno]=fork())==0) { // Cada hijo se queda con su cliente
                 sprintf(buf_tx,"Jugador %d de %d. Ingrese su nombre: ",turno+1,cant_jug);
                 SEND_RECV();
-                for (j=0;j<strlen(buf_rx);j++) if (buf_rx[j] == '\n') buf_rx[j] == '\0';
+                for (j=0;j<strlen(buf_rx);j++) if (buf_rx[j] == '\n') buf_rx[j] = '\0';
                 strcpy(jugadores[turno].nombre,buf_rx);
                 jugadores[turno].cant_cartas=0;
                 jugadores[turno].escobas=0;
@@ -284,7 +289,7 @@ int main(int argc, char *argv[]) {
                 for(j=0; j<40; j++){
                     cartas_jugadas += mazo[j];
                 }
-                printf("Arrancamos.\n");
+                printf("Arrancamos.\n",cartas_jugadas);
                 //Avisar a los hijos que se repartieron las cartas y pueden arrancar
                 for (i=0; i<3; i++){
                     for (j=0; j<cant_jug; j++) {
@@ -300,6 +305,10 @@ int main(int argc, char *argv[]) {
                             msgsnd(PaH,(struct msgbuf *)&mensaje,(size_t) 5,0);
                         }
                         msgrcv(HaP,(struct msgbuf *)&mensaje,(size_t) 5,1,0);
+                        if(mensaje.op=='L'){
+                            ultimoLevante=mensaje.turno;
+                            printf("Ultimo levante: %d\n",ultimoLevante);
+                        }
                         for (k=0; k<cant_jug; k++) {
                             mensaje.tipo=k+1;
                             msgsnd(PaH,(struct msgbuf *)&mensaje,(size_t) 5,0);
@@ -308,12 +317,33 @@ int main(int argc, char *argv[]) {
                 }
             }
             //mensaje.turno=j;
+            //////Aca
+
+            /* jugadores[turno].cartas_levantadas[jugadores[turno].cant_cartas]=jugadores[turno].mano[jugada->posiciones[0]];
+            jugadores[turno].cant_cartas++;
+            jugadores[turno].mano[jugada->posiciones[0]] = 40;
+            for(k=1; k<j; k++){
+                jugadores[turno].cartas_levantadas[jugadores[turno].cant_cartas]=cartas_mesa[jugada->posiciones[k]];
+                jugadores[turno].cant_cartas++;
+                cartas_mesa[jugada->posiciones[k]] = 40;
+            } */
+            j=0;
+            while (cartas_mesa[j]!=40){
+                jugadores[ultimoLevante].cartas_levantadas[jugadores[ultimoLevante].cant_cartas]=cartas_mesa[j];
+                jugadores[ultimoLevante].cant_cartas++;
+                j++;
+            }
             mensaje.op='F';
+            for (k=0;k<cant_jug;k++) qsort(jugadores[k].cartas_levantadas,(size_t) 40,sizeof(int),cmpfunc);
             for(j=0;j<cant_jug;j++){
-                mensaje.tipo=j;    
-                msgsnd(HaP,(struct msgbuf *)&mensaje,sizeof(mensaje)-sizeof(long),0);
+                //mensaje.tipo=j;    
+                mensaje.turno=j;    
+                msgsnd(PaH,(struct msgbuf *)&mensaje,(size_t) 5,0);
             }
         } else {                        //Estamos en el hijo, esperar operacion en mensaje
+            for(j=0;j<40;j++){
+                jugadores[turno].cartas_levantadas[j]=40;
+            }
             do {
                 msgrcv(PaH,(struct msgbuf *)&mensaje,(size_t) 5,turno+1,0);
                 printf("%d: Recibí %c.\n",getpid(),mensaje.op);
@@ -338,25 +368,29 @@ int main(int argc, char *argv[]) {
                             sprintf(buf_tx,"\nNo quedan cartas sobre la mesa.\n");
                             SEND();
                         }
-                        sprintf(buf_tx,"Tus cartas son: ");
-                        suma_mano=0;
-                        for(int k=0;k<3;k++){
-                            if(jugadores[turno].mano[k]!=40){ 
-                                suma_mano++;
+                        if (jugadores[turno].mano[0]==40){
+                            sprintf(buf_tx,"No quedan cartas en tu mano");
+                        }else{
+                            sprintf(buf_tx,"Tus cartas son: ");
+                            suma_mano=0;
+                            for(int k=0;k<3;k++){
+                                if(jugadores[turno].mano[k]!=40){ 
+                                    suma_mano++;
+                                }
                             }
-                        }    
-                        for (j=0;j<suma_mano-1;j++) {
+                            for (j=0;j<suma_mano-1;j++) {
                             traducirCarta(buf_tx,jugadores[turno].mano[j]);
                             strcat(buf_tx,", ");
-                        }
-                        traducirCarta(buf_tx,jugadores[turno].mano[suma_mano-1]);
+                            }
+                            traducirCarta(buf_tx,jugadores[turno].mano[suma_mano-1]);   
+                        } 
                         strcat(buf_tx,".\n\n");
                         SEND();
                         if (mensaje.turno!=turno) {                       
                             sprintf(buf_tx,"Espero la jugada de %s",jugadores[mensaje.turno].nombre);
                             SEND();
                         } else {
-                            sprintf(buf_tx,"Es tu turno, %s",jugadores[turno].nombre);
+                            sprintf(buf_tx,"\033[1m------------------------------------ Es tu turno, %s ------------------------------------\033[0m\n",jugadores[turno].nombre);
                             SEND();
                         }
                         break;
@@ -381,18 +415,23 @@ int main(int argc, char *argv[]) {
                                     strcat(buf_tx,".\n");
                                     SEND();
                                 }
-                                sprintf(buf_tx,"Tus cartas son: ");
-                                suma_mano=0;
-                                for(int k=0;k<3;k++){
-                                    if(jugadores[turno].mano[k]!=40){ 
-                                        suma_mano++;
+
+                                if (jugadores[turno].mano[0]==40){
+                                    sprintf(buf_tx,"No quedan cartas en tu mano");
+                                }else{
+                                    sprintf(buf_tx,"Tus cartas son: ");
+                                    suma_mano=0;
+                                    for(int k=0;k<3;k++){
+                                        if(jugadores[turno].mano[k]!=40){ 
+                                            suma_mano++;
+                                        }
                                     }
-                                }    
-                                for (j=0;j<suma_mano-1;j++) {
+                                    for (j=0;j<suma_mano-1;j++) {
                                     traducirCarta(buf_tx,jugadores[turno].mano[j]);
                                     strcat(buf_tx,", ");
+                                    }
+                                    traducirCarta(buf_tx,jugadores[turno].mano[suma_mano-1]);   
                                 }
-                                traducirCarta(buf_tx,jugadores[turno].mano[suma_mano-1]);
                                 strcat(buf_tx,".\n\n");
                                 SEND();
                     
@@ -466,6 +505,7 @@ int main(int argc, char *argv[]) {
                                                 || buf_rx[0]==eleccion_mesa[2] || buf_rx[0]==eleccion_mesa[3]
                                                 || buf_rx[0]==eleccion_mesa[4] || buf_rx[0]==eleccion_mesa[5]
                                                 || buf_rx[0]==eleccion_mesa[6] || buf_rx[0]==eleccion_mesa[7]
+                                                || buf_rx[0]==eleccion_mesa[8]
                                             ){
                                                 sprintf(buf_tx,"Ingrese una opción válida: \n");
                                                 SEND_RECV();
@@ -499,6 +539,12 @@ int main(int argc, char *argv[]) {
                                             qsort(cartas_mesa,(size_t) 10,sizeof(int),cmpfunc);     // Funcion para ordenar la mano de menor a mayor (los espacios vacios quedan al final)
                                             no_valido=0;
                                             for (i=0; i<9; i++) eleccion_mesa[i]=0;
+                                            suma_mesa=0;
+                                            for(k=0;k<10;k++){              //Agregue 
+                                                if(cartas_mesa[k]!=40){
+                                                    suma_mesa++;
+                                                }
+                                            }
                                             if (suma_mesa==0) {
                                                 jugadores[turno].escobas++;
                                                 jugada->op='E';
@@ -506,6 +552,8 @@ int main(int argc, char *argv[]) {
                                             mensaje.op='L';
                                             mensaje.turno=turno;
                                             mensaje.tipo=1;
+
+                                            /////////////Aca
                                             msgsnd(HaP,(struct msgbuf *)&mensaje,(size_t) 5,0);
                                         }else{
                                             strcpy(buf_tx,"Las cartas elegidas no suman 15.\n");
@@ -538,7 +586,7 @@ int main(int argc, char *argv[]) {
                         }
                         break;
                     case 'L':
-                        sprintf(buf_tx,"%s levantó ",jugadores[mensaje.turno].nombre);
+                        sprintf(buf_tx,"\n%s levantó ",jugadores[mensaje.turno].nombre);
                         j=0;
                         while (jugada->cartas[j]!=40) {
                             traducirCarta(buf_tx,jugada->cartas[j]);
@@ -553,7 +601,7 @@ int main(int argc, char *argv[]) {
                         SEND();
                         break;
                     case 'D':
-                        sprintf(buf_tx,"%s descartó ",jugadores[mensaje.turno].nombre);
+                        sprintf(buf_tx,"\n%s descartó ",jugadores[mensaje.turno].nombre);
                         traducirCarta(buf_tx,jugada->cartas[0]);
                         strcat(buf_tx,".\n");
                         SEND();
@@ -561,16 +609,23 @@ int main(int argc, char *argv[]) {
                     default:
                         break;
                 }
-            } while(mensaje.op!='F');
-            sprintf(buf_tx,"%s tus cartas son: ", jugadores[turno].nombre);
-            for(j=0; j<jugadores[turno].cant_cartas; j++){
-                traducirCarta(buf_tx,jugadores[turno].cartas_levantadas[j]);
+            } while(mensaje.op!='F');            
+            for(k=0;k<cant_jug;k++){
+                j=0;
+                sprintf(buf_tx,"Las cartas de %s son: \n", jugadores[k].nombre);
+                for (l=1;l<=4;l++){
+                    while (jugadores[k].cartas_levantadas[j]<10*l){
+                        traducirCarta(buf_tx,jugadores[k].cartas_levantadas[j]);
+                        strcat(buf_tx,"\t");
+                        j++;
+                    }
+                    strcat(buf_tx,"\n");
+                }
+                SEND();
+                sprintf(buf_tx,"Hizo %d escobas\n", jugadores[k].escobas);
+                strcat(buf_tx,".\n");
+                SEND();
             }
-            strcat(buf_tx,".\n");
-            SEND();
-            sprintf(buf_tx,"Hiciste %d escobas\n", jugadores[turno].escobas);
-            strcat(buf_tx,".\n");
-            SEND();
         }
     }
 }
