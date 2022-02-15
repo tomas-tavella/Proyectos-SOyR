@@ -65,8 +65,8 @@ typedef struct jugada_t{
 }jugada_t;
 
 typedef struct{
-	long tipo;
-	int turno;
+    long tipo;
+    int turno;
     char op;
 }mensaje_t;
 
@@ -155,14 +155,14 @@ int main(int argc, char *argv[]) {
     }
     HaP = msgget(clave4, 0600 | IPC_CREAT);
     if(HaP == -1){
-		printf("No se pudo obtener un ID de cola de mensajes\n");
-		exit(2);
-	}
+        printf("No se pudo obtener un ID de cola de mensajes\n");
+        exit(2);
+    }
     PaH = msgget(clave5, 0600 | IPC_CREAT);
     if(PaH == -1){
-		printf("No se pudo obtener un ID de cola de mensajes\n");
-		exit(2);
-	}
+        printf("No se pudo obtener un ID de cola de mensajes\n");
+        exit(2);
+    }
 
     // Adosar el proceso a los espacios de memoria mediante un puntero
     cartas_mesa = (int *) shmat(IDmem1, (const void *)0,0);
@@ -306,6 +306,12 @@ int main(int argc, char *argv[]) {
                         }
                     }
                 }
+            }
+            //mensaje.turno=j;
+            mensaje.op='F';
+            for(j=0;j<cant_jug;j++){
+                mensaje.tipo=j;    
+                msgsnd(HaP,(struct msgbuf *)&mensaje,sizeof(mensaje)-sizeof(long),0);
             }
         } else {                        //Estamos en el hijo, esperar operacion en mensaje
             do {
@@ -555,7 +561,16 @@ int main(int argc, char *argv[]) {
                     default:
                         break;
                 }
-            } while (1);
+            } while(mensaje.op!='F');
+            sprintf(buf_tx,"%s tus cartas son: ", jugadores[turno].nombre);
+            for(j=0; j<jugadores[turno].cant_cartas; j++){
+                traducirCarta(buf_tx,jugadores[turno].cartas_levantadas[j]);
+            }
+            strcat(buf_tx,".\n");
+            SEND();
+            sprintf(buf_tx,"Hiciste %d escobas\n", jugadores[turno].escobas);
+            strcat(buf_tx,".\n");
+            SEND();
         }
     }
 }
