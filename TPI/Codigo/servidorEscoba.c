@@ -13,17 +13,8 @@
 #include <unistd.h>
 #include <time.h>
 
-/* Basado (based) en la consulta:
-El mazo, las manos y las cartas son memoria compartida, pero no es necesario que se sincronice, los hijos solo leen, el padre escribe
-    Hijos escriben: Jugadores , leen: mano, cartas_mesa,
-    Padre escribe: mano, cartas_mesa , lee: Jugadores
-Se pueden usar colas de msj por ej para mandarle al padre que jugada hace cada cliente, asi los hijos no tienen que escribir mem comp.
-Los hijos tienen que ser lo mas modular posible, preguntar nombre, y esperar el turno, hay que ver como sincronizar lo del turno, tal vez con signals
-El padre tiene que preparar la memoria compartida y ponerse a esperar las conexiones para derivar a los hijos, una vez que estan todos conectados
-se puede repartir las cartas y demas.
-*/
+//------------------------------------------------ Defines ------------------------------------------------//
 
-//******************************* Defines *******************************//
 #define  PORT_NUM 1234  // Numero de Port
 #define  IP_ADDR "127.0.0.1" // Direccion IP LOCALHOST
 #define NCONCUR 4
@@ -72,7 +63,8 @@ typedef struct{
     char op;
 }mensaje_t;
 
-//******************************** Global *******************************//
+//---------------------------------------------- Global ----------------------------------------------//
+
 int terminar = 0;
 unsigned int connect_s;
 
@@ -86,8 +78,13 @@ int cmpfunc (const void * a, const void * b);
 
 void handler(int sig);
 
-//******************************* Main program *******************************//
+//---------------------------------------------- Main program ----------------------------------------------//
+
 int main(int argc, char *argv[]) {
+    
+    //------------------------------------------------------------------------------------------------------//
+    //-------------------------------------- Declaracion de variables --------------------------------------//
+    //------------------------------------------------------------------------------------------------------//
 
     unsigned int         server_s;        // Descriptor del socket
     struct sockaddr_in   server_addr, client_addr;     // Estructuras con los datos del servidor y clientes
@@ -117,7 +114,9 @@ int main(int argc, char *argv[]) {
     for (i=0;i<=39;i++) mazo[i]=0;      // Inicializo mazo en 0
     i = 0;
 
-    /*************************************** Obtención de la memoria compartida ***************************************/
+    //------------------------------------------------------------------------------------------------------//
+    //---------------------------- Setup de memoria comparitda y colas de mensajes -------------------------//
+    //------------------------------------------------------------------------------------------------------//
 
     clave1 = ftok(PATH,NUMERO);
     if (clave1 == (key_t) -1){
@@ -189,7 +188,9 @@ int main(int argc, char *argv[]) {
         exit(3);
     }
 
-    /************************************** Creación del socket para el servidor **************************************/
+    //----------------------------------------------------------------------------------------------------------------------//
+    //---------------------------------------- Creación del socket para el servidor ----------------------------------------//
+    //----------------------------------------------------------------------------------------------------------------------//
 
     server_s = socket(AF_INET, SOCK_STREAM, SOCKET_PROTOCOL);
     if (server_s==-1) {
@@ -210,7 +211,9 @@ int main(int argc, char *argv[]) {
     printf("Servidor en proceso %d listo.\n",getpid());
     listen(server_s, NCONCUR);
 
-    /******************************* Creacion de la partida y conexion de los jugadores *******************************/
+    //--------------------------------------------------------------------------------------------------------------------------------------//
+    //----------------------------------------- Creacion de la partida y conexion de los jugadores -----------------------------------------//
+    //--------------------------------------------------------------------------------------------------------------------------------------//
 
     addr_len = sizeof(client_addr);
     while(!terminar) { // Loop general, cuando termina una partida vuelve acá para iniciar otra
@@ -255,6 +258,11 @@ int main(int argc, char *argv[]) {
                 close(connect_s);
             }
         }
+
+        //--------------------------------------------------------------------------------------------------------------//
+        //--------------------------------------------- Seccion del padre ----------------------------------------------//
+        //--------------------------------------------------------------------------------------------------------------//
+
         if (getppid()!=pid_padre) {     //Estamos en el padre, repartir cartas y desbloquear hijos
             int numero_aleatorio = (int)(rand() % 40);
             int primera_mano = 1, cartas_jugadas = 0;
@@ -337,6 +345,12 @@ int main(int argc, char *argv[]) {
             }
             turno=0;
             cant_jug=1;
+
+
+        //-----------------------------------------------------------------------------------------------------------------//
+        //--------------------------------------------- Seccion de los hijos ----------------------------------------------//
+        //-----------------------------------------------------------------------------------------------------------------//
+
         } else {                        //Estamos en el hijo, esperar operacion en mensaje
             for(j=0;j<40;j++){
                 jugadores[turno].cartas_levantadas[j]=40;
@@ -661,6 +675,11 @@ int main(int argc, char *argv[]) {
             shmdt((const void *) jugada);
             return 0;
         }
+
+    //--------------------------------------------------------------------------------------------------------------//
+    //---------------------------- Cierre y eliminacion de memoria compartida y colas ------------------------------//
+    //--------------------------------------------------------------------------------------------------------------//
+
     }
     for (i=0; i<cant_jug; i++) {
         wait(NULL);
@@ -674,6 +693,12 @@ int main(int argc, char *argv[]) {
     msgctl(PaH, IPC_RMID, (struct msqid_ds *)NULL);
     msgctl(HaP, IPC_RMID, (struct msqid_ds *)NULL);
 }
+
+
+//------------------------------------------------------------------------------------------------------------------//
+//--------------------------------------------------- Funciones ----------------------------------------------------//
+//------------------------------------------------------------------------------------------------------------------//
+
                 
 void traducirCarta (char * carta, int num) {
     //Función para traducir el número en el nombre completo de la carta
