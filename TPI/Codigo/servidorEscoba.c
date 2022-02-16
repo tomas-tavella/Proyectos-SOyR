@@ -321,17 +321,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
-            //mensaje.turno=j;
-            //////Aca
-
-            /* jugadores[turno].cartas_levantadas[jugadores[turno].cant_cartas]=jugadores[turno].mano[jugada->posiciones[0]];
-            jugadores[turno].cant_cartas++;
-            jugadores[turno].mano[jugada->posiciones[0]] = 40;
-            for(k=1; k<j; k++){
-                jugadores[turno].cartas_levantadas[jugadores[turno].cant_cartas]=cartas_mesa[jugada->posiciones[k]];
-                jugadores[turno].cant_cartas++;
-                cartas_mesa[jugada->posiciones[k]] = 40;
-            } */
+            
             j=0;
             while (cartas_mesa[j]!=40){
                 jugadores[ultimoLevante].cartas_levantadas[jugadores[ultimoLevante].cant_cartas]=cartas_mesa[j];
