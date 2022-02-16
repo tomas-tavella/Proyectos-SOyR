@@ -409,10 +409,10 @@ int main(int argc, char *argv[]) {
                         strcat(buf_tx,".\n\n");
                         SEND();
                         if (mensaje.turno!=turno) {                       
-                            sprintf(buf_tx,"Espero la jugada de %s",jugadores[mensaje.turno].nombre);
+                            sprintf(buf_tx,"\033[1m\n------------------------------------Espero la jugada de %s ------------------------------------\033[0m\n",jugadores[mensaje.turno].nombre);
                             SEND();
                         } else {
-                            sprintf(buf_tx,"\033[1m------------------------------------ Es tu turno, %s ------------------------------------\033[0m\n",jugadores[turno].nombre);
+                            sprintf(buf_tx,"\033[1m\n------------------------------------ Es tu turno, %s ------------------------------------\033[0m\n",jugadores[turno].nombre);
                             SEND();
                         }
                         break;
@@ -654,13 +654,14 @@ int main(int argc, char *argv[]) {
                 for (l=1;l<=4;l++){
                     while (jugadores[k].cartas_levantadas[j]<10*l){
                         traducirCarta(buf_tx,jugadores[k].cartas_levantadas[j]);
-                        strcat(buf_tx,"\t");
+                        strcat(buf_tx,"\t\t");
                         j++;
                     }
                     strcat(buf_tx,"\n");
                 }
                 SEND();
-                sprintf(buf_tx,"Hizo %d escobas\n", jugadores[k].escobas);
+
+                sprintf(buf_tx,"Tiene %d cartas\nHizo %d escobas\n",jugadores[k].cant_cartas ,jugadores[k].escobas);
                 strcat(buf_tx,".\n");
                 SEND();
             }
