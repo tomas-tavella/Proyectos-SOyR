@@ -112,6 +112,20 @@ int main(int argc, char *argv[]) {
                 char delimitador[] = " ";
                 char *token = strtok(buf_rx, delimitador);
                 strcpy(archivo,token);
+                for (int i=0; i<strlen(archivo); i++) {
+                    if (!(archivo[i]>=48 && archivo[i]<=57) && !(archivo[i]>=65 && archivo[i]<=90) && !(archivo[i]>=97 && archivo[i]<=122) && archivo[i]!=46) {
+                        sprintf(buf_tx,"ERROR: El nombre del archivo solo puede contener caracteres alfanuméricos o '.'.\n");
+                        bytesaenviar = strlen(buf_tx);
+                        bytestx = send(connect_s, buf_tx, bytesaenviar, 0);
+                        if (bytestx==-1) {
+                            perror ("send");
+                            return 3;
+                        }
+                        contbytestx += bytestx;
+                        tiempo_fin = *localtime(&t);
+                        writeLog(tiempo_init, tiempo_fin, 1, 0, contbytestx, contbytesrx);
+                    }
+                }
                 token = strtok(NULL, delimitador);
                 strcpy(aux,token);
                 size=atoi(aux);
