@@ -237,6 +237,7 @@ int main(int argc, char *argv[]) {
             if ((clientes[turno]=fork())==0) { // Cada hijo se queda con su cliente
                 sprintf(buf_tx,"Jugador %d de %d. Ingrese su nombre: ",turno+1,cant_jug);
                 SEND_RECV();
+                if (buf_rx[0] == '\n') strcpy(jugadores[turno].nombre,"Jugador %d",turno+1);
                 for (j=0;j<strlen(buf_rx);j++) if (buf_rx[j] == '\n') buf_rx[j] = '\0';
                 strcpy(jugadores[turno].nombre,buf_rx);
                 jugadores[turno].cant_cartas=0;
@@ -409,7 +410,7 @@ int main(int argc, char *argv[]) {
                         strcat(buf_tx,".\n\n");
                         SEND();
                         if (mensaje.turno!=turno) {                       
-                            sprintf(buf_tx,"\033[1m\n------------------------------------Espero la jugada de %s ------------------------------------\033[0m\n",jugadores[mensaje.turno].nombre);
+                            sprintf(buf_tx,"\033[1m\n------------------------------------ Espero la jugada de %s ------------------------------------\033[0m\n",jugadores[mensaje.turno].nombre);
                             SEND();
                         } else {
                             sprintf(buf_tx,"\033[1m\n------------------------------------ Es tu turno, %s ------------------------------------\033[0m\n",jugadores[turno].nombre);
