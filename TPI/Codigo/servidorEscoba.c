@@ -344,6 +344,8 @@ int main(int argc, char *argv[]) {
                 mensaje.turno=0;    
                 msgsnd(PaH,(struct msgbuf *)&mensaje,(size_t) 5,0);
             }
+            turno=0;
+            cant_jug=1;
         } else {                        //Estamos en el hijo, esperar operacion en mensaje
             for(j=0;j<40;j++){
                 jugadores[turno].cartas_levantadas[j]=40;
@@ -665,7 +667,7 @@ int main(int argc, char *argv[]) {
             shmdt((const void *) cartas_mesa);
             shmdt((const void *) jugadores);
             shmdt((const void *) jugada);
-            return;
+            return 0;
         }
     }
     for (i=0; i<cant_jug; i++) {
