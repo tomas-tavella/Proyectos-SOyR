@@ -13,11 +13,11 @@ Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolu
     
 \end{itemize}
 
-Se decidió guardar los datos de cada jugador (nombre, cantidad y valor de las cartas levantadas, y escobas) y la jugada realizada (cartas levantadas o descartadas) como memoria compartida, para simplificar la comunicación entre procesos, y que no sea necesario mandar tantos datos cuando se debe anunciar de quien es el turno o que jugada realizó.\\
+Se decidió guardar los datos de cada jugador (nombre, cantidad y valor de las cartas levantadas, y escobas) y la jugada realizada (cartas levantadas o descartadas) como memoria compartida, para simplificar la comunicación entre procesos, y que no sea necesario mandar tantos datos en los mensajes entre procesos cuando se debe anunciar de quien es el turno o que jugada realizó.\\
 
-El padre es el encargado de sincronizar la partida, repartir las cartas, y avisarle a los hijos que operación tienen que realizar. Para lograr esta sincronización, se decidió por utilizar el mecanismo de colas de mensajes, con el padre enviando y recibiendo mensajes.\\
+El padre será el encargado de sincronizar la partida, repartir las cartas, y avisarle a los hijos que operación tienen que realizar. Los hijos por su parte esperarán un mensaje del padre una vez estén conectados los jugadores, y anunciarán de quien es el turno, pedirán la jugada o mostraran que jugada se realizó de acuerdo a lo recibido.
 
-% No usar tildes en el pseudocódigo y dejar una linea vacía al principio y al final
+Una vez terminada la partida (chequeado porque se repartieron las 40 cartas y no se pueden repartir más), el padre enviará un mensaje de finalización, para que los hijos muestren los puntajes, se desasocien de la memoria compartida y terminen, y quedará a la espera de una nueva conexión para iniciar otra partida.
 
 \subsection{Pseudocódigo}
 
@@ -30,7 +30,8 @@ A continuación se muestra un pseudocódigo que explica a grandes rasgos el func
         Obtener la clave de las memorias compartidas y colas de mensajes (en el caso de no obtenerlas imprimir error);
         Llamar al sistema para obtener el ID de las memorias compartidas y colas de mensajes (en el caso de que no obtenerlas imprimir error);
         Asociar el espacio de memoria compartida con un puntero (si no puede asociar imprimir error);
-        Crar socket para el servidor;
+        Obtener colas de mensajes (si no puede obtener imprimir error);
+        Crear socket para el servidor;
         Crear partida y conexion de jugadores;
         Mientras(El servidor este activo){
             Mientras(No se hayan terminado de conectar los jugadores){
