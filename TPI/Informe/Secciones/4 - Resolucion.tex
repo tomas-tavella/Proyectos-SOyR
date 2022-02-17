@@ -1,29 +1,37 @@
 \section{Resolución}
 
-Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolución del problema planteado:
+Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolución del problema planteado:\\
+
 \begin{itemize}
     \item \texttt{<sys/ipc.h>}: biblioteca de \textit{System V} para la comunicación entre procesos.
     \item \texttt{<sys/shm.h>}: biblioteca de \textit{System V} para la memoria compartida.
-    \item \item \texttt{<sys/msg.h>}: implementación de \textit{System V} para colas de mensajes.
+    \item \texttt{<sys/msg.h>}: implementación de \textit{System V} para colas de mensajes.
+    \item \texttt{<sys/socket.h>}: biblioteca de \textit{System V} para utilizar sockets.
+    \item \texttt{<sys/wait.h>}: biblioteca de \textit{System V} para ultilar la funcion \texttt{wait()}.
+    \item \texttt{<netinet/in.h>}: biblioteca que contiene varias definiciones útiles de macros y tipos de datos para manejo de sockets de red.
+    \item \texttt{<arpa/inet.h>}: biblioteca que contiene definiciones de varias funciones útiles para el manejo de direcciones IP.\\
+    
 \end{itemize}
 
-Se decidió guardar los datos de cada jugador (nombre, cantidad y valor de las cartas levantadas, y escobas) y la jugada realizada (cartas levantadas o descartadas) como memoria compartida, para simplificar la comunicación entre procesos, y que no sea necesario mandar tantos datos cuando se debe anunciar de quien es el turno o que jugada realizó.
+Se decidió guardar los datos de cada jugador (nombre, cantidad y valor de las cartas levantadas, y escobas) y la jugada realizada (cartas levantadas o descartadas) como memoria compartida, para simplificar la comunicación entre procesos, y que no sea necesario mandar tantos datos cuando se debe anunciar de quien es el turno o que jugada realizó.\\
 
-El padre es el encargado de sincronizar la partida, repartir las cartas, y avisarle a los hijos que operación tienen que realizar.
+El padre es el encargado de sincronizar la partida, repartir las cartas, y avisarle a los hijos que operación tienen que realizar. Para lograr esta sincronización, se decidió por utilizar el mecanismo de colas de mensajes, con el padre enviando y recibiendo mensajes.\\
 
-\subsubsection{Pseudocódigo}
+% No usar tildes en el pseudocódigo y dejar una linea vacía al principio y al final
 
-\begin{lstlisting}[language=C]          % No usar tildes en el pseudocódigo y dejar una linea vacía al principio y al final
+\subsection{Pseudocódigo}
 
-    Productor:
+A continuación se muestra un pseudocódigo que explica a grandes rasgos el funcionamiento del programa del servidor:\\
+
+\begin{lstlisting}[language=C]          
+
     INICIO
         Declarar y asignar variables, macros, estructuras y funciones;
-        Obtener la clave de las memorias compartidas (en el caso de no obtenerlas imprimir error);
-        Llamar al sistema para obtener el ID de las memorias compartidas (en el caso de que no obtenerlas imprimir error);
+        Obtener la clave de las memorias compartidas y colas de mensajes (en el caso de no obtenerlas imprimir error);
+        Llamar al sistema para obtener el ID de las memorias compartidas y colas de mensajes (en el caso de que no obtenerlas imprimir error);
         Asociar el espacio de memoria compartida con un puntero (si no puede asociar imprimir error);
         Crar socket para el servidor;
         Crear partida y conexion de jugadores;
-        Inicializar semaforos;
         Mientras(El servidor este activo){
             Mientras(No se hayan terminado de conectar los jugadores){
                 Esperar a que se conecte un jugador;
@@ -148,28 +156,30 @@ El padre es el encargado de sincronizar la partida, repartir las cartas, y avisa
             Liberar memoria compartida;
             return 0;
         }
-        Cierre y eliminacion de memoria compartida y colas
+        Cierre y eliminacion de memoria compartida y colas de mensajes
     FIN
+
 \end{lstlisting}
 
 \subsection{Compilación y ejecución del programa}
 
-Con el código completo, para compilar el programa a un archivo binario ejecutable se llama al comando \texttt{gcc} (\textit{GNU C Compiler}):
+Con el código completo, para compilar el programa a un archivo binario ejecutable se llama al comando \texttt{gcc} (\textit{GNU Compiler Collection}):
 
 \begin{center}
     \texttt{\$ gcc servidorEscoba.c -o servidorEscoba}\\
 \end{center}
 
-Con lo que se obtienen el archivo binario ejecutable, el cual, esta situado en la carpeta en la que se encuentra, se ejecutan desde la terminal de la siguiente manera:
+Con lo que se obtiene el archivo binario ejecutable \texttt{servidorEscoba}, el cual se ejecuta desde la terminal de la siguiente manera:
 
 \begin{center}
     \texttt{\$ ./servidorEscoba}\\
 \end{center}
 
-Luego, se deben ejecutar los clientes de telnet
+Luego, se deben ejecutar los clientes utilizando el puerto 1234, ya sea con el comando \texttt{netcat} o \texttt{telnet}:
 
 \begin{center}
-    \texttt{\$ netcat localhost 1234}\\
+    \texttt{\$ netcat \enquote{Direccion IP del servidor} 1234}\\
+    \texttt{\$ telnet \enquote{Direccion IP del servidor} 1234}\\
 \end{center}
 
-Es importante ejecutar primero el servidor y luego los clientes.
+Es importante ejecutar primero el servidor y luego los clientes.\\

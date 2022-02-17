@@ -1,8 +1,8 @@
 \section{Interpretación del problema}
-Para este programa, se debe crear un servidor concurrente que permita jugar una partida de la escoba de 15.
+Para este programa, se debe crear un servidor concurrente que haga uso del protocolo TCP y permita jugar una partida de la escoba de 15.\\
 
-Los clientes deben conectarse mediante netcat o telnet, así que el formateo de los mensajes debe realizarse del lado del servidor. Todos los clientes deben ser atendidos por hijos, siendo el primero el que determina la cantidad de jugadores de la partida.
+Dado que no se creo ningún programa para el cliente, los mismos se deben conectar a través de los comandos \texttt{netcat} o \texttt{telnet}, por lo que el formateo de los mensajes debe realizarse del lado del servidor. Todos los clientes deben ser atendidos por hijos, siendo el primero el que determina la cantidad de jugadores de la partida.\\
 
-Debe usarse algún método de sincronización o IPC para la comunicación entre hijos y determinación de los turnos de juego, ignorando jugadas no válidas por parte de los demás jugadores.
+Debe usarse algún método de sincronización o IPC para la comunicación entre hijos y determinación de los turnos de juego, ignorando jugadas no válidas por parte de los demás jugadores.\\
 
-Al finalizar la partida, el servidor quedará a la espera de nuevos jugadores para iniciar una nueva partida.
+Al finalizar la partida, el servidor quedará a la espera de nuevos jugadores para iniciar una nueva partida.\\
