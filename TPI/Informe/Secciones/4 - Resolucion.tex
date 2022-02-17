@@ -44,180 +44,159 @@ Finalmente, al terminar de correr el productor, se llaman a \texttt{shmctl()} y 
 
     Productor:
     INICIO
-        Declarar y asignar variables, macros y estructuras;
-        Obtener la clave de las dos memorias compartidas y el semaforo (en el caso de no obtenerlas imprimir error);
+        Declarar y asignar variables, macros, estructuras y funciones;
+        Obtener la clave de las memorias compartidas (en el caso de no obtenerlas imprimir error);
         Llamar al sistema para obtener el ID de las memorias compartidas (en el caso de que no obtenerlas imprimir error);
         Asociar el espacio de memoria compartida con un puntero (si no puede asociar imprimir error);
-        Crear semaforos (si no puede crear imprimir error);
+        Crar socket para el servidor;
+        Crear partida y conexion de jugadores;
         Inicializar semaforos;
-        Verificar la existencia del archivo datos.dat;
-        Obtener el tiempo de UNIX inicial;
-        Inicializar variables auxiliares para los buffers;
-        Mientras(1){
-	        Bloquear el semaforo del buffer1;
-	        Leer una linea del archivo .dat;
-	        Mientras(No se llegue al fin del buffer1){
-		        Copiar los datos en el buffer1;
-		        Leer una linea del archivo .dat;
-		        Si(Se llega al final del archivo){
-			        Salir del bucle y avisar que el ultimo elemento se escribio en el buffer1;
+        Mientras(El servidor este activo){
+            Mientras(No se hayan terminado de conectar los jugadores){
+                Esperar a que se conecte un jugador;
+                Imprimir desde donde se hizo la conexion;
+                Si(Es el primer jugador){
+                    Solicitar la cantidad de jugadores que van a jugar (si no se ingresa un numero entre 2 y 4 volver a solicitar);
                 }
-                Incrementar la variable para recorrer el buffer y la del id;
-	        }
-            Resetear la variable que recorre el buffer;
-            Desbloquear el semaforo del buffer1;
-            Bloquear el semaforo del buffer2;
-            Bloquear el semaforo de sincronizacion;
-            Leer una linea del archivo.dat;
-            Mientras(No se llegue al fin del buffer2){
-		        Copiar los datos en el buffer2;
-		        Leer una linea del archivo .dat;
-		        Si(Se llega al final del archivo){
-			        Se sale del bucle;
+                Si(Se crea un hijo y se esta en el hijo){
+                    Solicitar ingresar un nombre (si no ingresa se le asigna un nombre por defecto);
+                    Imprimir mensaje de esperando a los demas jugadores;
+                    Avisar al padre que el hijo esta listo;
                 }
-                Incrementar la variable para recorrer el buffer y la del ID;
-            }
-            Si(Se llega al final del archivo){
-        	    Se sale del bucle y avisar que el ultimo elemento se escribio en el buffer2;
-            }
-            Resetear la variable que recorre el buffer;
-            Desbloquear el semaforo del buffer2;
-            Bloquear el semaforo de sincronizacion;
-        }
-        Poner un ID Null despues de llegar al ultimo elemento del buffer correspondiente para avisarle al consumidor que se llego al EOF;
-        Cerrar el archivo .dat;
-        Liberar la memoria compartida y se remover los semaforos;
-    FIN
-
-    Consumidor:
-    INICIO
-        Declarar y asignar variables, macros y estructuras;
-        Obtener la clave de las dos memorias compartidas y el semaforo (en el caso de no obtenerlas imprimir error);
-        Llamar al sistema para obtener el ID de las memorias compartidas (en el caso de que no obtenerlas imprimir error);
-        Asociar el espacio de memoria compartida con un puntero (si no puede asociar imprimir error);
-        Crear semaforos (si no puede crear imprimir error);
-        Inicializar de semaforos;
-        Verificar la existencia del archivo datos.dat;
-        Inicializar variables auxiliares para los buffers;
-        Mientras(1){
-	        Bloquear el semaforo del Buffer1;
-	        Mientras(No se llega al fin del buffer1 y el ID del mismo sea distinto a -1){
-		        Copiar los datos del buffer1 en el archivo csv e imprimirlos en pantalla;
-		        Incrementar la variable para recorrer el buffer;
-		        Si(Se encontro el ID -1){
-			        Salir del bucle;
+                Sino{
+                    Aumentar la varible turno para llevar la cuenta de clientes conectados;
+                    Cerrar conexion no utilizada;
                 }
-	        }
-	        Resetear la variable que recorre el buffer;
-	        Si(Se encontro el ID -1){
-	            Salir del bucle principal;
-            }
-            Desbloquear el semaforo del buffer1;
-            Desbloquear el semaforo de sincronizacion;
-            Bloquear el semaforo del buffer2;
-		    Mientras(No se llegue al fin del buffer2 y el ID del mismo sea distinto a -1){
-		        Copiar los datos del buffer2 en el archivo csv e imprimirlos en pantalla;
-		        Incrementar la variable para recorrer el buffer;
-		        Si(Se encontro el ID -1){
-			        Salir del bucle;
-                }
-	        }
-	        Resetear la variable que recorre el buffer;
-	        Si(Se encontro el ID -1){
-	            Salir del bucle principal;
-            }
-            Desbloquear el semaforo del buffer2;
-            Desbloquear el semaforo de sincronizacion;
-            Si(Se encontro el ID -1){
-	            Salir del bucle principal;
             }
         }
-        Cerrar el archivo .csv;
-        Liberar la memoria compartida y remover los semaforos;
+        Si(Estoy en el padre){
+            Inicializar la mesa sin cartas;
+            Esperar a los jugadores;
+            Mientras(Queden cartas por repartir){
+                Repartir 3 cartas a cada jugador;
+                Si(Es la primera mano){
+                    Repartir 4 cartas en la mesa;
+                }
+                Contar cuantas cartas hay repartidas;
+                Imprimir el numero de ronda en el servidor;
+                Para(Las 3 rondas){
+                    Para(Los 4 jugadores){
+                        Enviar a todos los jugadores sus cartas;
+                        Enviar a los jugadores que toca jugar;
+                        Si al jugador que le tocaba jugar levanto se imprime que fue el ultimo en levantar;
+                        Enviar jugada a los demas jugadores;
+                    }
+                }
+            }
+            Asignar las cartas sobrantes en mesa al ultimo jugador en levantar;
+            Enviar a todos los jugadores que finalizo la partida;
+        }
+        Sino{
+            Inicializar cartas levantadas sin cartas;
+            Hacer{
+                Si(Se recibe 'A' del padre){
+                    Contar cartas en la mesa;
+                    Si(Quedan cartas sobre la mesa){
+                        Enviar cuales son las cartas;
+                    }
+                    Sino{
+                        Enviar que no hay cartas sobre la mesa;
+                    }
+                    Si(El jugador tiene cartas en la mano){
+                        Enviar cuales son las cartas;
+                    }
+                    Sino{
+                        Enviar que no tiene cartas en la mano;
+                    }
+                    Si(es el turno del jugador){
+                        Imprimir que se espera la jugada;
+                    }
+                    Sino{
+                        Imprimir de quien es el turno;
+                    }
+                }
+                Si(Se recibe 'T' del padre){
+                    Si(Es el turno del jugador){
+                        Contar cartas en la mesa;
+                        Si(Quedan cartas sobre la mesa){
+                            Enviar cuales son las cartas;
+                        }
+                        Sino{
+                            Enviar que no hay cartas sobre la mesa;
+                        }
+                        Si(El jugador tiene cartas en la mano){
+                            Enviar cuales son las cartas;
+                        }
+                        Sino{
+                            Enviar que no tiene cartas en la mano;
+                        }
+                        Mientras(La jugada no sea valida){
+                            Si(Quedan cartas sobre la mesa){
+                                Preguntar si el jugador quiere levantar o descartar;
+                            }
+                            Sino{
+                                Decirle que descarte;
+                            }
+                            Si(Levanta){
+                                Pedir que seleccione una carta de la mano y las correspondientes de la mesa;
+                                Si(la suma no da 15){
+                                    La jugada no es valida;
+                                }
+                                Sino{
+                                    Enviar la jugada al padre;
+                                    Contar cartas en la mesa;
+                                    Si(No quedan cartas sobre la mesa){
+                                        El jugador hizo escoba;
+                                    }
+                                    La jugada es valida;
+                                }
+                            }
+                            Si(Descarta){
+                                Pedir que seleccione una carta de la mano para descartar;
+                                Enviar la jugada al padre;
+                                La jugada es valida;
+                            }
+                        }
+                    }
+                }
+                Si(Se recibe 'L' del padre){
+                    Enviar la jugada de levante que hizo el jugador anterior;
+                    Si (Hizo escoba){
+                        Enviar que hizo escoba;
+                    }
+                }
+                Si(Se recibe 'D' del padre){
+                    Enviar la jugada de descarte que hizo el jugador anterior;
+                }
+            }Mientras(La partida no finalizo)
+            Para(Las 4 jugadores){
+                Enviar las cartas que levanto cada jugador y las escobas;
+            }
+            Liberar memoria compartida;
+            return 0;
+        }
+        Cierre y eliminacion de memoria compartida y colas
     FIN
-
 \end{lstlisting}
 
-\subsection{Realización con colas de mensajes}
+\subsection{Compilación y ejecución del programa}
 
-La implementación por cola de mensajes emplea dos colas con dos tipos de mensajes. Se utiliza una \textit{queue} por buffer, y los tipos de mensaje indican si el buffer está listo para ser escrito, o para ser leído. El productor siempre envía mensajes de un tipo, y el consumidor envía mensajes del otro. Para la sincronización, ambos programas esperan primero a recibir el mensaje del tipo que corresponda antes de operar con la memoria compartida, y una vez que terminan envían el mensaje recíproco. Al iniciar, el consumidor es el primero en enviar mensajes de que los buffers están disponibles, con lo cual ningún programa empieza por separado, sino que el trabajo sobre la memoria compartida se realiza solo con los dos programas en ejecución.\\
-
-\subsubsection{Pseudocódigo}
-
-\begin{lstlisting}[language=C]          % No usar tildes en el pseudocódigo y dejar una linea vacía al principio y al final
-
-    Productor:
-    INICIO
-        Declarar y asignar variables, macros y estructuras;
-        Obtener la clave de las dos memorias compartidas y colas de mensaje (en el caso de que no las obtenga imprime error);
-        Llamar al sistema para obtener el ID de las memorias compartidas (en el caso de que no las obtenga imprime error);
-        Asociar el espacio de memoria compartida con un puntero(si no puede asociar imprime error);
-        Crear colas de mensajes (si no los puede crear imprime error);
-        Verificar de la existencia del archivo datos.dat;
-        Obtener el tiempo de UNIX inicial;
-        Inicializar variables auxiliares para los buffers;
-        Mientras(no es el fin del archivo){
-            Esperar mensaje que se puede escribir el buffer 1;
-            Llenar buffer con datos;
-            Preparar mensaje de "listo para leer";
-            Enviar mensaje en cola 1;
-
-            Esperar mensaje que se puede escribir el buffer 2;
-            Llenar buffer con datos;
-            Preparar mensaje de "listo para leer";
-            Enviar mensaje en cola 2;
-        }
-        Cerrar archivo;
-        Liberar memoria compartida;
-    FIN
-
-    Consumidor:
-    INICIO
-        Declarar y asignar variables, macros y estructuras;
-        Obtener la clave de las dos memorias compartidas y colas de mensaje (en el caso de que no las obtenga imprime error);
-        Llamar al sistema para obtener el ID de las memorias compartidas (en el caso de que no las obtenga imprime error);
-        Asociar el espacio de memoria compartida con un puntero(si no puede asociar imprime error);
-        Crear colas de mensajes (si no los puede crear imprime error);
-        Enviar mensaje de "ambos buffers listos para escribir";
-        Abrir archivo de destino en modo escritura;
-        Mientras(1){
-            Esperar mensaje que se puede leer el buffer 1;
-            Si el mensaje indicaba fin del archivo, salir;
-            Leer buffer, imprimir en pantalla y en archivo de destino;
-            Preparar mensaje de "listo para escribir";
-            Enviar mensaje en cola 1;
-
-            Esperar mensaje que se puede leer el buffer 2;
-            Si el mensaje indicaba fin del archivo, salir;
-            Leer buffer, imprimir en pantalla y en archivo de destino;
-            Preparar mensaje de "listo para escribir";
-            Enviar mensaje en cola 2;
-        }
-        Cerrar archivo;
-        Liberar memoria compartida;
-        Liberar colas de mensajes;
-    FIN
-    
-\end{lstlisting}
-
-\subsection{Compilación y ejecución de los programas}
-
-Con el código completo, para compilar los programas a un archivo binario ejecutable se llama al comando \texttt{gcc} (\textit{GNU C Compiler}):
+Con el código completo, para compilar el programa a un archivo binario ejecutable se llama al comando \texttt{gcc} (\textit{GNU C Compiler}):
 
 \begin{center}
-    \texttt{\$ gcc productor\_sem.c -o prod\_sem}\\
-    \texttt{\$ gcc consumidor\_sem.c -o cons\_sem}\\
-    \texttt{\$ gcc productor\_col.c -o prod\_col}\\
-    \texttt{\$ gcc consumidor\_col.c -o cons\_col}\\
+    \texttt{\$ gcc servidorEscoba.c -o servidorEscoba}\\
 \end{center}
 
-Con lo que se obtienen cuatro archivos binarios ejecutables, los cuales, estando situados en la carpeta en la que se encuentran, se ejecutan desde la terminal de la siguiente manera:
+Con lo que se obtienen el archivo binario ejecutable, el cual, esta situado en la carpeta en la que se encuentra, se ejecutan desde la terminal de la siguiente manera:
 
 \begin{center}
-    \texttt{\$ ./prod\_sem}\\
-    \texttt{\$ ./cons\_sem}\\
-    \texttt{\$ ./prod\_col}\\
-    \texttt{\$ ./cons\_col}\\
+    \texttt{\$ ./servidorEscoba}\\
 \end{center}
 
-Es importante ejecutar los productores antes que los consumidores, para cualquiera de las dos implementaciones, por la forma en que se maneja la sincronización.
+Luego, se deben ejecutar los clientes de telnet
+
+\begin{center}
+    \texttt{\$ netcat localhost 1234}\\
+\end{center}
+
+Es importante ejecutar primero el servidor y luego los clientes.
