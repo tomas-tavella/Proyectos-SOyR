@@ -5,38 +5,20 @@ Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolu
     \item Para ambas implementaciones:
     \begin{itemize}
         \item \texttt{<sys/ipc.h>}: biblioteca de \textit{System V} para la comunicación entre procesos.
-        \item \texttt{<sys/time.h>}: biblioteca para obtener el tiempo de la \textit{timestamp}.
         \item \texttt{<sys/shm.h>}: biblioteca de \textit{System V} para la memoria compartida.
-    \end{itemize}
-    \item Para la resolución con semáforos:
-    \begin{itemize}
-        \item \texttt{<sys/sem.h>}: implementación de \textit{System V} para semáforos.
-    \end{itemize}
-    \item Para la resolución por colas de mensajes:
-    \begin{itemize}
-        \item \texttt{<sys/msg.h>}: implementación de \textit{System V} para colas de mensajes.\\
+        \item \texttt{<sys/msg.h>}: implementación de \textit{System V} para colas de mensajes.
+        \item \texttt{<sys/types.h>}: biblioteca de \textit{System V} para la definicion de tipos de variables.
+        \item \texttt{<sys/stat.h>}: biblioteca de \textit{System V} para la comunicación entre procesos.
+        \item \texttt{<sys/socket.h>}: biblioteca de \textit{System V} para utilizar sockets.
+        \item \texttt{<netinet/in.h>}: biblioteca que contiene varias definiciones útiles de macros y tipos de datos para manejo de sockets de red.
+        \item \texttt{<arpa/inet.h>}: biblioteca que contiene definiciones de varias funciones útiles para el manejo de direcciones IP.
+    
     \end{itemize}
 \end{itemize}
 
-En ambos casos se eligió reservar dos segmentos de memoria compartida, uno para cada mitad del \textit{buffer}, con capacidad para almacenar 100 estructuras de datos en total. Esto se logró mediante la función \texttt{shmget()} (contenida en la biblioteca \texttt{<sys/shm.h>}), a la cual se le pasan como argumentos el tamaño del segmento y una clave única (obtenida con la función \texttt{ftok()}) que debe ser la misma para el productor y el consumidor, para así poder compartir los segmentos creados.\\
+Se eligió reservar tres segmentos de memoria compartida, uno para las cartas de la mesa, otro para la información de los jugadores y otro para la información de las jugadas para asi poder compartir la información entre el proceso padre y los hijos. 
 
-Además, dado que los requerimientos no establecen que se debe hacer en el caso que el productor quiera escribir un \textit{buffer} que aun no fue consumido, se decidió priorizar la integridad de los datos a detrimento de la velocidad de respuesta, por lo que el productor espera a que el consumidor finalize de leer los datos del \textit{buffer}.\\
-
-\subsection{Realización con semáforos}
-
-Para la implementación con semáforos, se utilizaron las funciones \texttt{semget()}, \texttt{semctl()}, \texttt{semop()} incluidas en la biblioteca apropiada para implementar 3 semáforos distintos:
-
-\begin{itemize}
-    \item \textbf{Semáforo del \textit{buffer} 1}: Este semáforo es bloqueado por alguno de los dos procesos al comenzar operaciones sobre el primer \textit{buffer}, y desbloqueado al terminarlas.
-    \item \textbf{Semáforo del \textit{buffer} 2}: De manera similar al semaforo anterior, es bloqueado por alguno de los dos procesos al comenzar operaciones sobre el segundo buffer, y desbloqueado al terminarlas.
-    \item \textbf{Semáforo de sincronización}: Se encarga de sincronizar los dos programas, de manera que el productor no sobrescriba datos aún no consumidos.
-\end{itemize}
-
-Primeramente, se crean los semáforos y espacios de memoria compartida (con \texttt{shmget()} y \texttt{semget()}), utilizando claves únicas obtenidas con la función \texttt{ftok()}. En este caso, tanto la memoria compartida como los semáforos se crean en el programa productor, por lo que si se llama al consumidor previo a este, se va a arrojar en pantalla un error indicando que no se pudieron obtener los recursos.\\
-
-Una vez creados los semáforos, se inicializan dentro del productor mediante \texttt{semctl()}, y una vez que comienza la lectura y escritura de datos, se opera sobre los mismos mediante la función \texttt{semop} (para incrementar la legibilidad del código, las tres instrucciones requeridas para operar un semáforo se sintetizaron en un macro definido en el \textit{header} del programa).\\
-
-Finalmente, al terminar de correr el productor, se llaman a \texttt{shmctl()} y \texttt{semctl()}, para indicar al sistema que destruya los semáforos y las memorias compartidas que se crearon una vez que el ultimo programa haya dejado de utilizarlos (en este caso el consumidor).\\
+%Además, dado que los requerimientos no establecen que se debe hacer en el caso que el productor quiera escribir un \textit{buffer} que aun no fue consumido, se decidió priorizar la integridad de los datos a detrimento de la velocidad de respuesta, por lo que el productor espera a que el consumidor finalize de leer los datos del \textit{buffer}.\\
 
 \subsubsection{Pseudocódigo}
 
