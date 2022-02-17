@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Llamar al sistema para obtener la memoria compartida
-    IDmem1 = shmget(clave1, 10*sizeof(int), 0666 | IPC_CREAT); // Hasta 10 cartas en la mesa a la vez? Parece razonable, se puede cambiar -JP
+    IDmem1 = shmget(clave1, 10*sizeof(int), 0666 | IPC_CREAT); 
     if(IDmem1 == -1){
         printf("No se pudo obtener un ID de memoria compartida\n");
         exit(2);
