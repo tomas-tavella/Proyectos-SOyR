@@ -2,20 +2,9 @@
 
 Se utilizaron las siguientes bibliotecas de C para poder llevar a cabo la resolución del problema planteado:
 \begin{itemize}
-    \item Para ambas implementaciones:
-    \begin{itemize}
-        \item \texttt{<sys/ipc.h>}: biblioteca de \textit{System V} para la comunicación entre procesos.
-        \item \texttt{<sys/time.h>}: biblioteca para obtener el tiempo de la \textit{timestamp}.
-        \item \texttt{<sys/shm.h>}: biblioteca de \textit{System V} para la memoria compartida.
-    \end{itemize}
-    \item Para la resolución con semáforos:
-    \begin{itemize}
-        \item \texttt{<sys/sem.h>}: implementación de \textit{System V} para semáforos.
-    \end{itemize}
-    \item Para la resolución por colas de mensajes:
-    \begin{itemize}
-        \item \texttt{<sys/msg.h>}: implementación de \textit{System V} para colas de mensajes.\\
-    \end{itemize}
+    \item \texttt{<sys/ipc.h>}: biblioteca de \textit{System V} para la comunicación entre procesos.
+    \item \texttt{<sys/msg.h>}: implementación de \textit{System V} para colas de mensajes.
+    \item \texttt{<sys/shm.h>}: biblioteca de \textit{System V} para la memoria compartida.
 \end{itemize}
 
 En ambos casos se eligió reservar dos segmentos de memoria compartida, uno para cada mitad del \textit{buffer}, con capacidad para almacenar 100 estructuras de datos en total. Esto se logró mediante la función \texttt{shmget()} (contenida en la biblioteca \texttt{<sys/shm.h>}), a la cual se le pasan como argumentos el tamaño del segmento y una clave única (obtenida con la función \texttt{ftok()}) que debe ser la misma para el productor y el consumidor, para así poder compartir los segmentos creados.\\
