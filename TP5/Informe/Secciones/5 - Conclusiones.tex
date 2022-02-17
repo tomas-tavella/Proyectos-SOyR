@@ -1,3 +1,3 @@
 \section{Conclusiones}
-    El protocolo TCP intercambia paquetes llamados segmentos entre aplicaciones e IP, es utilizado en aplicaciones 1 a 1 (como en este caso cliente a servidor), es confiable y útil para LAN y WAN.
+    El uso de un servidor concurrente TCP es esencial para los casos en que es necesario atender a mas de un cliente en simultáneo, debido a que los procesos hijos se encargan de toda la comunicación con cada cliente, y el proceso padre esta libre para atender nuevas conexiones y derivarlas.
 \\

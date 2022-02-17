@@ -1,21 +1,8 @@
 \section{Interpretación del problema}
-Para este programa, se debe crear dos espacios de memoria compartida utilizando las funciones de la biblioteca \texttt{<sys/shm.h>}, en los que existirán las dos mitades de un \textit{buffer ping-pong}.\\
+Para este programa, se debe crear un servidor concurrente que permita jugar una partida de la escoba de 15.
 
-Los datos leídos del archivo \texttt{datos.dat} se almacenan en una estructura con los siguientes elementos:
+Los clientes deben conectarse mediante netcat o telnet, así que el formateo de los mensajes debe realizarse del lado del servidor. Todos los clientes deben ser atendidos por hijos, siendo el primero el que determina la cantidad de jugadores de la partida.
 
-\begin{itemize}
-    \item Una variable de tipo \texttt{int} que almacena un identificador menor a 50000.
-    \item Una etiqueta con el tiempo en el que fue escrito el dato, con precisión de micro segundos.
-    \item El dato que se leyó del archivo, de tipo \texttt{float}.\\
-\end{itemize}
+Debe usarse algún método de sincronización o IPC para la comunicación entre hijos y determinación de los turnos de juego, ignorando jugadas no válidas por parte de los demás jugadores.
 
-Como no se aclara el tamaño del \textit{buffer} en el enunciado, se elige que este tenga un tamaño total de 100 estructuras de las mencionadas previamente, dividido en dos mitades de 50 estructuras.\\
-
-El proceso productor debe leer datos del archivo \texttt{datos.dat} y almacenar las estructuras en su mitad del \textit{buffer}, mientras que el proceso consumidor debe leerlas en la otra mitad del \textit{buffer} a medida que estén disponibles, para imprimirlas en pantalla y escribirlas en un nuevo archivo \texttt{datos.csv}.\\
-
-Para administrar el \textit{buffer} de manera que no surjan condiciones de carrera y tanto el productor como el consumidor puedan trabajar en secciones críticas sin interrupciones, se van a crear dos programas que utilizan métodos distintos para este fin:\\
-
-\begin{itemize}
-    \item \textbf{Semáforos:} se utilizan los semáforos para sincronizar con las llamadas a sistema contenidas en la biblioteca \texttt{<sys/sem.h>} y memoria compartida mediante \texttt{<sys/ipc.h>}.
-    \item \textbf{Colas de mensajes:} se utilizan las colas de mensajes para sincronizar mediante las llamadas a sistema de la biblioteca \texttt{<sys/msg.h>}.\\
-\end{itemize}
+Al finalizar la partida, el servidor quedará a la espera de nuevos jugadores para iniciar una nueva partida.
